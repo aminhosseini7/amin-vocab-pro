@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>Placement Test – Grammar AI</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="grammar-theme.css">
+</head>
+
+<body>
+  <div class="container">
+
+    <!-- WELCOME SCREEN -->
+    <div id="welcome-screen" class="card center">
+      <div style="font-size: 48px; margin-bottom: 12px;">🎯</div>
+      <h1>آزمون تعیین سطح گرامر</h1>
+      <p class="muted">
+        این آزمون حدود ۶ تا ۸ دقیقه زمان می‌برد و به ما کمک می‌کند
+        مسیر یادگیری مناسب سطح شما را طراحی کنیم.
+      </p>
+
+      <p class="muted">شامل سه بخش است:</p>
+      <p>۱) ۱۰ سؤال گرامر<br>۲) ۳ تمرین نوشتاری<br>۳) تحلیل هوش مصنوعی و اعلام سطح</p>
+
+      <button id="start-btn" class="btn">شروع آزمون</button>
+    </div>
+
+    <!-- QUESTIONS SCREEN -->
+    <div id="question-screen" class="card" style="display:none;">
+      <h2 id="q-title">سؤال 1 از 10</h2>
+      <div class="progress-bar"><div id="q-progress" class="progress-fill"></div></div>
+      <p id="q-text"></p>
+
+      <div id="q-choices"></div>
+
+      <button id="next-question-btn" class="btn" style="margin-top:20px;">سؤال بعد</button>
+    </div>
+
+    <!-- WRITING SCREEN -->
+    <div id="writing-screen" class="card" style="display:none;">
+      <h2 id="w-title">بخش نوشتاری – سؤال 1 از 3</h2>
+      <p id="w-text"></p>
+
+      <textarea id="w-answer"></textarea>
+
+      <button id="next-writing-btn" class="btn" style="margin-top:20px;">بعدی</button>
+    </div>
+
+    <!-- LOADING AI SCREEN -->
+    <div id="loading-screen" class="card center" style="display:none;">
+      <div style="font-size:40px; margin-bottom:14px;">⚡</div>
+      <h2>در حال تحلیل پاسخ‌ها...</h2>
+      <p class="muted">لطفاً چند ثانیه صبر کنید</p>
+    </div>
+
+    <!-- RESULT SCREEN -->
+    <div id="result-screen" class="card" style="display:none;">
+      <h2>نتیجه سطح شما</h2>
+
+      <div id="level-box" class="result-box"></div>
+
+      <button id="finish-btn" class="btn" style="margin-top:20px;">شروع مسیر یادگیری</button>
+    </div>
+
+  </div>
+
+  <script src="grammar-placement.js"></script>
+</body>
+</html>
