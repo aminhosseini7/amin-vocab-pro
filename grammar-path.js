@@ -2,6 +2,24 @@
 // Grammar Learning Path – Dashboard + AI
 // ---------------------------
 
+// کارت تعیین سطح
+const placementDone = localStorage.getItem("placement_done");
+const placementCard = document.getElementById("placement-card");
+const placementBtn = document.getElementById("placement-btn");
+
+if (!placementDone) {
+  // اگر کاربر هنوز آزمون تعیین سطح را انجام نداده
+  if (placementCard) placementCard.style.display = "block";
+} else {
+  if (placementCard) placementCard.style.display = "none";
+}
+
+if (placementBtn) {
+  placementBtn.addEventListener("click", () => {
+    window.location.href = "grammar-placement.html";
+  });
+}
+
 // آدرس بک‌اند شما (همانی که روی Vercel ساختیم)
 const API_URL = "https://grammar-backend.vercel.app/api/grammar";
 
@@ -21,7 +39,7 @@ const weakPointsListEl = document.getElementById("weak-points-list");
 const historyListEl = document.getElementById("history-list");
 
 // نمایش سطح
-userLevelEl.textContent = userLevel;
+if (userLevelEl) userLevelEl.textContent = userLevel;
 
 const levelDescriptions = {
   "A2": "نیاز به یادگیری پایه‌های جمله‌سازی و زمان‌های ساده.",
@@ -29,7 +47,9 @@ const levelDescriptions = {
   "B2": "نوشتن روان – تمرکز روی ساختارهای پیچیده‌تر و دقت بالا.",
   "C1": "پیشرفته – تمرکز روی نوشتن آکادمیک و سبک‌سازی.",
 };
-levelDescEl.textContent = levelDescriptions[userLevel] || "";
+if (levelDescEl) {
+  levelDescEl.textContent = levelDescriptions[userLevel] || "";
+}
 
 // ---------------------------
 // ساختار آمار و تاریخچه در LocalStorage
@@ -183,15 +203,16 @@ const CATEGORY_LABELS = {
 // ---------------------------
 
 function updateStatsUI() {
-  statTotalEl.textContent = stats.totalChecks;
-  statTodayEl.textContent = stats.todayChecks;
-
-  statLastDateEl.textContent = stats.lastDate || "-";
+  if (statTotalEl) statTotalEl.textContent = stats.totalChecks;
+  if (statTodayEl) statTodayEl.textContent = stats.todayChecks;
+  if (statLastDateEl) statLastDateEl.textContent = stats.lastDate || "-";
 
   // ساخت لیست نقاط ضعف
   const items = Object.entries(stats.categories)
     .filter(([, count]) => count > 0)
     .sort((a, b) => b[1] - a[1]); // بیشترین خطا در بالا
+
+  if (!weakPointsListEl) return;
 
   weakPointsListEl.innerHTML = "";
 
@@ -211,6 +232,8 @@ function updateStatsUI() {
 }
 
 function updateHistoryUI() {
+  if (!historyListEl) return;
+
   historyListEl.innerHTML = "";
 
   if (history.length === 0) {
@@ -292,41 +315,51 @@ function generateLesson(level) {
 }
 
 // شروع تمرین روزانه
-document.getElementById("start-practice").addEventListener("click", () => {
-  const lesson = generateLesson(userLevel);
-  lessonBoxEl.textContent = lesson;
-
-  practiceStatusEl.textContent = "تمرین امروز فعال شد ✔";
-});
+const startPracticeBtn = document.getElementById("start-practice");
+if (startPracticeBtn) {
+  startPracticeBtn.addEventListener("click", () => {
+    const lesson = generateLesson(userLevel);
+    if (lessonBoxEl) {
+      lessonBoxEl.textContent = lesson;
+    }
+    if (practiceStatusEl) {
+      practiceStatusEl.textContent = "تمرین امروز فعال شد ✔";
+    }
+  });
+}
 
 // ---------------------------
 // بررسی جمله با هوش مصنوعی
 // ---------------------------
 
-document.getElementById("check-btn").addEventListener("click", async () => {
-  const textArea = document.getElementById("user-sentence");
-  const text = textArea.value.trim();
+const checkBtn = document.getElementById("check-btn");
+if (checkBtn) {
+  checkBtn.addEventListener("click", async () => {
+    const textArea = document.getElementById("user-sentence");
+    const text = textArea ? textArea.value.trim() : "";
 
-  if (!text) return;
+    if (!text) return;
 
-  aiResultEl.textContent = "در حال تحلیل...";
+    if (aiResultEl) aiResultEl.textContent = "در حال تحلیل...";
 
-  try {
-    const res = await fetch(API_URL, {
-      method: "POST",
-      headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({ text, level: userLevel }),
-    });
+    try {
+      const res = await fetch(API_URL, {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({ text, level: userLevel }),
+      });
 
-    const data = await res.json();
+      const data = await res.json();
 
-    if (!res.ok || data.error) {
-      aiResultEl.textContent =
-        "خطا در پاسخ سرور:\n" + JSON.stringify(data, null, 2);
-      return;
-    }
+      if (!res.ok || data.error) {
+        if (aiResultEl) {
+          aiResultEl.textContent =
+            "خطا در پاسخ سرور:\n" + JSON.stringify(data, null, 2);
+        }
+        return;
+      }
 
-    const resultText = `
+      const resultText = `
 جملهٔ تصحیح‌شده:
 ${data.corrected}
 
@@ -341,51 +374,54 @@ ${Array.isArray(data.examples) ? data.examples.join("\n") : ""}
 
 تمرین پیشنهادی:
 ${data.suggested_practice}
-    `.trim();
+      `.trim();
 
-    aiResultEl.textContent = resultText;
+      if (aiResultEl) aiResultEl.textContent = resultText;
 
-    // به‌روزرسانی آمار
-    const today = todayStr();
+      // به‌روزرسانی آمار
+      const today = todayStr();
 
-    stats.totalChecks += 1;
-    if (stats.lastDate === today) {
-      stats.todayChecks += 1;
-    } else {
-      stats.todayChecks = 1;
-      stats.lastDate = today;
+      stats.totalChecks += 1;
+      if (stats.lastDate === today) {
+        stats.todayChecks += 1;
+      } else {
+        stats.todayChecks = 1;
+        stats.lastDate = today;
+      }
+
+      const cat = categorizeError(
+        data.errors_explained_fa,
+        data.errors_explained_en
+      );
+      if (!stats.categories[cat]) {
+        stats.categories[cat] = 0;
+      }
+      stats.categories[cat] += 1;
+
+      saveStats(stats);
+
+      // ثبت در تاریخچه
+      history.push({
+        text,
+        corrected: data.corrected,
+        category: cat,
+        date: today,
+      });
+      // فقط آخرین 100 تا را نگه داریم
+      if (history.length > 100) {
+        history = history.slice(history.length - 100);
+      }
+      saveHistory(history);
+
+      // به‌روزرسانی UI
+      updateStatsUI();
+      updateHistoryUI();
+
+    } catch (e) {
+      if (aiResultEl) {
+        aiResultEl.textContent =
+          "ارتباط با سرور یا اینترنت ناموفق بود. بعداً دوباره تلاش کن.";
+      }
     }
-
-    const cat = categorizeError(
-      data.errors_explained_fa,
-      data.errors_explained_en
-    );
-    if (!stats.categories[cat]) {
-      stats.categories[cat] = 0;
-    }
-    stats.categories[cat] += 1;
-
-    saveStats(stats);
-
-    // ثبت در تاریخچه
-    history.push({
-      text,
-      corrected: data.corrected,
-      category: cat,
-      date: today,
-    });
-    // فقط آخرین 100 تا را نگه داریم
-    if (history.length > 100) {
-      history = history.slice(history.length - 100);
-    }
-    saveHistory(history);
-
-    // به‌روزرسانی UI
-    updateStatsUI();
-    updateHistoryUI();
-
-  } catch (e) {
-    aiResultEl.textContent =
-      "ارتباط با سرور یا اینترنت ناموفق بود. بعداً دوباره تلاش کن.";
-  }
-});
+  });
+}
