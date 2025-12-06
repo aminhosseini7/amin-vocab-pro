@@ -140,13 +140,15 @@
         });
 
         const data = await res.json();
-
+        
         if (!res.ok || data.error) {
-          const msg = data.error || "خطای نامشخص";
-          const raw = data.raw ? "\n\nخروجی مدل:\n" + data.raw : "";
-          resultDiv.textContent = "خطا در پاسخ سرور:\n" + msg + raw;
+          // این‌بار کل پاسخ سرور را خام چاپ می‌کنیم تا ببینیم DeepSeek چه گفته
+          resultDiv.textContent =
+            "خطا در پاسخ سرور (raw JSON):\n\n" +
+            JSON.stringify(data, null, 2);
           return;
         }
+
 
         const corrected = data.corrected || "";
         const faExp = data.errors_explained_fa || "";
