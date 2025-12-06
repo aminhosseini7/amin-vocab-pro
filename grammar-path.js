@@ -2,13 +2,24 @@
 // Grammar Learning Path – Dashboard + AI
 // ---------------------------
 
+// تابع تاریخ امروز (استفاده هم در آمار، هم آزمون روزانه)
+function todayStr() {
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+
+// ---------------------------
 // کارت تعیین سطح
+// ---------------------------
+
 const placementDone = localStorage.getItem("placement_done");
 const placementCard = document.getElementById("placement-card");
 const placementBtn = document.getElementById("placement-btn");
 
 if (!placementDone) {
-  // اگر کاربر هنوز آزمون تعیین سطح را انجام نداده
   if (placementCard) placementCard.style.display = "block";
 } else {
   if (placementCard) placementCard.style.display = "none";
@@ -20,7 +31,53 @@ if (placementBtn) {
   });
 }
 
-// آدرس بک‌اند شما (همانی که روی Vercel ساختیم)
+// ---------------------------
+// سکشن آزمون روزانه
+// ---------------------------
+
+const dailyTestStatusEl = document.getElementById("daily-test-status");
+const dailyTestBtn = document.getElementById("daily-test-btn");
+
+const today = todayStr();
+const dailyTestDate = localStorage.getItem("daily_test_date");
+const dailyFocusTopic = localStorage.getItem("daily_focus_topic");
+
+// توضیحات فارسی برای تمرکز امروز
+const DAILY_FOCUS_LABELS = {
+  tense: "زمان‌ها (Tenses – مثل گذشته ساده، حال کامل و ...)",
+  sv: "تطابق فاعل و فعل (He goes / They go و ...)",
+  prep: "حروف اضافه (in / on / at / for / since و ...)",
+  article: "حروف تعریف (a / an / the و ...)",
+  wordOrder: "ترتیب کلمات در جمله (جای قیدها، فاعل، فعل و ...)",
+  general: "مرور کلی گرامر (زمان‌ها + حروف اضافه + ساختارهای پایه)."
+};
+
+if (dailyTestStatusEl) {
+  if (dailyTestDate === today) {
+    // امروز آزمون داده شده
+    let txt = "آزمون روزانهٔ امروز را انجام داده‌ای.";
+    if (dailyFocusTopic && DAILY_FOCUS_LABELS[dailyFocusTopic]) {
+      txt += " تمرکز پیشنهادی امروز: " + DAILY_FOCUS_LABELS[dailyFocusTopic];
+    } else {
+      txt += " امروز می‌توانی یک مرور کلی روی گرامر داشته باشی.";
+    }
+    dailyTestStatusEl.textContent = txt;
+  } else {
+    dailyTestStatusEl.textContent =
+      "هنوز آزمون امروز را نداده‌ای. با یک تست ۵ سؤالی، مبحث مناسب امروز انتخاب می‌شود.";
+  }
+}
+
+if (dailyTestBtn) {
+  dailyTestBtn.addEventListener("click", () => {
+    window.location.href = "grammar-daily-test.html";
+  });
+}
+
+// ---------------------------
+// آدرس بک‌اند گرامر
+// ---------------------------
+
 const API_URL = "https://grammar-backend.vercel.app/api/grammar";
 
 // سطح پیش‌فرض (در صورت نبودن، B1)
@@ -66,7 +123,6 @@ function loadStats() {
       totalChecks: 0,
       todayChecks: 0,
       lastDate: null,
-      // شمارش خطاها بر اساس دسته‌بندی ساده
       categories: {
         tense: 0,
         sv: 0,
@@ -121,19 +177,9 @@ let stats = loadStats();
 let history = loadHistory();
 
 // ---------------------------
-// کمک‌تابع‌ها
+// کمک‌تابع‌ها برای دسته‌بندی خطا
 // ---------------------------
 
-// گرفتن تاریخ امروز به شکل YYYY-MM-DD
-function todayStr() {
-  const d = new Date();
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${y}-${m}-${day}`;
-}
-
-// طبقه‌بندی خطاها بر اساس متن توضیح انگلیسی/فارسی
 function categorizeError(errorsFa, errorsEn) {
   const fa = (errorsFa || "").toLowerCase();
   const en = (errorsEn || "").toLowerCase();
@@ -161,9 +207,9 @@ function categorizeError(errorsFa, errorsEn) {
 
   if (
     en.includes("preposition") ||
-    en.includes("in ") ||
-    en.includes("on ") ||
-    en.includes("at ") ||
+    en.includes(" in ") ||
+    en.includes(" on ") ||
+    en.includes(" at ") ||
     fa.includes("حرف اضافه")
   ) {
     return "prep";
@@ -207,14 +253,13 @@ function updateStatsUI() {
   if (statTodayEl) statTodayEl.textContent = stats.todayChecks;
   if (statLastDateEl) statLastDateEl.textContent = stats.lastDate || "-";
 
-  // ساخت لیست نقاط ضعف
-  const items = Object.entries(stats.categories)
-    .filter(([, count]) => count > 0)
-    .sort((a, b) => b[1] - a[1]); // بیشترین خطا در بالا
-
   if (!weakPointsListEl) return;
 
   weakPointsListEl.innerHTML = "";
+
+  const items = Object.entries(stats.categories)
+    .filter(([, count]) => count > 0)
+    .sort((a, b) => b[1] - a[1]);
 
   if (items.length === 0) {
     const li = document.createElement("li");
@@ -241,7 +286,6 @@ function updateHistoryUI() {
     return;
   }
 
-  // آخرین ۳۰ مورد
   const recent = history.slice(-30).reverse();
 
   for (const item of recent) {
@@ -279,7 +323,7 @@ updateStatsUI();
 updateHistoryUI();
 
 // ---------------------------
-// تولید درس روزانه ساده (بعداً می‌توانیم AIی‌اش کنیم)
+// تولید درس روزانه ساده
 // ---------------------------
 
 function generateLesson(level) {
@@ -378,15 +422,14 @@ ${data.suggested_practice}
 
       if (aiResultEl) aiResultEl.textContent = resultText;
 
-      // به‌روزرسانی آمار
-      const today = todayStr();
+      const todayLocal = todayStr();
 
       stats.totalChecks += 1;
-      if (stats.lastDate === today) {
+      if (stats.lastDate === todayLocal) {
         stats.todayChecks += 1;
       } else {
         stats.todayChecks = 1;
-        stats.lastDate = today;
+        stats.lastDate = todayLocal;
       }
 
       const cat = categorizeError(
@@ -400,20 +443,17 @@ ${data.suggested_practice}
 
       saveStats(stats);
 
-      // ثبت در تاریخچه
       history.push({
         text,
         corrected: data.corrected,
         category: cat,
-        date: today,
+        date: todayLocal,
       });
-      // فقط آخرین 100 تا را نگه داریم
       if (history.length > 100) {
         history = history.slice(history.length - 100);
       }
       saveHistory(history);
 
-      // به‌روزرسانی UI
       updateStatsUI();
       updateHistoryUI();
 
