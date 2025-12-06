@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+  <meta charset="UTF-8">
+  <title>Grammar AI Tutor</title>
+  <link rel="stylesheet" href="grammar-path.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+
+<body>
+  <div class="container">
+
+    <h1>🎓 Grammar AI Tutor</h1>
+    <p class="sub">مسیر یادگیری گرامر هوشمند – از سطح فعلی تا سطح عالی</p>
+
+    <div id="level-box">
+      <h2>سطح فعلی شما: <span id="user-level">…</span></h2>
+      <p id="level-desc"></p>
+    </div>
+
+    <div class="section">
+      <h3>📌 تمرین روزانه</h3>
+      <button id="start-practice" class="btn-primary">شروع تمرین امروز</button>
+      <p id="practice-status"></p>
+    </div>
+
+    <div class="section">
+      <h3>📘 درس امروز</h3>
+      <div id="lesson-box">برای شروع، دکمهٔ تمرین را فشار دهید.</div>
+    </div>
+
+    <div class="section">
+      <h3>📝 جمله بنویس</h3>
+      <textarea id="user-sentence" placeholder="یک جمله‌ی انگلیسی بنویس..."></textarea>
+      <button id="check-btn" class="btn-secondary">بررسی با هوش مصنوعی</button>
+      <div id="ai-result"></div>
+    </div>
+
+    <div class="section">
+      <h3>📊 پیشرفت شما</h3>
+      <p>این بخش به‌محض حل تمرین‌ها، آپدیت می‌شود.</p>
+      <ul id="weak-points"></ul>
+    </div>
+
+  </div>
+
+  <script src="grammar-path.js"></script>
+</body>
+</html>
