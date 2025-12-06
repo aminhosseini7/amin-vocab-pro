@@ -1,70 +1,190 @@
-<!DOCTYPE html>
-<html lang="fa">
-<head>
-  <meta charset="UTF-8">
-  <title>Grammar AI Tutor</title>
-  <link rel="stylesheet" href="grammar-path.css">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-</head>
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: radial-gradient(circle at top, #3a0ca3, #000);
+  direction: rtl;
+  text-align: right;
+  padding: 20px 8px 80px;
+  margin: 0;
+  color: #f8f8ff;
+}
 
-<body>
-  <div class="container">
+.container {
+  max-width: 900px;
+  margin: auto;
+}
 
-    <h1>🎓 Grammar AI Tutor</h1>
-    <p class="sub">مسیر یادگیری گرامر هوشمند – مخصوص خودت</p>
+h1 {
+  text-align: center;
+  margin-bottom: 4px;
+  font-size: 22px;
+}
 
-    <div id="level-box" class="section">
-      <h2>سطح فعلی شما: <span id="user-level">…</span></h2>
-      <p id="level-desc"></p>
-    </div>
+.sub {
+  text-align: center;
+  color: #cbd5f5;
+  margin-bottom: 20px;
+  font-size: 13px;
+}
 
-    <div class="section">
-      <h3>📌 تمرین روزانه</h3>
-      <button id="start-practice" class="btn-primary">شروع تمرین امروز</button>
-      <p id="practice-status" class="muted"></p>
-      <div id="lesson-box">برای شروع تمرین، دکمهٔ بالا را بزن.</div>
-    </div>
+.section {
+  background: rgba(15, 15, 25, 0.85);
+  padding: 14px;
+  margin-top: 14px;
+  border-radius: 16px;
+  box-shadow: 0 0 16px rgba(15, 23, 42, 0.7);
+}
 
-    <div class="section">
-      <h3>📝 جمله بنویس</h3>
-      <textarea id="user-sentence" placeholder="یک جمله‌ی انگلیسی بنویس..."></textarea>
-      <button id="check-btn" class="btn-secondary">بررسی با هوش مصنوعی</button>
-      <div id="ai-result"></div>
-    </div>
+.section h3 {
+  margin-top: 0;
+  font-size: 15px;
+}
 
-    <div class="section">
-      <h3>📊 آمار کلی گرامر شما</h3>
-      <div class="stats-grid">
-        <div class="stat-item">
-          <div class="stat-label">تعداد کل جملات بررسی‌شده</div>
-          <div class="stat-value" id="stat-total">0</div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-label">جملات امروز</div>
-          <div class="stat-value" id="stat-today">0</div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-label">آخرین تمرین</div>
-          <div class="stat-value" id="stat-last-date">-</div>
-        </div>
-      </div>
-      <p class="muted">این آمار فقط روی دستگاه خودت ذخیره می‌شود (LocalStorage).</p>
-    </div>
+#level-box h2 {
+  margin: 0 0 6px;
+  font-size: 16px;
+}
 
-    <div class="section">
-      <h3>🎯 نقاط ضعف شما (بر اساس جمله‌های اخیر)</h3>
-      <p class="muted">هوش مصنوعی بر اساس توضیح خطاها، خطاها را در چند دسته ساده طبقه‌بندی می‌کند.</p>
-      <ul id="weak-points-list"></ul>
-    </div>
+#level-desc {
+  font-size: 13px;
+  color: #e5e7eb;
+}
 
-    <div class="section">
-      <h3>📚 تاریخچه جملات اخیر</h3>
-      <p class="muted">آخرین جمله‌هایی که نوشتی و نسخهٔ تصحیح‌شدهٔ آن‌ها:</p>
-      <div id="history-list"></div>
-    </div>
+textarea {
+  width: 100%;
+  min-height: 90px;
+  padding: 10px;
+  font-size: 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(148, 163, 184, 0.7);
+  resize: vertical;
+  background: rgba(15, 23, 42, 0.9);
+  color: #f9fafb;
+}
 
-  </div>
+.btn-primary,
+.btn-secondary {
+  padding: 9px 16px;
+  border: none;
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: 14px;
+  margin-top: 10px;
+  box-shadow: 0 0 10px rgba(59, 130, 246, 0.6);
+}
 
-  <script src="grammar-path.js"></script>
-</body>
-</html>
+.btn-primary {
+  background: #3b82f6;
+  color: white;
+}
+
+.btn-secondary {
+  background: #6b21a8;
+  color: white;
+}
+
+.btn-primary:active,
+.btn-secondary:active {
+  transform: scale(0.96);
+}
+
+#ai-result {
+  margin-top: 10px;
+  white-space: pre-wrap;
+  background: rgba(30, 64, 175, 0.4);
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(129, 140, 248, 0.8);
+  font-size: 13px;
+}
+
+#lesson-box {
+  background: rgba(15, 23, 42, 0.7);
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(75, 85, 99, 0.9);
+  white-space: pre-wrap;
+  font-size: 13px;
+}
+
+.muted {
+  font-size: 12px;
+  color: #9ca3af;
+  margin-top: 4px;
+}
+
+/* آمار کلی */
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.stat-item {
+  background: rgba(15, 23, 42, 0.9);
+  border-radius: 12px;
+  padding: 8px 10px;
+  border: 1px solid rgba(55, 65, 81, 0.9);
+}
+
+.stat-label {
+  font-size: 11px;
+  color: #9ca3af;
+}
+
+.stat-value {
+  margin-top: 4px;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+/* نقاط ضعف */
+
+#weak-points-list {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+  font-size: 13px;
+}
+
+#weak-points-list li {
+  margin-top: 4px;
+}
+
+/* تاریخچه */
+
+.history-item {
+  background: rgba(15, 23, 42, 0.9);
+  border-radius: 10px;
+  padding: 8px 10px;
+  border: 1px solid rgba(55, 65, 81, 0.9);
+  margin-top: 6px;
+  font-size: 12px;
+}
+
+.history-item .orig {
+  color: #e5e7eb;
+}
+
+.history-item .corr {
+  color: #bef264;
+}
+
+.history-item .cat {
+  color: #93c5fd;
+  font-size: 11px;
+  margin-top: 3px;
+}
+
+.history-item .date {
+  color: #9ca3af;
+  font-size: 11px;
+  margin-top: 2px;
+}
+
+@media (max-width: 640px) {
+  body {
+    padding: 10px 6px 80px;
+  }
+}
