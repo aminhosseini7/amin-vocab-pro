@@ -11,9 +11,9 @@
   <div class="container">
 
     <h1>🎓 Grammar AI Tutor</h1>
-    <p class="sub">مسیر یادگیری گرامر هوشمند – از سطح فعلی تا سطح عالی</p>
+    <p class="sub">مسیر یادگیری گرامر هوشمند – مخصوص خودت</p>
 
-    <div id="level-box">
+    <div id="level-box" class="section">
       <h2>سطح فعلی شما: <span id="user-level">…</span></h2>
       <p id="level-desc"></p>
     </div>
@@ -21,12 +21,8 @@
     <div class="section">
       <h3>📌 تمرین روزانه</h3>
       <button id="start-practice" class="btn-primary">شروع تمرین امروز</button>
-      <p id="practice-status"></p>
-    </div>
-
-    <div class="section">
-      <h3>📘 درس امروز</h3>
-      <div id="lesson-box">برای شروع، دکمهٔ تمرین را فشار دهید.</div>
+      <p id="practice-status" class="muted"></p>
+      <div id="lesson-box">برای شروع تمرین، دکمهٔ بالا را بزن.</div>
     </div>
 
     <div class="section">
@@ -37,9 +33,34 @@
     </div>
 
     <div class="section">
-      <h3>📊 پیشرفت شما</h3>
-      <p>این بخش به‌محض حل تمرین‌ها، آپدیت می‌شود.</p>
-      <ul id="weak-points"></ul>
+      <h3>📊 آمار کلی گرامر شما</h3>
+      <div class="stats-grid">
+        <div class="stat-item">
+          <div class="stat-label">تعداد کل جملات بررسی‌شده</div>
+          <div class="stat-value" id="stat-total">0</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">جملات امروز</div>
+          <div class="stat-value" id="stat-today">0</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">آخرین تمرین</div>
+          <div class="stat-value" id="stat-last-date">-</div>
+        </div>
+      </div>
+      <p class="muted">این آمار فقط روی دستگاه خودت ذخیره می‌شود (LocalStorage).</p>
+    </div>
+
+    <div class="section">
+      <h3>🎯 نقاط ضعف شما (بر اساس جمله‌های اخیر)</h3>
+      <p class="muted">هوش مصنوعی بر اساس توضیح خطاها، خطاها را در چند دسته ساده طبقه‌بندی می‌کند.</p>
+      <ul id="weak-points-list"></ul>
+    </div>
+
+    <div class="section">
+      <h3>📚 تاریخچه جملات اخیر</h3>
+      <p class="muted">آخرین جمله‌هایی که نوشتی و نسخهٔ تصحیح‌شدهٔ آن‌ها:</p>
+      <div id="history-list"></div>
     </div>
 
   </div>
