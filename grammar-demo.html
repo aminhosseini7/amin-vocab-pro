@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+  <meta charset="UTF-8" />
+  <title>دستیار گرامر با هوش مصنوعی (نسخهٔ آزمایشی)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body {
+      font-family: sans-serif;
+      max-width: 900px;
+      margin: 1.5rem auto;
+      padding: 0 1rem;
+      direction: rtl;
+      text-align: right;
+      line-height: 1.7;
+      background: #f7f7f7;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 0.5rem;
+    }
+    h2 {
+      text-align: center;
+      margin-top: 0;
+      font-size: 0.9rem;
+      color: #666;
+    }
+    form {
+      background: #ffffff;
+      padding: 1rem;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+      margin-top: 1rem;
+    }
+    label {
+      display: block;
+      margin-top: 0.8rem;
+      margin-bottom: 0.3rem;
+      font-weight: bold;
+    }
+    textarea {
+      width: 100%;
+      padding: 0.6rem;
+      font-family: "Courier New", monospace;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      min-height: 100px;
+      resize: vertical;
+    }
+    select {
+      padding: 0.4rem 0.6rem;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      margin-top: 0.3rem;
+    }
+    button {
+      margin-top: 1rem;
+      padding: 0.6rem 1.2rem;
+      border-radius: 8px;
+      border: none;
+      background: #0070f3;
+      color: #fff;
+      font-size: 0.95rem;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #0057b8;
+    }
+    #grammar-result {
+      margin-top: 1.5rem;
+      background: #ffffff;
+      padding: 1rem;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+      white-space: pre-wrap;
+    }
+    .section-title {
+      font-weight: bold;
+      margin-top: 0.8rem;
+      display: inline-block;
+    }
+    .section-block {
+      margin-top: 0.6rem;
+    }
+    .examples-list {
+      margin-right: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <h1>دستیار گرامر با هوش مصنوعی</h1>
+  <h2>(نسخهٔ تست برای اتصال به DeepSeek)</h2>
+
+  <form id="grammar-form">
+    <label for="grammar-input">جمله یا متن انگلیسی خود را وارد کنید:</label>
+    <textarea id="grammar-input" placeholder="مثال: I learning English since three years." required></textarea>
+
+    <label for="grammar-level">سطح تقریبی شما (CEFR):</label>
+    <select id="grammar-level">
+      <option value="A2">A2</option>
+      <option value="B1" selected>B1</option>
+      <option value="B2">B2</option>
+      <option value="C1">C1</option>
+    </select>
+
+    <button type="submit">بررسی گرامر</button>
+  </form>
+
+  <div id="grammar-result"></div>
+
+  <script>
+    // آدرس بک‌اندی که روی Vercel ساختی
+    const API_URL = "https://grammar-backend.vercel.app/api/grammar";
+
+    const form = document.getElementById("grammar-form");
+    const input = document.getElementById("grammar-input");
+    const levelSelect = document.getElementById("grammar-level");
+    const resultDiv = document.getElementById("grammar-result");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const text = input.value.trim();
+      const level = levelSelect.value;
+
+      if (!text) {
+        return;
+      }
+
+      resultDiv.textContent = "در حال ارسال به سرور و بررسی گرامر...";
+
+      try {
+        const res = await fetch(API_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ text, level }),
+        });
+
+        const data = await res.json();
+
+        if (!res.ok || data.error) {
+          const msg = data.error || "خطای نامشخص";
+          const raw = data.raw ? "\n\nخروجی مدل:\n" + data.raw : "";
+          resultDiv.textContent = "خطا در پاسخ سرور:\n" + msg + raw;
+          return;
+        }
+
+        const corrected = data.corrected || "";
+        const faExp = data.errors_explained_fa || "";
+        const enExp = data.errors_explained_en || "";
+        const examples = Array.isArray(data.examples) ? data.examples : [];
+        const practice = data.suggested_practice || "";
+
+        resultDiv.innerHTML = "";
+
+        // جمله تصحیح‌شده
+        const correctedEl = document.createElement("div");
+        correctedEl.className = "section-block";
+        correctedEl.innerHTML =
+          "<span class='section-title'>جملهٔ تصحیح‌شده:</span><br>" +
+          (corrected || "<em>چیزی برنگشت.</em>");
+        resultDiv.appendChild(correctedEl);
+
+        // توضیح فارسی
+        const faEl = document.createElement("div");
+        faEl.className = "section-block";
+        faEl.innerHTML =
+          "<span class='section-title'>توضیح خطاها (فارسی):</span><br>" +
+          (faExp || "<em>توضیحی برنگشت.</em>");
+        resultDiv.appendChild(faEl);
+
+        // توضیح انگلیسی
+        const enEl = document.createElement("div");
+        enEl.className = "section-block";
+        enEl.innerHTML =
+          "<span class='section-title'>Explanation (English):</span><br>" +
+          (enExp || "<em>No explanation returned.</em>");
+        resultDiv.appendChild(enEl);
+
+        // مثال‌ها
+        const exEl = document.createElement("div");
+        exEl.className = "section-block";
+        if (examples.length > 0) {
+          exEl.innerHTML =
+            "<span class='section-title'>مثال‌های پیشنهادی:</span>";
+          const ul = document.createElement("ul");
+          ul.className = "examples-list";
+          examples.forEach((ex) => {
+            const li = document.createElement("li");
+            li.textContent = ex;
+            ul.appendChild(li);
+          });
+          exEl.appendChild(document.createElement("br"));
+          exEl.appendChild(ul);
+        } else {
+          exEl.innerHTML =
+            "<span class='section-title'>مثال‌های پیشنهادی:</span><br><em>مثالی برنگشت.</em>";
+        }
+        resultDiv.appendChild(exEl);
+
+        // تمرین پیشنهادی
+        const prEl = document.createElement("div");
+        prEl.className = "section-block";
+        prEl.innerHTML =
+          "<span class='section-title'>تمرین پیشنهادی:</span><br>" +
+          (practice || "<em>تمرینی برنگشت.</em>");
+        resultDiv.appendChild(prEl);
+      } catch (err) {
+        console.error(err);
+        resultDiv.textContent =
+          "خطا در ارتباط با سرور یا اینترنت. لطفاً بعداً دوباره امتحان کنید.";
+      }
+    });
+  </script>
+</body>
+</html>
