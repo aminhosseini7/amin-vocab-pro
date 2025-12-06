@@ -1,0 +1,149 @@
+/* =============================
+   Grammar AI – Cyber Neon Theme
+   Colors: Black #000 | Neon Yellow #FDE047
+   ============================= */
+
+body {
+  background: #000;
+  color: #F8F8FF;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  margin: 0;
+  padding: 20px 16px 80px;
+  direction: rtl;
+  text-align: right;
+}
+
+/* CONTAINER */
+.container {
+  max-width: 900px;
+  margin: auto;
+}
+
+/* TITLES */
+h1, h2, h3 {
+  color: #FDE047;
+  text-shadow: 0 0 10px rgba(253, 224, 71, 0.6);
+}
+
+/* CARD */
+.card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(253, 224, 71, 0.25);
+  border-radius: 14px;
+  padding: 16px;
+  margin-top: 18px;
+  box-shadow: 0 0 14px rgba(253, 224, 71, 0.15);
+}
+
+/* BUTTONS */
+.btn {
+  background: #FDE047;
+  color: #000;
+  font-weight: 600;
+  padding: 10px 16px;
+  border-radius: 999px;
+  cursor: pointer;
+  border: none;
+  margin-top: 10px;
+  font-size: 14px;
+  box-shadow: 0 0 8px rgba(253, 224, 71, 0.9);
+  transition: 0.2s;
+}
+
+.btn:hover {
+  box-shadow: 0 0 14px rgba(253, 224, 71, 1);
+  transform: scale(1.03);
+}
+
+.btn:active {
+  transform: scale(0.96);
+}
+
+/* SECONDARY BUTTON */
+.btn-secondary {
+  background: transparent;
+  border: 1px solid #FDE047;
+  color: #FDE047;
+}
+
+.btn-secondary:hover {
+  background: rgba(253, 224, 71, 0.1);
+}
+
+/* TEXTAREA */
+textarea {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(253, 224, 71, 0.4);
+  color: #fff;
+  padding: 10px;
+  border-radius: 12px;
+  min-height: 100px;
+  margin-top: 8px;
+  font-size: 14px;
+}
+
+textarea:focus {
+  outline: none;
+  box-shadow: 0 0 14px rgba(253, 224, 71, 0.7);
+}
+
+/* PROGRESS BAR */
+.progress-bar {
+  width: 100%;
+  height: 10px;
+  background: rgba(253, 224, 71, 0.15);
+  border-radius: 999px;
+  overflow: hidden;
+  margin: 10px 0 18px;
+}
+
+.progress-fill {
+  height: 100%;
+  background: #FDE047;
+  width: 0%;
+  box-shadow: 0 0 10px rgba(253, 224, 71, 0.7);
+  transition: width 0.3s ease;
+}
+
+/* CHOICE BUTTONS */
+.choice-option {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(253, 224, 71, 0.35);
+  padding: 12px;
+  border-radius: 10px;
+  margin-top: 10px;
+  cursor: pointer;
+  transition: 0.25s;
+}
+
+.choice-option:hover {
+  background: rgba(253, 224, 71, 0.15);
+}
+
+.choice-selected {
+  border-color: #FDE047;
+  background: rgba(253, 224, 71, 0.25);
+}
+
+/* MUTED */
+.muted {
+  color: #9CA3AF;
+  font-size: 13px;
+}
+
+/* RESULT BOX */
+.result-box {
+  background: rgba(253, 224, 71, 0.1);
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(253, 224, 71, 0.4);
+  margin-top: 15px;
+  color: #fff;
+  white-space: pre-line;
+}
+
+/* CENTER */
+.center {
+  text-align: center;
+}
