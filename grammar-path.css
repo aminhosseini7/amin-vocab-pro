@@ -1,78 +1,70 @@
-body {
-  font-family: sans-serif;
-  background: #f5f7fa;
-  direction: rtl;
-  text-align: right;
-  padding: 20px;
-  margin: 0;
-}
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+  <meta charset="UTF-8">
+  <title>Grammar AI Tutor</title>
+  <link rel="stylesheet" href="grammar-path.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
 
-.container {
-  max-width: 900px;
-  margin: auto;
-}
+<body>
+  <div class="container">
 
-h1 {
-  text-align: center;
-  margin-bottom: 5px;
-}
+    <h1>🎓 Grammar AI Tutor</h1>
+    <p class="sub">مسیر یادگیری گرامر هوشمند – مخصوص خودت</p>
 
-.sub {
-  text-align: center;
-  color: #666;
-  margin-bottom: 25px;
-}
+    <div id="level-box" class="section">
+      <h2>سطح فعلی شما: <span id="user-level">…</span></h2>
+      <p id="level-desc"></p>
+    </div>
 
-.section {
-  background: white;
-  padding: 15px;
-  margin-top: 20px;
-  border-radius: 12px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-}
+    <div class="section">
+      <h3>📌 تمرین روزانه</h3>
+      <button id="start-practice" class="btn-primary">شروع تمرین امروز</button>
+      <p id="practice-status" class="muted"></p>
+      <div id="lesson-box">برای شروع تمرین، دکمهٔ بالا را بزن.</div>
+    </div>
 
-textarea {
-  width: 100%;
-  min-height: 90px;
-  padding: 10px;
-  font-size: 15px;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-  resize: vertical;
-}
+    <div class="section">
+      <h3>📝 جمله بنویس</h3>
+      <textarea id="user-sentence" placeholder="یک جمله‌ی انگلیسی بنویس..."></textarea>
+      <button id="check-btn" class="btn-secondary">بررسی با هوش مصنوعی</button>
+      <div id="ai-result"></div>
+    </div>
 
-.btn-primary, .btn-secondary {
-  padding: 10px 18px;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 15px;
-  margin-top: 10px;
-}
+    <div class="section">
+      <h3>📊 آمار کلی گرامر شما</h3>
+      <div class="stats-grid">
+        <div class="stat-item">
+          <div class="stat-label">تعداد کل جملات بررسی‌شده</div>
+          <div class="stat-value" id="stat-total">0</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">جملات امروز</div>
+          <div class="stat-value" id="stat-today">0</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">آخرین تمرین</div>
+          <div class="stat-value" id="stat-last-date">-</div>
+        </div>
+      </div>
+      <p class="muted">این آمار فقط روی دستگاه خودت ذخیره می‌شود (LocalStorage).</p>
+    </div>
 
-.btn-primary {
-  background: #0070f3;
-  color: white;
-}
+    <div class="section">
+      <h3>🎯 نقاط ضعف شما (بر اساس جمله‌های اخیر)</h3>
+      <p class="muted">هوش مصنوعی بر اساس توضیح خطاها، خطاها را در چند دسته ساده طبقه‌بندی می‌کند.</p>
+      <ul id="weak-points-list"></ul>
+    </div>
 
-.btn-secondary {
-  background: #555;
-  color: white;
-}
+    <div class="section">
+      <h3>📚 تاریخچه جملات اخیر</h3>
+      <p class="muted">آخرین جمله‌هایی که نوشتی و نسخهٔ تصحیح‌شدهٔ آن‌ها:</p>
+      <div id="history-list"></div>
+    </div>
 
-#ai-result {
-  margin-top: 15px;
-  white-space: pre-wrap;
-  background: #eef4ff;
-  padding: 12px;
-  border-radius: 8px;
-  border: 1px solid #c8d8ff;
-}
+  </div>
 
-#lesson-box {
-  background: #fdfdfd;
-  padding: 12px;
-  border-radius: 8px;
-  border: 1px solid #ddd;
-  white-space: pre-wrap;
-}
+  <script src="grammar-path.js"></script>
+</body>
+</html>
