@@ -68,7 +68,7 @@ document.addEventListener("DOMContentLoaded", () => {
     meaningBox.innerText = "در حال گرفتن معنی از هوش مصنوعی...";
 
     try {
-      const res = await fetch(VOCAB_API_URL, {
+      const res = await fetch(window.VOCAB_API_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ word })
