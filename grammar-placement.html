@@ -1,65 +1,75 @@
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <title>Placement Test – Grammar AI</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="grammar-theme.css">
+  <meta charset="UTF-8" />
+  <title>آزمون تعیین سطح گرامر</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- از همان استایل تیره نئونی گرامر استفاده می‌کنیم -->
+  <link rel="stylesheet" href="grammar-path.css" />
 </head>
 
 <body>
   <div class="container">
 
-    <!-- WELCOME SCREEN -->
-    <div id="welcome-screen" class="card center">
-      <div style="font-size: 48px; margin-bottom: 12px;">🎯</div>
-      <h1>آزمون تعیین سطح گرامر</h1>
+    <!-- صفحه خوشامد -->
+    <div id="welcome-screen" class="card">
+      <h3>🎯 آزمون تعیین سطح گرامر</h3>
       <p class="muted">
-        این آزمون حدود ۶ تا ۸ دقیقه زمان می‌برد و به ما کمک می‌کند
-        مسیر یادگیری مناسب سطح شما را طراحی کنیم.
+        این آزمون شامل ۱۰ سؤال تستی و ۳ سؤال نوشتاری کوتاه است. بر اساس نتیجه،
+        سطح تقریبی (A2 تا C1) و مسیر پیشنهادی یادگیری برایت ذخیره می‌شود.
       </p>
-
-      <p class="muted">شامل سه بخش است:</p>
-      <p>۱) ۱۰ سؤال گرامر<br>۲) ۳ تمرین نوشتاری<br>۳) تحلیل هوش مصنوعی و اعلام سطح</p>
-
-      <button id="start-btn" class="btn">شروع آزمون</button>
+      <button id="start-btn" class="btn-primary">
+        شروع آزمون
+      </button>
     </div>
 
-    <!-- QUESTIONS SCREEN -->
-    <div id="question-screen" class="card" style="display:none;">
-      <h2 id="q-title">سؤال 1 از 10</h2>
-      <div class="progress-bar"><div id="q-progress" class="progress-fill"></div></div>
-      <p id="q-text"></p>
-
+    <!-- صفحه سوالات تستی -->
+    <div id="question-screen" class="section" style="display:none;">
+      <h3>بخش ۱ – سؤالات تستی</h3>
+      <div style="height:6px; background:#020617; border-radius:999px; overflow:hidden; margin-bottom:12px;">
+        <div id="q-progress" style="height:100%; width:0; background:#facc15;"></div>
+      </div>
+      <h4 id="q-title" style="margin:0 0 8px; font-size:16px;"></h4>
+      <p id="q-text" style="white-space:pre-line; margin-top:0;"></p>
       <div id="q-choices"></div>
-
-      <button id="next-question-btn" class="btn" style="margin-top:20px;">سؤال بعد</button>
+      <div style="margin-top:14px; text-align:left;">
+        <button id="next-question-btn" class="btn-primary">
+          سؤال بعدی
+        </button>
+      </div>
     </div>
 
-    <!-- WRITING SCREEN -->
-    <div id="writing-screen" class="card" style="display:none;">
-      <h2 id="w-title">بخش نوشتاری – سؤال 1 از 3</h2>
-      <p id="w-text"></p>
-
-      <textarea id="w-answer"></textarea>
-
-      <button id="next-writing-btn" class="btn" style="margin-top:20px;">بعدی</button>
+    <!-- صفحه سوالات نوشتاری -->
+    <div id="writing-screen" class="section" style="display:none;">
+      <h3>بخش ۲ – نوشتاری کوتاه</h3>
+      <h4 id="w-title" style="margin:0 0 8px; font-size:16px;"></h4>
+      <p id="w-text" class="muted" style="white-space:pre-line;"></p>
+      <textarea id="w-answer" placeholder="پاسخت را اینجا بنویس..." style="margin-top:8px; width:100%; min-height:100px; border-radius:14px; border:1px solid rgba(148,163,184,0.45); background:rgba(15,23,42,0.95); color:#e5e7eb; padding:10px 12px; font-family:inherit; font-size:13px;"></textarea>
+      <div style="margin-top:12px; text-align:left;">
+        <button id="next-writing-btn" class="btn-primary">
+          ادامه
+        </button>
+      </div>
     </div>
 
-    <!-- LOADING AI SCREEN -->
-    <div id="loading-screen" class="card center" style="display:none;">
-      <div style="font-size:40px; margin-bottom:14px;">⚡</div>
-      <h2>در حال تحلیل پاسخ‌ها...</h2>
-      <p class="muted">لطفاً چند ثانیه صبر کنید</p>
+    <!-- صفحه در حال محاسبه -->
+    <div id="loading-screen" class="section" style="display:none; text-align:center;">
+      <h3>⏳ در حال تحلیل پاسخ‌ها</h3>
+      <p class="muted">
+        چند لحظه صبر کن تا سطح تقریبی و پیشنهاد مسیر یادگیری محاسبه شود...
+      </p>
     </div>
 
-    <!-- RESULT SCREEN -->
-    <div id="result-screen" class="card" style="display:none;">
-      <h2>نتیجه سطح شما</h2>
-
-      <div id="level-box" class="result-box"></div>
-
-      <button id="finish-btn" class="btn" style="margin-top:20px;">شروع مسیر یادگیری</button>
+    <!-- صفحه نتیجه نهایی -->
+    <div id="result-screen" class="section" style="display:none;">
+      <h3>نتیجه آزمون تعیین سطح</h3>
+      <pre id="level-box" style="white-space:pre-line; font-size:13px; line-height:1.7; background:rgba(15,23,42,0.95); border-radius:14px; padding:10px 12px; border:1px solid rgba(148,163,184,0.45);"></pre>
+      <p class="muted">
+        این نتیجه در دستگاهت ذخیره شد و در صفحهٔ Grammar AI Tutor به‌عنوان سطح فعلی استفاده می‌شود.
+      </p>
+      <button id="finish-btn" class="btn-primary">
+        بازگشت به صفحهٔ گرامر
+      </button>
     </div>
 
   </div>
