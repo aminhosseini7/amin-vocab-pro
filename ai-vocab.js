@@ -1,188 +1,242 @@
+// ai-vocab.js
 import WORD_LIST from "./data/word_list.js";
 
-const API_URL = "https://api-inference.huggingface.co/models/gpt2"; 
-// تو بعداً مدل دلخواهت را می‌گذاری
+// ---------------------------
+// تنظیمات API
+// ---------------------------
 
-//--------------------------------------------------
-// UI Elements
-//--------------------------------------------------
-const wordInput = document.getElementById("word-input");
-const loadWordBtn = document.getElementById("load-word-btn");
+// برای واژگان (fa, example, usage, hint)
+const API_URL_VOCAB = "https://grammar-backend.vercel.app/api/vocab";
+
+// برای جمله‌سازی و داستان (می‌توانی همین /api/grammar را هم استفاده کنی)
+const API_URL_GRAMMAR = "https://grammar-backend.vercel.app/api/grammar";
+
+// ---------------------------
+// عناصر UI
+// ---------------------------
+const currentWordEl = document.getElementById("current-word");
+const wordMetaEl = document.getElementById("word-meta");
+const wordStatusEl = document.getElementById("word-status");
+
+const prevWordBtn = document.getElementById("prev-word-btn");
+const nextWordBtn = document.getElementById("next-word-btn");
+const randomWordBtn = document.getElementById("random-word-btn");
+
+const generateWordAiBtn = document.getElementById("generate-word-ai-btn");
 const exampleBox = document.getElementById("example-box");
+
 const sentenceInput = document.getElementById("sentence-input");
 const sentenceCheckBtn = document.getElementById("sentence-check-btn");
 const sentenceResult = document.getElementById("sentence-result");
+
 const storyBtn = document.getElementById("story-btn");
 const storyBox = document.getElementById("story-box");
 
-//--------------------------------------------------
-// 1) تولید معنی + مثال + توضیح + Hint
-//--------------------------------------------------
-async function generateWordData(word) {
-  const prompt = `
-Provide JSON only.
+// ---------------------------
+// وضعیت فعلی واژه
+// ---------------------------
 
-Word: "${word}"
+let currentIndex = 0;
 
-Required fields:
-- fa (Persian meaning)
-- example (English example)
-- usage (short description in English)
-- hint (creative mnemonic to remember the word)
-
-Example JSON format:
-{
-  "fa": "",
-  "example": "",
-  "usage": "",
-  "hint": ""
+function loadInitialIndex() {
+  const raw = localStorage.getItem("ai_vocab_index");
+  if (!raw) return 0;
+  const n = parseInt(raw, 10);
+  if (Number.isNaN(n) || n < 0 || n >= WORD_LIST.length) return 0;
+  return n;
 }
-`;
 
-  const res = await fetch(API_URL, {
+function saveIndex() {
+  localStorage.setItem("ai_vocab_index", String(currentIndex));
+}
+
+function clampIndex() {
+  if (currentIndex < 0) currentIndex = 0;
+  if (currentIndex >= WORD_LIST.length) currentIndex = WORD_LIST.length - 1;
+}
+
+function renderCurrentWord() {
+  clampIndex();
+  const word = WORD_LIST[currentIndex] || "...";
+
+  currentWordEl.textContent = word;
+  wordMetaEl.textContent = `واژه ${currentIndex + 1} از ${WORD_LIST.length}`;
+
+  exampleBox.textContent = "برای این واژه هنوز چیزی تولید نشده است.";
+  sentenceInput.value = "";
+  sentenceResult.textContent = "";
+  storyBox.textContent = "";
+
+  wordStatusEl.textContent = "";
+}
+
+// مقدار اولیه
+currentIndex = loadInitialIndex();
+renderCurrentWord();
+
+// ---------------------------
+// جابه‌جایی بین واژه‌ها
+// ---------------------------
+
+prevWordBtn.addEventListener("click", () => {
+  if (currentIndex > 0) {
+    currentIndex -= 1;
+    saveIndex();
+    renderCurrentWord();
+  }
+});
+
+nextWordBtn.addEventListener("click", () => {
+  if (currentIndex < WORD_LIST.length - 1) {
+    currentIndex += 1;
+    saveIndex();
+    renderCurrentWord();
+  }
+});
+
+randomWordBtn.addEventListener("click", () => {
+  currentIndex = Math.floor(Math.random() * WORD_LIST.length);
+  saveIndex();
+  renderCurrentWord();
+});
+
+// ---------------------------
+// A) تولید معنی + مثال + usage + hint
+// ---------------------------
+
+async function fetchVocabAI(word) {
+  // فرض: backend تو یک endpoint /api/vocab دارد که JSON زیر را برمی‌گرداند:
+  // { fa, example, usage, hint }
+  const res = await fetch(API_URL_VOCAB, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ inputs: prompt })
+    body: JSON.stringify({ word })
   });
 
   const data = await res.json();
-
-  let text = "";
-
-  if (Array.isArray(data) && data[0]?.generated_text) {
-    text = data[0].generated_text;
-  } else if (data.generated_text) {
-    text = data.generated_text;
-  } else {
-    return null;
+  if (!res.ok || data.error) {
+    throw new Error(data.error || "API error");
   }
-
-  // استخراج بخش JSON
-  let start = text.indexOf("{");
-  let end = text.lastIndexOf("}");
-
-  if (start === -1 || end === -1) return null;
-
-  try {
-    return JSON.parse(text.slice(start, end + 1));
-  } catch {
-    return null;
-  }
+  return data;
 }
 
-//--------------------------------------------------
-// دکمه شروع تمرین لغت
-//--------------------------------------------------
-loadWordBtn.addEventListener("click", async () => {
-  const word = wordInput.value.trim();
+generateWordAiBtn.addEventListener("click", async () => {
+  const word = WORD_LIST[currentIndex];
   if (!word) return;
 
-  exampleBox.textContent = "در حال تولید...";
+  exampleBox.textContent = "در حال تولید با هوش مصنوعی...";
 
-  const result = await generateWordData(word);
+  try {
+    const data = await fetchVocabAI(word);
 
-  if (!result) {
-    exampleBox.textContent = "خطا در دریافت اطلاعات از هوش مصنوعی.";
-    return;
-  }
+    // انتظار داریم data مثل:
+    // { fa: "...", example: "...", usage: "...", hint: "..." }
 
-  exampleBox.innerHTML = `
-🔵 <b>${word}</b>
+    exampleBox.textContent = `
+🔵 ${word}
 
-📘 معنی:
-${result.fa}
+📘 معنی (فارسی):
+${data.fa || "-"}
 
-✏ مثال:
-${result.example}
+✏ مثال (English):
+${data.example || "-"}
 
 📌 کاربرد:
-${result.usage}
+${data.usage || "-"}
 
 💡 راهنمای حفظ:
-${result.hint}
-  `;
+${data.hint || "-"}
+    `.trim();
+  } catch (e) {
+    exampleBox.textContent =
+      "خطا در پاسخ سرور یا تنظیمات بک‌اند. بعداً دوباره تلاش کن.\n" +
+      (e.message || "");
+  }
 });
 
-//--------------------------------------------------
-// 2) جمله‌سازی و بررسی
-//--------------------------------------------------
+// ---------------------------
+// B) جمله‌سازی و تصحیح با واژه فعلی
+// ---------------------------
+
+async function fetchSentenceAI(sentence) {
+  // اینجا از /api/grammar استفاده می‌کنیم؛
+  // backend تو باید چیزی شبیه { corrected, errors_explained_fa, errors_explained_en } بدهد.
+  const res = await fetch(API_URL_GRAMMAR, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ text: sentence, level: "B1" })
+  });
+
+  const data = await res.json();
+  if (!res.ok || data.error) {
+    throw new Error(data.error || "API error");
+  }
+  return data;
+}
+
 sentenceCheckBtn.addEventListener("click", async () => {
   const sentence = sentenceInput.value.trim();
   if (!sentence) return;
 
-  sentenceResult.textContent = "در حال بررسی...";
+  sentenceResult.textContent = "در حال تحلیل جمله...";
 
+  try {
+    const data = await fetchSentenceAI(sentence);
+
+    const text = `
+✔ جملهٔ تصحیح‌شده:
+${data.corrected}
+
+🇮🇷 توضیح خطاها:
+${data.errors_explained_fa || "-"}
+
+🇬🇧 Explanation:
+${data.errors_explained_en || "-"}
+    `.trim();
+
+    sentenceResult.textContent = text;
+  } catch (e) {
+    sentenceResult.textContent =
+      "خطا در پاسخ سرور یا تنظیمات بک‌اند.\n" + (e.message || "");
+  }
+});
+
+// ---------------------------
+// C) داستان کوتاه با واژه فعلی
+// ---------------------------
+
+async function fetchStoryAI(word) {
   const prompt = `
-Correct the sentence and explain errors:
+Write a short story in simple English (5–7 sentences) using the word "${word}" at least 3 times.
+The story should be suitable for an intermediate learner.
+Return only the story text.
+  `.trim();
 
-"${sentence}"
-
-Return JSON:
-{
-  "corrected": "",
-  "fa": "",
-  "en": ""
-}
-`;
-
-  const res = await fetch(API_URL, {
+  const res = await fetch(API_URL_GRAMMAR, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ inputs: prompt })
+    body: JSON.stringify({ text: prompt, level: "B2" })
   });
 
   const data = await res.json();
-
-  let text = "";
-  if (Array.isArray(data) && data[0]?.generated_text) text = data[0].generated_text;
-  else if (data.generated_text) text = data.generated_text;
-
-  let start = text.indexOf("{");
-  let end = text.lastIndexOf("}");
-
-  if (start === -1 || end === -1) {
-    sentenceResult.textContent = "خطا در فرمت پاسخ.";
-    return;
+  if (!res.ok || data.error) {
+    throw new Error(data.error || "API error");
   }
+  // فرض: backend متن را در فیلد corrected برمی‌گرداند
+  return data.corrected || JSON.stringify(data);
+}
 
-  const result = JSON.parse(text.slice(start, end + 1));
-
-  sentenceResult.innerHTML = `
-✔ جملهٔ صحیح:
-${result.corrected}
-
-🇮🇷 توضیح:
-${result.fa}
-
-🇬🇧 Explanation:
-${result.en}
-  `;
-});
-
-//--------------------------------------------------
-// 3) داستان کوتاه روزانه با لغت
-//--------------------------------------------------
 storyBtn.addEventListener("click", async () => {
-  const word = wordInput.value.trim();
+  const word = WORD_LIST[currentIndex];
   if (!word) return;
 
   storyBox.textContent = "در حال ساخت داستان...";
 
-  const prompt = `
-Write a short story (6–7 sentences) in simple English using the word "${word}" at least 3 times. Return plain text only.
-`;
-
-  const res = await fetch(API_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ inputs: prompt })
-  });
-
-  const data = await res.json();
-
-  let text = "";
-  if (Array.isArray(data) && data[0]?.generated_text) text = data[0].generated_text;
-  else if (data.generated_text) text = data.generated_text;
-
-  storyBox.textContent = text;
+  try {
+    const story = await fetchStoryAI(word);
+    storyBox.textContent = story;
+  } catch (e) {
+    storyBox.textContent =
+      "خطا در پاسخ سرور یا تنظیمات بک‌اند.\n" + (e.message || "");
+  }
 });
