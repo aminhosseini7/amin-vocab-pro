@@ -10,6 +10,16 @@ function todayStr() {
   return `${y}-${m}-${day}`;
 }
 
+function daysBetween(d1, d2) {
+  if (!d1 || !d2) return 0;
+  const [y1, m1, day1] = d1.split("-").map(Number);
+  const [y2, m2, day2] = d2.split("-").map(Number);
+  const dt1 = new Date(y1, m1 - 1, day1);
+  const dt2 = new Date(y2, m2 - 1, day2);
+  const diffMs = dt2 - dt1;
+  return Math.round(diffMs / (1000 * 60 * 60 * 24));
+}
+
 // ---------------------------
 // وضعیت آزمون تعیین سطح (Placement)
 // ---------------------------
@@ -35,7 +45,6 @@ if (placementBtn) {
 const dailyTestStatusEl = document.getElementById("daily-test-status");
 const dailyTestBtn = document.getElementById("daily-test-btn");
 
-// الان دیگر تاریخ را چک نمی‌کنیم؛ هر وقت فوکوس وجود داشته باشد از آن استفاده می‌کنیم
 const dailyFocusTopic = localStorage.getItem("daily_focus_topic");
 const hasFocusTopic = !!dailyFocusTopic;
 const lastDailyDate = localStorage.getItem("daily_test_date");
@@ -96,45 +105,62 @@ if (levelDescEl) {
 }
 
 // ---------------------------
-// آمار و تاریخچه در LocalStorage
+// آمار، استریک، تاریخچه در LocalStorage
 // ---------------------------
 
 const STATS_KEY = "grammar_stats_v1";
 const HISTORY_KEY = "grammar_history_v1";
 
+function createEmptyStats() {
+  return {
+    totalChecks: 0,
+    todayChecks: 0,
+    lastDate: null,
+    points: 0,
+    streakCurrent: 0,
+    streakBest: 0,
+    categories: {
+      tense: 0,
+      sv: 0,
+      prep: 0,
+      article: 0,
+      wordOrder: 0,
+      other: 0
+    }
+  };
+}
+
+function normalizeStats(obj) {
+  const base = createEmptyStats();
+  if (!obj || typeof obj !== "object") return base;
+
+  base.totalChecks = typeof obj.totalChecks === "number" ? obj.totalChecks : 0;
+  base.todayChecks = typeof obj.todayChecks === "number" ? obj.todayChecks : 0;
+  base.lastDate = obj.lastDate || null;
+  base.points = typeof obj.points === "number" ? obj.points : 0;
+  base.streakCurrent =
+    typeof obj.streakCurrent === "number" ? obj.streakCurrent : 0;
+  base.streakBest = typeof obj.streakBest === "number" ? obj.streakBest : 0;
+
+  const cats = obj.categories || {};
+  for (const key of Object.keys(base.categories)) {
+    base.categories[key] =
+      typeof cats[key] === "number" ? cats[key] : 0;
+  }
+
+  return base;
+}
+
 function loadStats() {
   const raw = localStorage.getItem(STATS_KEY);
   if (!raw) {
-    return {
-      totalChecks: 0,
-      todayChecks: 0,
-      lastDate: null,
-      categories: {
-        tense: 0,
-        sv: 0,
-        prep: 0,
-        article: 0,
-        wordOrder: 0,
-        other: 0
-      }
-    };
+    return createEmptyStats();
   }
   try {
-    return JSON.parse(raw);
+    const obj = JSON.parse(raw);
+    return normalizeStats(obj);
   } catch {
-    return {
-      totalChecks: 0,
-      todayChecks: 0,
-      lastDate: null,
-      categories: {
-        tense: 0,
-        sv: 0,
-        prep: 0,
-        article: 0,
-        wordOrder: 0,
-        other: 0
-      }
-    };
+    return createEmptyStats();
   }
 }
 
@@ -146,7 +172,8 @@ function loadHistory() {
   const raw = localStorage.getItem(HISTORY_KEY);
   if (!raw) return [];
   try {
-    return JSON.parse(raw);
+    const arr = JSON.parse(raw);
+    return Array.isArray(arr) ? arr : [];
   } catch {
     return [];
   }
@@ -224,7 +251,7 @@ const CATEGORY_LABELS = {
 };
 
 // ---------------------------
-// به‌روزرسانی UI آمار و تاریخچه
+// به‌روزرسانی UI آمار، استریک، نقاط ضعف، تاریخچه
 // ---------------------------
 
 const statTotalEl = document.getElementById("stat-total");
@@ -232,11 +259,17 @@ const statTodayEl = document.getElementById("stat-today");
 const statLastDateEl = document.getElementById("stat-last-date");
 const weakPointsListEl = document.getElementById("weak-points-list");
 const historyListEl = document.getElementById("history-list");
+const streakCurrentEl = document.getElementById("streak-current");
+const streakBestEl = document.getElementById("streak-best");
+const grammarPointsEl = document.getElementById("grammar-points");
 
 function updateStatsUI() {
   if (statTotalEl) statTotalEl.textContent = stats.totalChecks;
   if (statTodayEl) statTodayEl.textContent = stats.todayChecks;
   if (statLastDateEl) statLastDateEl.textContent = stats.lastDate || "-";
+  if (streakCurrentEl) streakCurrentEl.textContent = stats.streakCurrent || 0;
+  if (streakBestEl) streakBestEl.textContent = stats.streakBest || 0;
+  if (grammarPointsEl) grammarPointsEl.textContent = stats.points || 0;
 
   if (!weakPointsListEl) return;
 
@@ -254,12 +287,46 @@ function updateStatsUI() {
     return;
   }
 
-  for (const [cat, count] of items) {
+  const totalErrors = items.reduce((sum, [, c]) => sum + c, 0);
+
+  items.forEach(([cat, count], index) => {
     const li = document.createElement("li");
     const label = CATEGORY_LABELS[cat] || cat;
-    li.textContent = `${label}: ${count} خطا`;
+    const ratio =
+      stats.totalChecks > 0
+        ? Math.round((count / stats.totalChecks) * 100)
+        : Math.round((count / totalErrors) * 100);
+
+    li.classList.add("weak-item");
+    if (index === 0) li.classList.add("weak-top");
+
+    const row = document.createElement("div");
+    row.className = "weak-row";
+
+    const nameSpan = document.createElement("span");
+    nameSpan.className = "weak-name";
+    nameSpan.textContent = label;
+
+    const countSpan = document.createElement("span");
+    countSpan.className = "weak-count";
+    countSpan.textContent = `${count} خطا (${ratio}٪)`;
+
+    row.appendChild(nameSpan);
+    row.appendChild(countSpan);
+
+    const bar = document.createElement("div");
+    bar.className = "weak-bar";
+
+    const barFill = document.createElement("div");
+    barFill.className = "weak-bar-fill";
+    barFill.style.width = `${Math.min(ratio, 100)}%`;
+
+    bar.appendChild(barFill);
+
+    li.appendChild(row);
+    li.appendChild(bar);
     weakPointsListEl.appendChild(li);
-  }
+  });
 }
 
 function updateHistoryUI() {
@@ -272,33 +339,61 @@ function updateHistoryUI() {
     return;
   }
 
-  const recent = history.slice(-30).reverse();
+  const recent = history.slice(-150).reverse();
 
   for (const item of recent) {
     const div = document.createElement("div");
+    const catKey = item.category || "other";
+    const label = CATEGORY_LABELS[catKey] || "نامشخص";
+
     div.className = "history-item";
+    if (catKey === "tense") div.classList.add("cat-tense");
+    else if (catKey === "sv") div.classList.add("cat-sv");
+    else if (catKey === "prep") div.classList.add("cat-prep");
+    else if (catKey === "article") div.classList.add("cat-article");
+    else if (catKey === "wordOrder") div.classList.add("cat-wordOrder");
 
-    const orig = document.createElement("div");
-    orig.className = "orig";
-    orig.textContent = "جمله شما: " + item.text;
+    const header = document.createElement("div");
+    header.className = "history-header";
 
-    const corr = document.createElement("div");
-    corr.className = "corr";
-    corr.textContent = "تصحیح: " + item.corrected;
-
-    const cat = document.createElement("div");
-    cat.className = "cat";
-    const label = CATEGORY_LABELS[item.category] || "نامشخص";
-    cat.textContent = "دسته خطا: " + label;
+    const badge = document.createElement("span");
+    badge.className = "history-badge";
+    badge.textContent = label;
 
     const dateEl = document.createElement("div");
-    dateEl.className = "date";
-    dateEl.textContent = "تاریخ: " + (item.date || "-");
+    dateEl.className = "history-date";
+    dateEl.textContent = item.date || "-";
 
-    div.appendChild(orig);
-    div.appendChild(corr);
-    div.appendChild(cat);
-    div.appendChild(dateEl);
+    header.appendChild(badge);
+    header.appendChild(dateEl);
+
+    const body = document.createElement("div");
+    body.className = "history-body";
+
+    const origLabel = document.createElement("div");
+    origLabel.className = "history-label";
+    origLabel.textContent = "جملهٔ شما:";
+
+    const origText = document.createElement("div");
+    origText.className = "history-text";
+    origText.textContent = item.text;
+
+    const corrLabel = document.createElement("div");
+    corrLabel.className = "history-label";
+    corrLabel.style.marginTop = "4px";
+    corrLabel.textContent = "نسخهٔ تصحیح‌شده:";
+
+    const corrText = document.createElement("div");
+    corrText.className = "history-corrected";
+    corrText.textContent = item.corrected;
+
+    body.appendChild(origLabel);
+    body.appendChild(origText);
+    body.appendChild(corrLabel);
+    body.appendChild(corrText);
+
+    div.appendChild(header);
+    div.appendChild(body);
 
     historyListEl.appendChild(div);
   }
@@ -308,6 +403,68 @@ updateStatsUI();
 updateHistoryUI();
 
 // ---------------------------
+// ثبت یک چک جدید (هم برای آزاد، هم هدایت‌شده)
+// ---------------------------
+
+function registerCheck(text, corrected, errorsFa, errorsEn, source) {
+  const todayLocal = todayStr();
+  const prevDate = stats.lastDate;
+
+  // استریک و todayChecks
+  if (!prevDate) {
+    stats.streakCurrent = 1;
+    stats.streakBest = 1;
+    stats.todayChecks = 1;
+    stats.lastDate = todayLocal;
+  } else if (prevDate === todayLocal) {
+    stats.todayChecks += 1;
+    // استریک همون مقدار قبلی می‌مونه
+  } else {
+    const diff = daysBetween(prevDate, todayLocal);
+    if (diff === 1) {
+      stats.streakCurrent = (stats.streakCurrent || 0) + 1;
+    } else {
+      stats.streakCurrent = 1;
+    }
+    if (!stats.streakBest || stats.streakCurrent > stats.streakBest) {
+      stats.streakBest = stats.streakCurrent;
+    }
+    stats.todayChecks = 1;
+    stats.lastDate = todayLocal;
+  }
+
+  // مجموع چک‌ها
+  stats.totalChecks += 1;
+
+  // امتیاز: آزاد ۵، هدایت‌شده ۸
+  const basePoints = source === "guided" ? 8 : 5;
+  stats.points = (stats.points || 0) + basePoints;
+
+  // دسته خطا
+  const cat = categorizeError(errorsFa, errorsEn);
+  if (!stats.categories[cat]) stats.categories[cat] = 0;
+  stats.categories[cat] += 1;
+
+  // تاریخچه
+  history.push({
+    text,
+    corrected,
+    category: cat,
+    date: todayLocal,
+    source
+  });
+  if (history.length > 150) {
+    history = history.slice(history.length - 150);
+  }
+
+  saveStats(stats);
+  saveHistory(history);
+
+  updateStatsUI();
+  updateHistoryUI();
+}
+
+// ---------------------------
 // درس امروز بر اساس سطح + آخرین آزمون روزانه (درسنامه متنی)
 // ---------------------------
 
@@ -315,7 +472,7 @@ const lessonBoxEl = document.getElementById("lesson-box");
 const practiceStatusEl = document.getElementById("practice-status");
 
 function generateLesson(level, focusTopic) {
-  // اگر از آزمون روزانه فوکوس خاص داریم:
+  // فوکوس‌های آزمون روزانه
   if (focusTopic === "tense") {
     return `🎯 مبحث امروز: زمان‌ها (Tenses – مخصوصاً Present Perfect vs Past Simple)
 
@@ -358,7 +515,7 @@ I have never ...
 I have been ...
 
 💡 پیشنهاد:
-هر جمله‌ای که می‌نویسی را در بخش «📝 جمله بنویس» همین صفحه وارد کن و با هوش مصنوعی تصحیح کن تا خطاها و توضیحات را ببینی.`;
+هر جمله‌ای که می‌نویسی را در تمرین هدایت‌شده یا بخش «📝 جمله بنویس» وارد کن و با هوش مصنوعی تصحیح کن.`;
   }
 
   if (focusTopic === "prep") {
@@ -398,7 +555,7 @@ I have been ...
 ۳ جمله با for و since دربارهٔ چیزهایی که مدت‌دار هستند بنویس.
 
 [۵] تمرین ۳ – جمله‌نویسی و تصحیح:
-جملاتت را یکی‌یکی در بخش «📝 جمله بنویس» وارد کن و ببین AI چه توضیحی درباره حروف اضافه بهت می‌دهد.`;
+جملاتت را یکی‌یکی در تمرین هدایت‌شده یا بخش «📝 جمله بنویس» اضافه کن.`;
   }
 
   if (focusTopic === "sv") {
@@ -434,9 +591,7 @@ They work in a bank.
 
 [۵] تمرین ۳ – جمله‌نویسی:
 ۵ جمله با he/she/it بنویس (همه با s)،
-۵ جمله با I/you/we/they (بدون s).
-
-هر جمله را در بخش «📝 جمله بنویس» وارد کن و نتیجه را ببین.`;
+۵ جمله با I/you/we/they (بدون s).`;
   }
 
   if (focusTopic === "article") {
@@ -445,11 +600,11 @@ They work in a bank.
 [۱] خلاصه:
 - a: قبل از اسم مفرد قابل‌شمار، با صدای consonant
   a car, a book
-- an: قبل از اسم مفرد قابل‌شمار، با صدای vowel (a, e, i, o, u)
+- an: قبل از اسم مفرد قابل‌شمار، با صدای vowel
   an apple, an engineer
 - the: وقتی چیز مشخص است یا قبلاً اشاره شده
   I bought a car. The car is red.
-- صفر (هیچ): وقتی به طور کلی صحبت می‌کنیم
+- صفر: وقتی به طور کلی صحبت می‌کنیم
   I like music. Life is short.
 
 [۲] مثال درست/غلط:
@@ -471,11 +626,9 @@ They work in a bank.
 3) I have an car.
 
 [۵] تمرین ۳ – جمله‌نویسی:
-۳ جمله که در آن‌ها a/an استفاده کنی،
-۳ جمله که در آن‌ها the استفاده کنی،
-۲ جمله بدون هیچ حرف تعریفی (مثلاً دربارهٔ music, life, love).
-
-باز هم می‌توانی همه را در بخش «📝 جمله بنویس» چک کنی.`;
+۳ جمله با a/an،
+۳ جمله با the،
+۲ جمله بدون هیچ حرف تعریفی (مثل music, life, love).`;
   }
 
   if (focusTopic === "wordOrder") {
@@ -497,15 +650,13 @@ She usually goes to work by bus.
 3) They eat breakfast. (never)
 
 [۴] تمرین ۲ – جمله‌سازی:
-۵ جمله با always/usually/often/sometimes/never بنویس،
-سعی کن هر بار قید را جای درست بگذاری.
+۵ جمله با always/usually/often/sometimes/never بنویس.
 
 [۵] تمرین ۳ – جمله‌نویسی آزاد:
-دو یا سه جمله طولانی بنویس که در آن‌ها از دو قید مختلف استفاده کرده باشی؛
-بعد بفرست برای «📝 جمله بنویس» و ببین AI چه می‌گوید.`;
+دو سه جملهٔ طولانی بنویس که در آن‌ها از دو قید مختلف استفاده کرده باشی.`;
   }
 
-  // اگر فوکوس خاص نداریم → بر اساس سطح کلی
+  // بدون فوکوس خاص → بر اساس سطح
   if (level === "A2") {
     return `📘 درس امروز (A2 – مرور کلی گرامر پایه)
 
@@ -520,12 +671,11 @@ She likes tea.
 
 [۳] تمرین:
 1) ۵ جملهٔ ساده در زمان حال دربارهٔ روتین روزانه‌ات بنویس.
-2) ۵ جملهٔ ساده در زمان گذشته دربارهٔ دیروزت بنویس.
-3) هر کدام را در «📝 جمله بنویس» بفرست و تصحیح را ببین.`;
+2) ۵ جملهٔ ساده در زمان گذشته دربارهٔ دیروزت بنویس.`;
   }
 
   if (level === "B1") {
-    return `📘 درس امروز (B1 – مرور Present Perfect vs Present Perfect Continuous)
+    return `📘 درس امروز (B1 – Present Perfect vs Present Perfect Continuous)
 
 [۱] توضیح:
 - Present Perfect: روی نتیجه/تجربه تمرکز دارد.
@@ -544,18 +694,7 @@ She likes tea.
 [۴] تمرین ۱ – تشخیص:
 تصمیم بگیر برای هر موقعیت کدام زمان بهتر است:
 1) تأکید روی «مدتِ کار خواندن»، نه تمام‌شدن آن.
-2) تأکید روی این‌که «کار تمام شده» و الان اثرش مهم است.
-
-[۵] تمرین ۲ – بازنویسی:
-جملات زیر را یک بار با Present Perfect
-و یک بار با Present Perfect Continuous بنویس:
-- I / learn English / three years
-- She / work here / six months
-- They / study / all day
-
-[۶] تمرین ۳ – جمله‌نویسی:
-۳ جمله دربارهٔ مهارت‌های خودت با این ساختارها بنویس
-و در «📝 جمله بنویس» چک کن.`;
+2) تأکید روی این‌که «کار تمام شده» و الان اثرش مهم است.`;
   }
 
   if (level === "B2") {
@@ -565,12 +704,7 @@ She likes tea.
 از who/which/that برای توضیح بیشتر دربارهٔ اسم استفاده می‌کنیم.
 مثال:
 The man who lives next door is a doctor.
-The book that I bought yesterday is interesting.
-
-[۲] تمرین:
-۱) ۵ جمله بساز که در آن‌ها از who استفاده کنی.
-۲) ۵ جمله بساز که در آن‌ها از which/that استفاده کنی.
-۳) جمله‌ها را در «📝 جمله بنویس» چک کن.`;
+The book that I bought yesterday is interesting.`;
   }
 
   // C1 یا سایر
@@ -581,8 +715,7 @@ however, although, in addition, moreover, nevertheless, on the other hand
 
 [۲] تمرین:
 ۱) یک پاراگراف ۶–۸ جمله‌ای در مورد یک موضوع (مثلاً «یادگیری زبان انگلیسی») بنویس.
-۲) سعی کن حداقل از ۴–۵ linking word مختلف استفاده کنی.
-۳) متن را در چند بخش به «📝 جمله بنویس» بده و خطاها را ببین.`;
+۲) سعی کن حداقل از ۴–۵ linking word مختلف استفاده کنی.`;
 }
 
 // ---------------------------
@@ -590,28 +723,33 @@ however, although, in addition, moreover, nevertheless, on the other hand
 // ---------------------------
 
 function buildGuidedPlan(level, focusTopic) {
-  // همیشه ۳ تمرین می‌سازیم: ساده → متوسط → آزاد
   if (focusTopic === "tense") {
     return {
       title: "زمان‌ها – Past vs Present Perfect",
       steps: [
         {
           id: "tense_1",
-          title: "Past Simple",
+          title: "Past Simple – زمان مشخص",
           instruction:
-            "یک جمله دربارهٔ تجربه‌ای در گذشته بنویس که زمان آن مشخص است (yesterday, last year, in 2019 ...)\nمثال الهام‌بخش (خودت کپی نکن): I visited Istanbul last year."
+            "یک جمله دربارهٔ تجربه‌ای در گذشته بنویس که زمان آن مشخص است (yesterday, last year, in 2019 ...)\nمثال الهام‌بخش: I visited Istanbul last year."
         },
         {
           id: "tense_2",
-          title: "Present Perfect (تجربه)",
+          title: "Present Perfect – تجربهٔ کلی",
           instruction:
-            "یک جمله دربارهٔ تجربه‌ای بنویس که مهم است تا الان چه‌کار کرده‌ای (فقط نتیجه مهم است، نه زمان دقیق):\nمثال الهام‌بخش: I have visited many countries."
+            "یک جمله دربارهٔ تجربه‌ای بنویس که مهم است تا الان چه‌کار کرده‌ای (بدون زمان دقیق).\nمثال: I have visited many countries."
         },
         {
           id: "tense_3",
-          title: "Present Perfect (مدت زمان)",
+          title: "Present Perfect – مدت زمان (for)",
           instruction:
-            "یک جمله بنویس که در آن از for یا since استفاده کنی و بگویی از چه زمانی تا الان کاری را انجام داده‌ای:\nمثال الهام‌بخش: I have lived in Tehran for five years."
+            "یک جمله بنویس که در آن از for برای مدت زمان استفاده کنی.\nمثال: I have lived in Tehran for five years."
+        },
+        {
+          id: "tense_4",
+          title: "Present Perfect – نقطهٔ شروع (since)",
+          instruction:
+            "یک جمله بنویس که در آن از since برای نقطهٔ شروع استفاده کنی.\nمثال: I have worked here since 2020."
         }
       ]
     };
@@ -623,21 +761,27 @@ function buildGuidedPlan(level, focusTopic) {
       steps: [
         {
           id: "prep_1",
-          title: "زمان تولد / تاریخ",
+          title: "in + سال/ماه",
           instruction:
-            "یک جمله بنویس که در آن از in + سال یا ماه استفاده شود.\nمثال الهام‌بخش: I was born in 1995."
+            "یک جمله بنویس که در آن از in + سال یا in + ماه استفاده‌شود.\nمثال: I was born in 1995."
         },
         {
           id: "prep_2",
-          title: "برنامهٔ روزانه",
+          title: "برنامه روزانه با on/at",
           instruction:
-            "یک جمله دربارهٔ برنامهٔ روزانه‌ات بنویس و از on (برای روز) و at (برای ساعت) استفاده کن.\nمثال الهام‌بخش: I go to the gym on Mondays at 7 p.m."
+            "یک جمله دربارهٔ برنامهٔ روزانه‌ات بنویس با on (روز) و at (ساعت).\nمثال: I go to the gym on Mondays at 7 p.m."
         },
         {
           id: "prep_3",
-          title: "for / since",
+          title: "for – مدت زمان",
           instruction:
-            "یک جمله بنویس که در آن از for یا since برای مدت زمان استفاده کنی.\nمثال الهام‌بخش: I have been studying English since 2020."
+            "یک جمله بنویس که در آن از for برای مدت استفاده کنی.\nمثال: I have studied English for three years."
+        },
+        {
+          id: "prep_4",
+          title: "since – نقطه شروع",
+          instruction:
+            "یک جمله بنویس که در آن از since برای نقطهٔ شروع استفاده کنی.\nمثال: I have been here since 2020."
         }
       ]
     };
@@ -651,19 +795,19 @@ function buildGuidedPlan(level, focusTopic) {
           id: "sv_1",
           title: "he/she/it + s",
           instruction:
-            "یک جمله با فاعل he/she/it بنویس که فعلش s بگیرد.\nمثال الهام‌بخش: She works in a bank."
+            "یک جمله با فاعل he/she/it بنویس که فعلش s بگیرد.\nمثال: She works in a bank."
         },
         {
           id: "sv_2",
           title: "I/you/we/they بدون s",
           instruction:
-            "یک جمله با فاعل we یا they بنویس که فعل s نگیرد.\nمثال الهام‌بخش: They live in London."
+            "یک جمله با we یا they بنویس که فعل s نگیرد.\nمثال: They live in London."
         },
         {
           id: "sv_3",
-          title: "ترکیبی",
+          title: "ترکیبی مفرد + جمع",
           instruction:
-            "یک جمله طولانی‌تر بنویس که در آن هم یک فاعل مفرد باشد هم یک فاعل جمع.\nمثال الهام‌بخش: My brother works in a bank and my parents live in another city."
+            "یک جمله طولانی‌تر بنویس که هم فاعل مفرد داشته باشد هم جمع.\nمثال: My brother works in a bank and my parents live in another city."
         }
       ]
     };
@@ -677,19 +821,19 @@ function buildGuidedPlan(level, focusTopic) {
           id: "art_1",
           title: "a / an",
           instruction:
-            "یک جمله بنویس که در آن از a یا an قبل از اسم استفاده کنی.\nمثال الهام‌بخش: I bought a new phone."
+            "یک جمله با a یا an بنویس.\nمثال: I bought a new phone."
         },
         {
           id: "art_2",
-          title: "معرفی دوباره با the",
+          title: "a/an + the",
           instruction:
-            "دو جمله پشت سر هم بنویس؛ در جملهٔ اول از a/an و در جملهٔ دوم از the استفاده کن.\nمثال الهام‌بخش: I bought a car. The car is very fast."
+            "دو جمله پشت سر هم بنویس؛ اولی با a/an و دومی با the.\nمثال: I bought a car. The car is very fast."
         },
         {
           id: "art_3",
           title: "بدون حرف تعریف",
           instruction:
-            "یک جمله بنویس که دربارهٔ یک مفهوم کلی مثل life, music, love باشد و هیچ حرف تعریفی نداشته باشد.\nمثال الهام‌بخش: Life is beautiful."
+            "یک جمله دربارهٔ مفهوم کلی مثل life یا music بنویس.\nمثال: Life is beautiful."
         }
       ]
     };
@@ -703,25 +847,25 @@ function buildGuidedPlan(level, focusTopic) {
           id: "wo_1",
           title: "always / usually",
           instruction:
-            "یک جمله بنویس که در آن از always یا usually در جای درست استفاده شده باشد.\nمثال الهام‌بخش: I usually drink coffee in the morning."
+            "یک جمله بنویس که در آن از always یا usually در جای درست استفاده شود.\nمثال: I usually drink coffee in the morning."
         },
         {
           id: "wo_2",
           title: "never / sometimes",
           instruction:
-            "یک جمله با never یا sometimes بنویس.\nمثال الهام‌بخش: I never eat fast food."
+            "یک جمله با never یا sometimes بنویس.\nمثال: I never eat fast food."
         },
         {
           id: "wo_3",
-          title: "جملهٔ طولانی‌تر",
+          title: "دو قید در یک جمله",
           instruction:
-            "یک جملهٔ طولانی‌تر بنویس که در آن از دو قید استفاده کرده باشی.\nمثال الهام‌بخش: I usually get up at 7, but I sometimes sleep until 9 on Fridays."
+            "یک جمله طولانی‌تر بنویس که در آن از دو قید مختلف استفاده کرده باشی.\nمثال: I usually get up at 7, but I sometimes sleep until 9 on Fridays."
         }
       ]
     };
   }
 
-  // اگر فوکوس خاص نداریم، یک تمرین عمومی می‌سازیم
+  // بدون فوکوس خاص → طبق سطح
   if (level === "A2") {
     return {
       title: "جمله‌سازی پایه",
@@ -730,11 +874,11 @@ function buildGuidedPlan(level, focusTopic) {
           id: "A2_1",
           title: "حال ساده",
           instruction:
-            "یک جمله ساده دربارهٔ روتین روزانه‌ات در زمان حال بنویس.\nمثال: I go to work at 8."
+            "یک جمله ساده در زمان حال دربارهٔ روتین روزانه‌ات بنویس.\nمثال: I go to work at 8."
         },
         {
           id: "A2_2",
-          title: "گذشتهٔ ساده",
+          title: "گذشته ساده",
           instruction:
             "یک جمله دربارهٔ دیروزت در زمان گذشته بنویس.\nمثال: I watched a movie yesterday."
         }
@@ -744,17 +888,17 @@ function buildGuidedPlan(level, focusTopic) {
 
   if (level === "B1") {
     return {
-      title: "Present Perfect / Continuous – تمرین هدایت‌شده",
+      title: "Present Perfect / Continuous",
       steps: [
         {
           id: "B1_pp_1",
-          title: "تجربه",
+          title: "Present Perfect – تجربه",
           instruction:
             "یک جمله با Present Perfect دربارهٔ تجربه‌ای در زندگی‌ات بنویس.\nمثال: I have visited three countries."
         },
         {
           id: "B1_pp_2",
-          title: "مدت زمان",
+          title: "Present Perfect Continuous – مدت زمان",
           instruction:
             "یک جمله با Present Perfect Continuous دربارهٔ کاری که مدتی انجام می‌دهی بنویس.\nمثال: I have been studying English for three years."
         }
@@ -782,7 +926,7 @@ function buildGuidedPlan(level, focusTopic) {
     };
   }
 
-  // اگر هیچ‌چیز مشخص نیست:
+  // حالت عمومی
   return {
     title: "تمرین عمومی جمله‌نویسی",
     steps: [
@@ -797,12 +941,11 @@ function buildGuidedPlan(level, focusTopic) {
 }
 
 // ---------------------------
-// دکمه شروع تمرین روزانه + راه‌اندازی تمرین هدایت‌شده
+// دکمه شروع تمرین روزانه + تمرین هدایت‌شده
 // ---------------------------
 
 const startPracticeBtn = document.getElementById("start-practice");
 
-// عناصر تمرین هدایت‌شده
 const guidedContainer = document.getElementById("guided-container");
 const guidedHeader = document.getElementById("guided-header");
 const guidedInstructionEl = document.getElementById("guided-instruction");
@@ -824,7 +967,9 @@ function renderGuidedStep() {
 
   const step = steps[guidedIndex];
   guidedContainer.style.display = "block";
-  guidedHeader.textContent = `تمرین ${guidedIndex + 1} از ${steps.length} – ${step.title}`;
+  guidedHeader.textContent = `تمرین ${guidedIndex + 1} از ${
+    steps.length
+  } – ${step.title}`;
   guidedInstructionEl.textContent = step.instruction;
   guidedInput.value = "";
   guidedResultEl.textContent = "";
@@ -852,7 +997,6 @@ if (startPracticeBtn) {
       }
     }
 
-    // راه‌اندازی تمرین هدایت‌شده
     guidedPlan = buildGuidedPlan(
       userLevel,
       hasFocusTopic ? dailyFocusTopic : null
@@ -863,7 +1007,7 @@ if (startPracticeBtn) {
 }
 
 // ---------------------------
-// بخش جمله‌نویسی آزاد + اتصال به بک‌اند
+// جمله‌نویسی آزاد + اتصال به بک‌اند
 // ---------------------------
 
 const checkBtn = document.getElementById("check-btn");
@@ -913,38 +1057,13 @@ ${data.suggested_practice}
 
       if (aiResultEl) aiResultEl.textContent = resultText;
 
-      const todayLocal = todayStr();
-
-      stats.totalChecks += 1;
-      if (stats.lastDate === todayLocal) {
-        stats.todayChecks += 1;
-      } else {
-        stats.todayChecks = 1;
-        stats.lastDate = todayLocal;
-      }
-
-      const cat = categorizeError(
-        data.errors_explained_fa,
-        data.errors_explained_en
-      );
-      if (!stats.categories[cat]) stats.categories[cat] = 0;
-      stats.categories[cat] += 1;
-
-      saveStats(stats);
-
-      history.push({
+      registerCheck(
         text,
-        corrected: data.corrected,
-        category: cat,
-        date: todayLocal
-      });
-      if (history.length > 100) {
-        history = history.slice(history.length - 100);
-      }
-      saveHistory(history);
-
-      updateStatsUI();
-      updateHistoryUI();
+        data.corrected,
+        data.errors_explained_fa,
+        data.errors_explained_en,
+        "free"
+      );
     } catch (e) {
       if (aiResultEl) {
         aiResultEl.textContent =
@@ -955,7 +1074,7 @@ ${data.suggested_practice}
 }
 
 // ---------------------------
-// بررسی و تصحیح تمرین هدایت‌شده
+// بررسی تمرین هدایت‌شده
 // ---------------------------
 
 if (guidedCheckBtn) {
@@ -998,14 +1117,21 @@ ${data.errors_explained_en}
 
       guidedResultEl.textContent = resultText;
 
-      // بعد از چک شدن، دکمهٔ «تمرین بعدی» فعال می‌شود
+      registerCheck(
+        text,
+        data.corrected,
+        data.errors_explained_fa,
+        data.errors_explained_en,
+        "guided"
+      );
+
       if (guidedNextBtn) {
+        const stepsLen = guidedPlan.steps?.length || 1;
         guidedNextBtn.style.display = "inline-block";
-        if (guidedIndex === (guidedPlan.steps?.length || 1) - 1) {
-          guidedNextBtn.textContent = "اتمام تمرین امروز 🎉";
-        } else {
-          guidedNextBtn.textContent = "تمرین بعدی ⏭️";
-        }
+        guidedNextBtn.textContent =
+          guidedIndex === stepsLen - 1
+            ? "اتمام تمرین امروز 🎉"
+            : "تمرین بعدی ⏭️";
       }
     } catch (e) {
       if (guidedResultEl) {
@@ -1024,9 +1150,81 @@ if (guidedNextBtn) {
       guidedIndex += 1;
       renderGuidedStep();
     } else {
-      // تمام شد
       guidedNextBtn.style.display = "none";
-      guidedResultEl.textContent += "\n\n✅ تمرین هدایت‌شدهٔ امروز تمام شد. آفرین!";
+      guidedResultEl.textContent +=
+        "\n\n✅ تمرین هدایت‌شدهٔ امروز تمام شد. آفرین!";
     }
   });
 }
+
+// ---------------------------
+// دکمه‌های 🎙️ – تبدیل گفتار به متن (Speaking ساده)
+// ---------------------------
+
+const voiceBtn = document.getElementById("voice-btn");
+const guidedVoiceBtn = document.getElementById("guided-voice-btn");
+
+(function initSpeech() {
+  const SpeechRecognition =
+    window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRecognition) {
+    // اگر پشتیبانی نشود، دکمه‌ها را مخفی کن
+    if (voiceBtn) voiceBtn.style.display = "none";
+    if (guidedVoiceBtn) guidedVoiceBtn.style.display = "none";
+    return;
+  }
+
+  let currentTarget = null;
+  let currentButton = null;
+  const rec = new SpeechRecognition();
+  rec.lang = "en-US";
+  rec.interimResults = false;
+
+  function startRec(target, buttonEl) {
+    currentTarget = target;
+    currentButton = buttonEl;
+    if (currentButton) {
+      currentButton.textContent = "🎙️ ضبط...";
+    }
+    try {
+      rec.start();
+    } catch (e) {
+      // ممکن است در حال حاضر در حال ضبط باشد
+    }
+  }
+
+  rec.onresult = (e) => {
+    const transcript = e.results[0][0].transcript;
+    if (currentTarget) {
+      // متن فعلی را جایگزین می‌کنیم (می‌توانی اگر خواستی append کنی)
+      currentTarget.value = transcript;
+    }
+  };
+
+  rec.onend = () => {
+    if (currentButton) {
+      currentButton.textContent = "🎙️";
+    }
+    currentTarget = null;
+    currentButton = null;
+  };
+
+  rec.onerror = () => {
+    if (currentButton) currentButton.textContent = "🎙️";
+  };
+
+  if (voiceBtn) {
+    voiceBtn.addEventListener("click", () => {
+      const ta = document.getElementById("user-sentence");
+      if (!ta) return;
+      startRec(ta, voiceBtn);
+    });
+  }
+
+  if (guidedVoiceBtn) {
+    guidedVoiceBtn.addEventListener("click", () => {
+      if (!guidedInput) return;
+      startRec(guidedInput, guidedVoiceBtn);
+    });
+  }
+})();
