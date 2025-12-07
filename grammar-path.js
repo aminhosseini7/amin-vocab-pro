@@ -1157,12 +1157,70 @@ if (guidedNextBtn) {
   });
 }
 
+
 // ---------------------------
 // دکمه‌های 🎙️ – تبدیل گفتار به متن (Speaking ساده)
 // ---------------------------
 
 const voiceBtn = document.getElementById("voice-btn");
 const guidedVoiceBtn = document.getElementById("guided-voice-btn");
+
+// تابع کوچک برای تمیز کردن متن ویس و اضافه‌کردن علائم نگارشی
+function autoPunctuate(raw) {
+  if (!raw) return "";
+
+  let text = raw.trim();
+
+  // جایگزینی کلمات نشانه‌گذاری → علامت
+  function replaceWord(str, word, symbol) {
+    const re = new RegExp("\\b" + word + "\\b", "gi");
+    return str.replace(re, symbol);
+  }
+
+  text = replaceWord(text, "question mark", "?");
+  text = replaceWord(text, "comma", ",");
+  text = replaceWord(text, "dot", ".");
+  text = replaceWord(text, "full stop", ".");
+  text = replaceWord(text, "period", ".");
+
+  // فاصله‌های اضافی قبل از علامت‌ها را حذف کنیم
+  text = text.replace(/\s+([,.!?])/g, "$1");
+
+  // اگر آخر متن هیچ .?! نداشت → خودش اضافه کن (؟ یا .)
+  if (!/[.!?]$/.test(text)) {
+    const firstWord = text.split(/\s+/)[0].toLowerCase();
+
+    const questionStarters = [
+      "why",
+      "what",
+      "when",
+      "where",
+      "who",
+      "how",
+      "do",
+      "does",
+      "did",
+      "is",
+      "are",
+      "can",
+      "could",
+      "would",
+      "should",
+      "will"
+    ];
+
+    if (questionStarters.includes(firstWord)) {
+      text = text + "?";
+    } else {
+      text = text + ".";
+    }
+  }
+
+  // اول جمله را بزرگ‌حرف کنیم (اختیاری ولی قشنگ‌تره)
+  text = text.replace(/^([a-z])/, (m) => m.toUpperCase());
+
+  return text;
+}
 
 (function initSpeech() {
   const SpeechRecognition =
@@ -1189,15 +1247,17 @@ const guidedVoiceBtn = document.getElementById("guided-voice-btn");
     try {
       rec.start();
     } catch (e) {
-      // ممکن است در حال حاضر در حال ضبط باشد
+      // اگر هم‌زمان دوبار start بشود، اینجا می‌افتد؛ لازم نیست کاری کنیم
     }
   }
 
   rec.onresult = (e) => {
     const transcript = e.results[0][0].transcript;
+    const processed = autoPunctuate(transcript);
+
     if (currentTarget) {
-      // متن فعلی را جایگزین می‌کنیم (می‌توانی اگر خواستی append کنی)
-      currentTarget.value = transcript;
+      // اگر دوست داشتی متن قبلی حفظ شود، می‌تونی این خط را عوض کنی به +=
+      currentTarget.value = processed;
     }
   };
 
