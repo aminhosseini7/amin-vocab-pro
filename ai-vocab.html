@@ -5,7 +5,6 @@
   <title>AI Vocabulary Trainer</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <!-- استایل ساده مخصوص این صفحه -->
   <style>
     body {
       background: #000;
@@ -40,20 +39,22 @@
       font-size: 13px;
       color: #9ca3af;
     }
-    input, textarea {
-      width: 100%;
-      background: #111827;
-      color: #f9fafb;
-      border-radius: 10px;
-      border: 1px solid #374151;
-      padding: 10px 12px;
-      margin-top: 10px;
-      font-size: 14px;
-      box-sizing: border-box;
+    .word-box {
+      background: #020617;
+      border-radius: 14px;
+      border: 1px solid #27272a;
+      padding: 14px;
+      margin-top: 8px;
+      text-align: center;
     }
-    textarea {
-      min-height: 90px;
-      resize: vertical;
+    .word-main {
+      font-size: 26px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+    .word-meta {
+      font-size: 12px;
+      color: #9ca3af;
     }
     .btn-primary {
       background: #FDE047;
@@ -81,6 +82,20 @@
       flex-wrap: wrap;
       gap: 8px;
       margin-top: 8px;
+      justify-content: center;
+    }
+    textarea {
+      width: 100%;
+      background: #111827;
+      color: #f9fafb;
+      border-radius: 10px;
+      border: 1px solid #374151;
+      padding: 10px 12px;
+      margin-top: 10px;
+      font-size: 14px;
+      min-height: 90px;
+      resize: vertical;
+      box-sizing: border-box;
     }
     .box {
       background: #020617;
@@ -113,19 +128,22 @@
     <a class="back-link" href="index.html"><span>⬅</span>بازگشت به فلش‌کارت‌ها</a>
 
     <h1>🧠 AI Vocabulary Trainer</h1>
-    <p class="sub">از هر واژه فقط خودش را بده؛ معنی، مثال، کاربرد و راهنمای حفظ را هوش مصنوعی برایت می‌سازد.</p>
+    <p class="sub">همهٔ واژه‌ها از لیست اکسل خودت می‌آیند؛ معنی و مثال و راهنمای حفظ را هوش مصنوعی می‌سازد.</p>
 
-    <!-- انتخاب لغت -->
+    <!-- انتخاب واژه از لیست -->
     <div class="section">
-      <h3>📌 انتخاب واژه</h3>
-      <p class="muted">
-        می‌توانی واژه را دستی وارد کنی، یا از کلمه‌ای که در فلش‌کارت دیده‌ای استفاده کنی.
-      </p>
+      <h3>📌 واژهٔ فعلی</h3>
+      <p class="muted">واژه‌ها مستقیماً از فایل اکسل شما (WORD_LIST) خوانده می‌شوند.</p>
 
-      <input id="word-input" type="text" placeholder="مثلاً: migrate, exhausted, efficient ..." />
+      <div class="word-box">
+        <div id="current-word" class="word-main">...</div>
+        <div id="word-meta" class="word-meta">...</div>
+      </div>
 
       <div class="btn-row">
-        <button id="load-word-btn" class="btn-primary">شروع تولید با هوش مصنوعی</button>
+        <button id="prev-word-btn" class="btn-secondary">⬅ قبلی</button>
+        <button id="next-word-btn" class="btn-secondary">بعدی ➡</button>
+        <button id="random-word-btn" class="btn-secondary">🎲 تصادفی</button>
       </div>
 
       <p id="word-status" class="muted"></p>
@@ -133,19 +151,22 @@
 
     <!-- بخش A: معنی + مثال + توضیح + Hint -->
     <div class="section">
-      <h3>📚 معنی، مثال و راهنمای حفظ</h3>
-      <p class="muted">این بخش با هوش مصنوعی تولید می‌شود و لازم نیست در اکسل چیزی جز خودِ لغت ذخیره کنی.</p>
+      <h3>📚 معنی، مثال و راهنمای حفظ (AI)</h3>
+      <p class="muted">با زدن دکمه زیر، بسته کامل (fa + example + usage + hint) برای همین واژه تولید می‌شود.</p>
+
+      <button id="generate-word-ai-btn" class="btn-primary">تولید با هوش مصنوعی</button>
+
       <div id="example-box" class="box">
-        هنوز واژه‌ای انتخاب نشده است.
+        هنوز برای این واژه چیزی تولید نشده است.
       </div>
     </div>
 
     <!-- بخش B: جمله‌سازی -->
     <div class="section">
       <h3>✍ جمله‌سازی با این واژه</h3>
-      <p class="muted">یک جمله با این واژه بنویس؛ هوش مصنوعی آن را اصلاح و توضیح می‌دهد.</p>
+      <p class="muted">یک جمله با واژهٔ فعلی بنویس؛ هوش مصنوعی آن را اصلاح و توضیح می‌دهد.</p>
 
-      <textarea id="sentence-input" placeholder="یک جمله با واژهٔ انتخاب‌شده بنویس..."></textarea>
+      <textarea id="sentence-input" placeholder="یک جمله با واژهٔ فعلی بنویس..."></textarea>
 
       <div class="btn-row">
         <button id="sentence-check-btn" class="btn-primary">بررسی جمله</button>
@@ -166,7 +187,7 @@
 
   </div>
 
-  <!-- اسکریپت منطق صفحه؛ حتماً به صورت module تا بتواند از word_list.js ایمپورت کند -->
+  <!-- اسکریپت منطق صفحه؛ به‌صورت module تا بتواند از word_list.js ایمپورت کند -->
   <script type="module" src="ai-vocab.js"></script>
 </body>
 </html>
