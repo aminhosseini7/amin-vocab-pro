@@ -4,8 +4,6 @@
   <meta charset="UTF-8">
   <title>Grammar AI Tutor</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-
-  <!-- استایل تیره + نئونی -->
   <link rel="stylesheet" href="grammar-path.css">
 </head>
 
@@ -30,6 +28,18 @@
     <div id="level-box" class="section">
       <h2>سطح فعلی شما: <span id="user-level">…</span></h2>
       <p id="level-desc"></p>
+    </div>
+
+    <!-- استریک و امتیاز -->
+    <div class="section">
+      <div class="streak-box">
+        <div class="streak-main">
+          استریک گرامر: <span id="streak-current">0</span> روز 🔥
+        </div>
+        <div class="streak-sub">
+          بهترین استریک: <span id="streak-best">0</span> — امتیاز گرامر: <span id="grammar-points">0</span>
+        </div>
+      </div>
     </div>
 
     <!-- آزمون روزانه -->
@@ -58,11 +68,15 @@
         <h4 id="guided-header" style="margin:0 0 6px; font-size:15px;"></h4>
         <p id="guided-instruction" class="muted" style="white-space:pre-line;"></p>
 
-        <textarea
-          id="guided-input"
-          placeholder="پاسخ خودت به این تمرین را اینجا بنویس..."
-          style="margin-top:8px; width:100%; min-height:80px; border-radius:14px; border:1px solid rgba(148,163,184,0.45); background:rgba(15,23,42,0.95); color:#e5e7eb; padding:10px 12px; font-family:inherit; font-size:13px;"
-        ></textarea>
+        <div class="textarea-row">
+          <textarea
+            id="guided-input"
+            placeholder="پاسخ خودت به این تمرین را اینجا بنویس..."
+          ></textarea>
+          <button id="guided-voice-btn" class="btn-icon" title="صحبت کن">
+            🎙️
+          </button>
+        </div>
 
         <button id="guided-check-btn" class="btn-secondary" style="margin-top:8px;">
           بررسی این تمرین با هوش مصنوعی
@@ -70,7 +84,7 @@
 
         <div
           id="guided-result"
-          style="margin-top:8px; padding:8px 10px; border-radius:14px; background:rgba(15,23,42,0.9); border:1px solid rgba(148,163,184,0.45); font-size:12px; white-space:pre-line;"
+          class="result-box"
         ></div>
 
         <div style="margin-top:8px; text-align:left;">
@@ -88,9 +102,16 @@
         این بخش برای وقتی است که خودت می‌خواهی هر جمله یا پاراگرافی را امتحان کنی؛
         ربطی به تمرین امروز ندارد.
       </p>
-      <textarea id="user-sentence" placeholder="یک جمله‌ی انگلیسی بنویس..." ></textarea>
+
+      <div class="textarea-row">
+        <textarea id="user-sentence" placeholder="یک جمله‌ی انگلیسی بنویس..."></textarea>
+        <button id="voice-btn" class="btn-icon" title="صحبت کن">
+          🎙️
+        </button>
+      </div>
+
       <button id="check-btn" class="btn-secondary">بررسی با هوش مصنوعی</button>
-      <div id="ai-result"></div>
+      <div id="ai-result" class="result-box"></div>
     </div>
 
     <!-- آمار کلی -->
@@ -117,16 +138,18 @@
     <div class="section">
       <h3>🎯 نقاط ضعف شما (بر اساس جمله‌های اخیر)</h3>
       <p class="muted">
-        هوش مصنوعی بر اساس توضیح خطاها، خطاها را در چند دسته ساده طبقه‌بندی می‌کند.
+        این بخش نشان می‌دهد در کدام مباحث بیشترین خطا را داشته‌ای. نوارهای پررنگ‌تر یعنی نیاز به تمرین بیشتر.
       </p>
-      <ul id="weak-points-list"></ul>
+      <ul id="weak-points-list" class="weak-list"></ul>
     </div>
 
     <!-- تاریخچه -->
     <div class="section">
       <h3>📚 تاریخچه جملات اخیر</h3>
-      <p class="muted">آخرین جمله‌هایی که نوشتی و نسخهٔ تصحیح‌شدهٔ آن‌ها:</p>
-      <div id="history-list"></div>
+      <p class="muted">
+        آخرین جمله‌هایی که نوشتی، نسخهٔ تصحیح‌شده، و دستهٔ خطاها. (حداکثر ۱۵۰ رکورد آخر نگه‌داری می‌شود.)
+      </p>
+      <div id="history-list" class="history-list"></div>
     </div>
 
   </div>
