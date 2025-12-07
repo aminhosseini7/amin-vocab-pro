@@ -351,3 +351,12 @@ textarea {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
+
+
+/* فرمت بهتر برای متن درسنامه */
+#lesson-box {
+  margin-top: 8px;
+  font-size: 13px;
+  line-height: 1.8;
+  white-space: pre-line;  /* این خط مهمه که \n ها حفظ بشه */
+}
