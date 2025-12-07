@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>AI Vocabulary Trainer</title>
+  <link rel="stylesheet" href="ai-vocab.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+
+<body>
+
+  <div class="container">
+
+    <h1>🧠 AI Vocabulary Trainer</h1>
+    <p class="sub">یادگیری لغت با مثال، جمله‌سازی و داستان — همه با هوش مصنوعی</p>
+
+    <!-- انتخاب لغت امروز -->
+    <div class="section">
+      <h3>📌 انتخاب لغت</h3>
+      <p class="muted">لغت امروز را انتخاب کن (یا از لیست روزانه‌ی فلش‌کارت استفاده کن).</p>
+
+      <input id="word-input" type="text" placeholder="مثلاً: migrate, exhausted, efficient..." />
+
+      <button id="load-word-btn" class="btn-primary">شروع تمرین لغت</button>
+      <p id="word-status" class="muted"></p>
+    </div>
+
+    <!-- بخش A: مثال های هوشمند -->
+    <div class="section" id="example-section" style="display:none;">
+      <h3>📚 مثال‌های هوشمند</h3>
+      <p class="muted">سه مثال واقعی — سطح A2، سطح B1/B2 و مثال شخصی درباره خودت</p>
+
+      <div id="example-box" class="box"></div>
+    </div>
+
+    <!-- بخش B: جمله‌سازی و اصلاح -->
+    <div class="section" id="sentence-section" style="display:none;">
+      <h3>✍ جمله‌سازی</h3>
+      <textarea id="sentence-input" placeholder="یک جمله با این لغت بنویس..."></textarea>
+
+      <div class="btn-row">
+        <button id="sentence-voice-btn" class="btn-secondary">🎙</button>
+        <button id="sentence-check-btn" class="btn-primary">بررسی جمله</button>
+      </div>
+
+      <div id="sentence-result" class="box"></div>
+    </div>
+
+    <!-- بخش C: داستان روزانه -->
+    <div class="section" id="story-section" style="display:none;">
+      <h3>📖 داستان کوتاه</h3>
+      <p class="muted">یک داستان ۵–۷ جمله‌ای که این لغت (و چند لغت مرتبط) را در متن واقعی استفاده می‌کند</p>
+
+      <button id="story-btn" class="btn-primary">📘 ساخت داستان</button>
+
+      <div id="story-box" class="box"></div>
+    </div>
+
+  </div>
+
+  <script src="ai-vocab.js"></script>
+</body>
+</html>
