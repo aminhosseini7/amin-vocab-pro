@@ -2,7 +2,6 @@
 // Daily Grammar Test – 5 Questions
 // ================================
 
-// تابع تاریخ امروز
 function todayStr() {
   const d = new Date();
   const y = d.getFullYear();
@@ -11,7 +10,6 @@ function todayStr() {
   return `${y}-${m}-${day}`;
 }
 
-// سوالات (همه چندگزینه‌ای؛ هرکدام یک دسته گرامری)
 const dailyQuestions = [
   {
     text: "کدام جمله صحیح است؟ (زمان حال ساده – Present Simple)",
@@ -21,7 +19,7 @@ const dailyQuestions = [
       "He going to school every day."
     ],
     correct: 1,
-    category: "sv" // تطابق فاعل و فعل
+    category: "sv" // Subject–Verb agreement
   },
   {
     text: "کدام گزینه از نظر زمان (Present Perfect) درست است؟",
@@ -64,7 +62,6 @@ const dailyQuestions = [
 let currentIndex = 0;
 let selectedChoice = null;
 
-// شمارش خطا در هر دسته
 let wrongCounts = {
   tense: 0,
   sv: 0,
@@ -73,7 +70,6 @@ let wrongCounts = {
   wordOrder: 0
 };
 
-// المان‌ها
 const qTitle = document.getElementById("q-title");
 const qText = document.getElementById("q-text");
 const qChoices = document.getElementById("q-choices");
@@ -85,17 +81,15 @@ const resultScreen = document.getElementById("result-screen");
 const focusBox = document.getElementById("focus-box");
 const backBtn = document.getElementById("back-btn");
 
-// توضیح فارسی برای هر دسته
 const FOCUS_DESCRIPTIONS = {
-  tense: "زمان‌ها (به‌خصوص Present Perfect و ترکیب‌های زمان حال/گذشته). امروز بهتر است روی مرور زمان‌ها تمرکز کنی.",
-  sv: "تطابق فاعل و فعل (He goes / They go). امروز روی تفاوت فعل مفرد و جمع تمرکز کن.",
-  prep: "حروف اضافه مثل in / on / at / for / since. امروز بهتر است مثال‌های زیادی با این حروف بسازی.",
-  article: "حروف تعریف a / an / the. امروز روی اینکه کجا از a/an و کجا از the استفاده می‌شود تمرکز کن.",
-  wordOrder: "ترتیب کلمات در جمله (I am always tired...). امروز روی جای قیدها و ترتیب فعل و فاعل تمرکز کن.",
-  general: "امروز وضعیت کلی‌ات خوب بود؛ می‌توانی یک مرور کلی روی گرامر (زمان‌ها + حروف اضافه) انجام دهی."
+  tense: "زمان‌ها (Tenses): امروز بهتر است روی Present Perfect، Past Simple و تفاوت since/for تمرکز کنی.",
+  sv: "تطابق فاعل و فعل (Subject–Verb Agreement): امروز روی he/she/it + فعل s دار و تفاوت آن با I/you/they تمرکز کن.",
+  prep: "حروف اضافه (Prepositions): امروز روی in / on / at و چند ترکیب پرکاربرد دیگر تمرکز کن.",
+  article: "حروف تعریف (Articles): امروز روی a / an / the و اینکه کجا از هیچ حرف تعریفی استفاده نکنیم تمرکز کن.",
+  wordOrder: "ترتیب کلمات (Word Order): امروز جایگاه قیدها (always, usually, often) و ترتیب فاعل/فعل را تمرین کن.",
+  general: "نتایج کلی خوب بود؛ می‌توانی یک مرور کلی روی زمان‌ها، حروف اضافه و ساختار جمله داشته باشی."
 };
 
-// بارگذاری سوال
 function loadQuestion() {
   const q = dailyQuestions[currentIndex];
   qTitle.textContent = `سؤال ${currentIndex + 1} از ${dailyQuestions.length}`;
@@ -120,12 +114,8 @@ function loadQuestion() {
   });
 }
 
-// دکمه بعدی
 nextBtn.addEventListener("click", () => {
-  if (selectedChoice === null) {
-    // هیچ گزینه‌ای انتخاب نشده
-    return;
-  }
+  if (selectedChoice === null) return;
 
   const q = dailyQuestions[currentIndex];
   if (selectedChoice !== q.correct) {
@@ -141,13 +131,10 @@ nextBtn.addEventListener("click", () => {
   }
 });
 
-// پایان آزمون
 function finishTest() {
-  // ثبت تاریخ امروز
   const today = todayStr();
   localStorage.setItem("daily_test_date", today);
 
-  // تعیین دسته با بیشترین خطا
   let maxCat = "general";
   let maxVal = 0;
   for (const [cat, val] of Object.entries(wrongCounts)) {
@@ -159,18 +146,50 @@ function finishTest() {
 
   localStorage.setItem("daily_focus_topic", maxCat);
 
-  // نمایش نتیجه
   testScreen.style.display = "none";
   resultScreen.style.display = "block";
 
+  const totalWrong = Object.values(wrongCounts).reduce((a, b) => a + b, 0);
+
+  let lines = [];
+
+  if (totalWrong === 0) {
+    lines.push("تقریباً همهٔ پاسخ‌هایت درست بود 👏");
+    lines.push("به همین دلیل، تمرکز امروز را «مرور کلی گرامر» در نظر می‌گیریم.");
+  } else {
+    lines.push(`از ۵ سؤال، ${totalWrong} سؤال را اشتباه پاسخ دادی.`);
+    lines.push("");
+    lines.push("توزیع خطاها بر اساس دسته‌ها:");
+
+    for (const [cat, val] of Object.entries(wrongCounts)) {
+      if (val > 0) {
+        let label = "";
+        if (cat === "tense") label = "زمان‌ها (Tenses)";
+        else if (cat === "sv") label = "تطابق فاعل و فعل";
+        else if (cat === "prep") label = "حروف اضافه";
+        else if (cat === "article") label = "حروف تعریف";
+        else if (cat === "wordOrder") label = "ترتیب کلمات";
+
+        lines.push(`- ${label}: ${val} سؤال اشتباه`);
+      }
+    }
+
+    lines.push("");
+    if (maxCat !== "general") {
+      lines.push("بیشترین خطا در این بخش بوده است، بنابراین:");
+    }
+  }
+
   const desc = FOCUS_DESCRIPTIONS[maxCat] || FOCUS_DESCRIPTIONS.general;
-  focusBox.textContent = desc;
+  lines.push("");
+  lines.push("🎯 تمرکز پیشنهادی امروز:");
+  lines.push(desc);
+
+  focusBox.textContent = lines.join("\n");
 }
 
-// بازگشت به صفحه گرامر
 backBtn.addEventListener("click", () => {
   window.location.href = "grammar-path.html";
 });
 
-// شروع
 loadQuestion();
