@@ -1,6 +1,6 @@
 // ========================================
 // Daily Grammar Test – Hybrid (AI + Local)
-// حالت C: ترکیبی از AI و بانک سؤال داخلی
+// نسخه با بانک بزرگ‌تر + جلوگیری نسبی از تکرار
 // ========================================
 
 // کمک برای تاریخ امروز (برای ذخیره در localStorage)
@@ -16,18 +16,67 @@ function todayStr() {
 const userLevel = localStorage.getItem("grammar_level") || "B1";
 
 // آدرس API فرضی برای دریافت سؤالات روزانه از بک‌اند
-// اگر بعداً در بک‌اندت این endpoint را بسازی، خودبه‌خود فعال می‌شود.
 const DAILY_API_URL =
   "https://grammar-backend.vercel.app/api/daily-questions";
 
+// کلید ذخیره‌ی id سؤال‌هایی که اخیراً استفاده شده‌اند
+const USED_Q_KEY = "daily_used_question_ids_v1";
+
+// چند روز/جلسه اخیر را در نظر بگیریم (مثلاً آخر ۵ آزمون)
+const USED_Q_HISTORY_LIMIT = 5;
+
+// ---------------------------------------
+// خواندن / ذخیره‌کردن id سؤال‌های استفاده‌شده
+// ---------------------------------------
+
+function loadUsedQuestionIds() {
+  const raw = localStorage.getItem(USED_Q_KEY);
+  if (!raw) return [];
+  try {
+    const arr = JSON.parse(raw);
+    if (!Array.isArray(arr)) return [];
+    return arr;
+  } catch {
+    return [];
+  }
+}
+
+function saveUsedQuestionIds(sessions) {
+  localStorage.setItem(USED_Q_KEY, JSON.stringify(sessions));
+}
+
+function registerNewSessionUsedIds(ids) {
+  let sessions = loadUsedQuestionIds();
+  sessions.push({
+    date: todayStr(),
+    ids: ids
+  });
+  if (sessions.length > USED_Q_HISTORY_LIMIT) {
+    sessions = sessions.slice(sessions.length - USED_Q_HISTORY_LIMIT);
+  }
+  saveUsedQuestionIds(sessions);
+}
+
+function getRecentlyUsedIdSet() {
+  const sessions = loadUsedQuestionIds();
+  const set = new Set();
+  sessions.forEach(s => {
+    if (Array.isArray(s.ids)) {
+      s.ids.forEach(id => set.add(id));
+    }
+  });
+  return set;
+}
+
 // ---------------------------------------
 // بانک بزرگ سؤال داخلی (fallback + تصادفی)
-// هر سؤال: text, choices[], correct, category, level
+// هر سؤال: id, text, choices[], correct, category, level
 // ---------------------------------------
 
 const DAILY_QUESTION_BANK = [
-  // ===== A2 =====
+  // ===== A2 – SV =====
   {
+    id: "A2_SV_1",
     level: "A2",
     category: "sv",
     text: "کدام جمله صحیح است؟ (Present Simple)",
@@ -39,6 +88,33 @@ const DAILY_QUESTION_BANK = [
     correct: 1
   },
   {
+    id: "A2_SV_2",
+    level: "A2",
+    category: "sv",
+    text: "کدام جمله صحیح است؟",
+    choices: [
+      "They is happy.",
+      "They are happy.",
+      "They be happy."
+    ],
+    correct: 1
+  },
+  {
+    id: "A2_SV_3",
+    level: "A2",
+    category: "sv",
+    text: "کدام جمله درست است؟",
+    choices: [
+      "She like pizza.",
+      "She likes pizza.",
+      "She liking pizza."
+    ],
+    correct: 1
+  },
+
+  // ===== A2 – Tense =====
+  {
+    id: "A2_TENSE_1",
     level: "A2",
     category: "tense",
     text: "جای خالی را پر کن:\nI ____ football yesterday.",
@@ -46,6 +122,33 @@ const DAILY_QUESTION_BANK = [
     correct: 1
   },
   {
+    id: "A2_TENSE_2",
+    level: "A2",
+    category: "tense",
+    text: "کدام جمله درباره گذشته است؟",
+    choices: [
+      "I work in a factory.",
+      "I worked in a factory.",
+      "I am working in a factory."
+    ],
+    correct: 1
+  },
+  {
+    id: "A2_TENSE_3",
+    level: "A2",
+    category: "tense",
+    text: "کدام جمله درباره حال ساده است؟",
+    choices: [
+      "I am studying English.",
+      "I studied English yesterday.",
+      "I study English every day."
+    ],
+    correct: 2
+  },
+
+  // ===== A2 – Preposition =====
+  {
+    id: "A2_PREP_1",
     level: "A2",
     category: "prep",
     text: "حرف اضافهٔ درست:\nShe is sitting ____ the chair.",
@@ -53,9 +156,24 @@ const DAILY_QUESTION_BANK = [
     correct: 1
   },
   {
+    id: "A2_PREP_2",
+    level: "A2",
+    category: "prep",
+    text: "کدام درست است؟",
+    choices: [
+      "I was born at 1995.",
+      "I was born in 1995.",
+      "I was born on 1995."
+    ],
+    correct: 1
+  },
+
+  // ===== A2 – Article =====
+  {
+    id: "A2_ART_1",
     level: "A2",
     category: "article",
-    text: "کدام درست است؟",
+    text: "کدام جمله از نظر حروف تعریف درست است؟",
     choices: [
       "I have cat.",
       "I have a cat.",
@@ -64,19 +182,35 @@ const DAILY_QUESTION_BANK = [
     correct: 1
   },
   {
+    id: "A2_ART_2",
+    level: "A2",
+    category: "article",
+    text: "کدام جمله صحیح است؟",
+    choices: [
+      "She is engineer.",
+      "She is an engineer.",
+      "She is a engineer."
+    ],
+    correct: 1
+  },
+
+  // ===== A2 – Word Order =====
+  {
+    id: "A2_WO_1",
     level: "A2",
     category: "wordOrder",
     text: "ترتیب درست کدام است؟",
     choices: [
       "Always I am happy.",
-      "I always am happy.",
-      "I am always happy."
+      "I am always happy.",
+      "I always am happy."
     ],
-    correct: 2
+    correct: 1
   },
 
-  // ===== B1 =====
+  // ===== B1 – Tense =====
   {
+    id: "B1_TENSE_1",
     level: "B1",
     category: "tense",
     text: "کدام گزینه از نظر زمان (Present Perfect) درست است؟",
@@ -88,6 +222,33 @@ const DAILY_QUESTION_BANK = [
     correct: 2
   },
   {
+    id: "B1_TENSE_2",
+    level: "B1",
+    category: "tense",
+    text: "کدام جمله طبیعی‌تر است؟",
+    choices: [
+      "I have seen him yesterday.",
+      "I saw him yesterday.",
+      "I have saw him yesterday."
+    ],
+    correct: 1
+  },
+  {
+    id: "B1_TENSE_3",
+    level: "B1",
+    category: "tense",
+    text: "کدام جمله مفهوم «مدت زمان تا الان» را بهتر نشان می‌دهد؟",
+    choices: [
+      "I live here for five years.",
+      "I have lived here for five years.",
+      "I am living here for five years."
+    ],
+    correct: 1
+  },
+
+  // ===== B1 – SV =====
+  {
+    id: "B1_SV_1",
     level: "B1",
     category: "sv",
     text: "کدام جمله صحیح است؟",
@@ -99,6 +260,21 @@ const DAILY_QUESTION_BANK = [
     correct: 1
   },
   {
+    id: "B1_SV_2",
+    level: "B1",
+    category: "sv",
+    text: "کدام جمله از نظر فاعل/فعل درست است؟",
+    choices: [
+      "My friends lives in London.",
+      "My friends live in London.",
+      "My friends living in London."
+    ],
+    correct: 1
+  },
+
+  // ===== B1 – Preposition =====
+  {
+    id: "B1_PREP_1",
     level: "B1",
     category: "prep",
     text: "حرف اضافهٔ مناسب:\nI was born ____ 1995.",
@@ -106,30 +282,57 @@ const DAILY_QUESTION_BANK = [
     correct: 1
   },
   {
+    id: "B1_PREP_2",
+    level: "B1",
+    category: "prep",
+    text: "حرف اضافهٔ مناسب:\nWe have been friends ____ ten years.",
+    choices: ["since", "for", "during"],
+    correct: 1
+  },
+
+  // ===== B1 – Article =====
+  {
+    id: "B1_ART_1",
     level: "B1",
     category: "article",
     text: "کدام جمله از نظر حروف تعریف درست است؟",
     choices: [
-      "I bought a new car. The car is red.",
-      "I bought new car. Car is red.",
-      "I bought an new car. The car is red."
+      "I bought new car. Car is very fast.",
+      "I bought a new car. The car is very fast.",
+      "I bought the new car. Car is very fast."
     ],
-    correct: 0
+    correct: 1
   },
   {
+    id: "B1_ART_2",
+    level: "B1",
+    category: "article",
+    text: "کدام جمله بهتر است؟",
+    choices: [
+      "The life is hard.",
+      "Life is hard.",
+      "A life is hard."
+    ],
+    correct: 1
+  },
+
+  // ===== B1 – Word Order =====
+  {
+    id: "B1_WO_1",
     level: "B1",
     category: "wordOrder",
     text: "ترتیب کلمات درست کدام است؟",
     choices: [
       "Always I drink coffee in the morning.",
-      "I drink always coffee in the morning.",
-      "I always drink coffee in the morning."
+      "I always drink coffee in the morning.",
+      "I drink always coffee in the morning."
     ],
-    correct: 2
+    correct: 1
   },
 
-  // ===== B2 =====
+  // ===== B2 – Tense =====
   {
+    id: "B2_TENSE_1",
     level: "B2",
     category: "tense",
     text: "کدام جمله از نظر زمان صحیح‌تر و طبیعی‌تر است؟",
@@ -141,6 +344,21 @@ const DAILY_QUESTION_BANK = [
     correct: 1
   },
   {
+    id: "B2_TENSE_2",
+    level: "B2",
+    category: "tense",
+    text: "کدام جمله برای بیان تجربه بهتر است؟",
+    choices: [
+      "I went to London three times.",
+      "I have been to London three times.",
+      "I have gone to London yesterday."
+    ],
+    correct: 1
+  },
+
+  // ===== B2 – SV =====
+  {
+    id: "B2_SV_1",
     level: "B2",
     category: "sv",
     text: "جملهٔ درست: (Subject–Verb Agreement)",
@@ -151,28 +369,37 @@ const DAILY_QUESTION_BANK = [
     ],
     correct: 1
   },
+
+  // ===== B2 – Preposition =====
   {
+    id: "B2_PREP_1",
     level: "B2",
     category: "prep",
     text: "حرف اضافهٔ مناسب:\nHe is interested ____ politics.",
     choices: ["in", "on", "about"],
     correct: 0
   },
+
+  // ===== B2 – Article =====
   {
+    id: "B2_ART_1",
     level: "B2",
     category: "article",
     text: "کدام استفاده از حروف تعریف درست است؟",
     choices: [
-      "The life is short.",
-      "Life is short.",
-      "A life is short."
+      "The globalization has many effects.",
+      "Globalization has many effects.",
+      "A globalization has many effects."
     ],
     correct: 1
   },
+
+  // ===== B2 – Word Order =====
   {
+    id: "B2_WO_1",
     level: "B2",
     category: "wordOrder",
-    text: "ترتیب درست قید:",
+    text: "کدام جمله از نظر ترتیب کلمات طبیعی‌تر است؟",
     choices: [
       "I completely agree with you.",
       "I agree completely with you.",
@@ -181,8 +408,9 @@ const DAILY_QUESTION_BANK = [
     correct: 2
   },
 
-  // ===== C1 =====
+  // ===== C1 – Tense =====
   {
+    id: "C1_TENSE_1",
     level: "C1",
     category: "tense",
     text: "کدام جمله از نظر زمانی و معنایی مناسب‌تر است؟",
@@ -193,7 +421,10 @@ const DAILY_QUESTION_BANK = [
     ],
     correct: 1
   },
+
+  // ===== C1 – SV =====
   {
+    id: "C1_SV_1",
     level: "C1",
     category: "sv",
     text: "کدام گزینه از نظر تطابق فاعل و فعل صحیح است؟",
@@ -204,14 +435,20 @@ const DAILY_QUESTION_BANK = [
     ],
     correct: 1
   },
+
+  // ===== C1 – Preposition =====
   {
+    id: "C1_PREP_1",
     level: "C1",
     category: "prep",
     text: "حرف اضافهٔ دقیق‌تر در متن آکادمیک:",
     choices: ["in regard of", "with regard to", "in regarding"],
     correct: 1
   },
+
+  // ===== C1 – Article =====
   {
+    id: "C1_ART_1",
     level: "C1",
     category: "article",
     text: "کدام جمله در متن آکادمیک طبیعی‌تر است؟",
@@ -222,7 +459,10 @@ const DAILY_QUESTION_BANK = [
     ],
     correct: 1
   },
+
+  // ===== C1 – Word Order =====
   {
+    id: "C1_WO_1",
     level: "C1",
     category: "wordOrder",
     text: "کدام جمله از نظر ترتیب کلمات و سبک رسمی مناسب‌تر است؟",
@@ -236,26 +476,44 @@ const DAILY_QUESTION_BANK = [
 ];
 
 // ---------------------------------------
-// انتخاب تصادفی چند سؤال متناسب با سطح
+// انتخاب تصادفی چند سؤال متناسب با سطح + ضدتکرار
 // ---------------------------------------
 
 function pickRandomQuestions(level, count) {
-  // سعی می‌کنیم اول سؤالات همان سطح را بگیریم
+  const usedSet = getRecentlyUsedIdSet();
+
+  // اول سؤالات سطح خودت
   let pool = DAILY_QUESTION_BANK.filter(q => q.level === level);
 
-  // اگر خیلی کم بود، از همه سطوح استفاده می‌کنیم
   if (pool.length < count) {
+    // اگر کم بود، کل بانک رو در نظر می‌گیریم
     pool = DAILY_QUESTION_BANK.slice();
   }
 
-  // شافل ساده
-  pool.sort(() => Math.random() - 0.5);
+  // اول سعی می‌کنیم سؤالاتی که اخیراً استفاده نشده‌اند را انتخاب کنیم
+  const fresh = pool.filter(q => !usedSet.has(q.id));
+  let chosen = [];
 
-  return pool.slice(0, count);
+  // اگر سؤالات fresh کافی بود
+  if (fresh.length >= count) {
+    fresh.sort(() => Math.random() - 0.5);
+    chosen = fresh.slice(0, count);
+  } else {
+    // اول همهٔ freshها را می‌گیریم
+    chosen = fresh.slice();
+    // بعد بقیه را از کل pool پر می‌کنیم (ممکن است تکراری هم باشد)
+    const remaining = pool.filter(q => !chosen.includes(q));
+    remaining.sort(() => Math.random() - 0.5);
+    while (chosen.length < count && remaining.length > 0) {
+      chosen.push(remaining.shift());
+    }
+  }
+
+  return chosen;
 }
 
 // ---------------------------------------
-// تلاش برای گرفتن سؤال از AI، وگرنه fallback
+// AI + fallback
 // ---------------------------------------
 
 let currentQuestions = [];
@@ -291,7 +549,7 @@ const FOCUS_DESCRIPTIONS = {
   article:
     "حروف تعریف (Articles): امروز روی a/an/the و اینکه کجا از هیچ حرف تعریفی استفاده نکنیم تمرکز کن.",
   wordOrder:
-    "ترتیب کلمات (Word Order): امروز جایگاه قیدها (always, usually, often) و ترتیب فاعل/فعل را تمرین کن.",
+    "ترتیب کلمات (Word Order): امروز جایگاه قیدها (always, usually, often, sometimes, never) و ترتیب فاعل/فعل را تمرین کن.",
   general:
     "نتایج کلی خوب بود؛ می‌توانی یک مرور کلی روی زمان‌ها، حروف اضافه و ساختار جمله داشته باشی."
 };
@@ -314,12 +572,10 @@ async function loadQuestions() {
 
     const data = await res.json();
 
-    // انتظار: آرایه‌ای از سؤال‌ها با همان ساختار بانک داخلی
     if (!Array.isArray(data) || data.length === 0) {
       throw new Error("Invalid daily questions payload");
     }
 
-    // ولیدیشن سبک
     const normalized = data
       .filter(
         q =>
@@ -397,6 +653,14 @@ if (nextBtn) {
 function finishTest() {
   const today = todayStr();
   localStorage.setItem("daily_test_date", today);
+
+  // ذخیره‌ی id سؤالات استفاده‌شده (فقط برای بانک داخلی که id دارند)
+  const usedIds = currentQuestions
+    .map(q => q.id)
+    .filter(id => typeof id === "string");
+  if (usedIds.length > 0) {
+    registerNewSessionUsedIds(usedIds);
+  }
 
   let maxCat = "general";
   let maxVal = 0;
