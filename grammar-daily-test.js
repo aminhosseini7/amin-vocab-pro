@@ -19,7 +19,7 @@ const dailyQuestions = [
       "He going to school every day."
     ],
     correct: 1,
-    category: "sv" // Subject–Verb agreement
+    category: "sv"
   },
   {
     text: "کدام گزینه از نظر زمان (Present Perfect) درست است؟",
@@ -82,12 +82,17 @@ const focusBox = document.getElementById("focus-box");
 const backBtn = document.getElementById("back-btn");
 
 const FOCUS_DESCRIPTIONS = {
-  tense: "زمان‌ها (Tenses): امروز بهتر است روی Present Perfect، Past Simple و تفاوت since/for تمرکز کنی.",
+  tense:
+    "زمان‌ها (Tenses): امروز بهتر است روی Present Perfect، Past Simple و تفاوت since/for تمرکز کنی.",
   sv: "تطابق فاعل و فعل (Subject–Verb Agreement): امروز روی he/she/it + فعل s دار و تفاوت آن با I/you/they تمرکز کن.",
-  prep: "حروف اضافه (Prepositions): امروز روی in / on / at و چند ترکیب پرکاربرد دیگر تمرکز کن.",
-  article: "حروف تعریف (Articles): امروز روی a / an / the و اینکه کجا از هیچ حرف تعریفی استفاده نکنیم تمرکز کن.",
-  wordOrder: "ترتیب کلمات (Word Order): امروز جایگاه قیدها (always, usually, often) و ترتیب فاعل/فعل را تمرین کن.",
-  general: "نتایج کلی خوب بود؛ می‌توانی یک مرور کلی روی زمان‌ها، حروف اضافه و ساختار جمله داشته باشی."
+  prep:
+    "حروف اضافه (Prepositions): امروز روی in / on / at و چند ترکیب پرکاربرد دیگر تمرکز کن.",
+  article:
+    "حروف تعریف (Articles): امروز روی a/an/the و اینکه کجا از هیچ حرف تعریفی استفاده نکنیم تمرکز کن.",
+  wordOrder:
+    "ترتیب کلمات (Word Order): امروز جایگاه قیدها (always, usually, often) و ترتیب فاعل/فعل را تمرین کن.",
+  general:
+    "نتایج کلی خوب بود؛ می‌توانی یک مرور کلی روی زمان‌ها، حروف اضافه و ساختار جمله داشته باشی."
 };
 
 function loadQuestion() {
