@@ -3,61 +3,170 @@
 <head>
   <meta charset="UTF-8">
   <title>AI Vocabulary Trainer</title>
-  <link rel="stylesheet" href="ai-vocab.css">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- استایل ساده مخصوص این صفحه -->
+  <style>
+    body {
+      background: #000;
+      color: #eee;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 720px;
+      margin: 20px auto 40px;
+      padding: 16px;
+    }
+    h1 {
+      color: #FDE047;
+      font-size: 22px;
+      margin-bottom: 6px;
+    }
+    .sub {
+      color: #9ca3af;
+      font-size: 13px;
+      margin-bottom: 18px;
+    }
+    .section {
+      border-bottom: 1px solid #27272a;
+      padding: 16px 0;
+    }
+    .section:last-child {
+      border-bottom: none;
+    }
+    .muted {
+      font-size: 13px;
+      color: #9ca3af;
+    }
+    input, textarea {
+      width: 100%;
+      background: #111827;
+      color: #f9fafb;
+      border-radius: 10px;
+      border: 1px solid #374151;
+      padding: 10px 12px;
+      margin-top: 10px;
+      font-size: 14px;
+      box-sizing: border-box;
+    }
+    textarea {
+      min-height: 90px;
+      resize: vertical;
+    }
+    .btn-primary {
+      background: #FDE047;
+      color: #000;
+      border: none;
+      border-radius: 999px;
+      padding: 9px 16px;
+      font-size: 14px;
+      cursor: pointer;
+      font-weight: 600;
+      margin-top: 10px;
+    }
+    .btn-secondary {
+      background: #111827;
+      color: #FDE047;
+      border-radius: 999px;
+      border: 1px solid #FDE047;
+      padding: 9px 16px;
+      font-size: 14px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    .btn-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 8px;
+    }
+    .box {
+      background: #020617;
+      border-radius: 14px;
+      border: 1px solid #27272a;
+      padding: 14px;
+      margin-top: 12px;
+      font-size: 14px;
+      line-height: 1.8;
+      white-space: pre-line;
+    }
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 13px;
+      color: #e5e7eb;
+      text-decoration: none;
+      margin-bottom: 10px;
+    }
+    .back-link span {
+      font-size: 16px;
+    }
+  </style>
 </head>
 
 <body>
-
   <div class="container">
 
+    <a class="back-link" href="index.html"><span>⬅</span>بازگشت به فلش‌کارت‌ها</a>
+
     <h1>🧠 AI Vocabulary Trainer</h1>
-    <p class="sub">یادگیری لغت با مثال، جمله‌سازی و داستان — همه با هوش مصنوعی</p>
+    <p class="sub">از هر واژه فقط خودش را بده؛ معنی، مثال، کاربرد و راهنمای حفظ را هوش مصنوعی برایت می‌سازد.</p>
 
-    <!-- انتخاب لغت امروز -->
+    <!-- انتخاب لغت -->
     <div class="section">
-      <h3>📌 انتخاب لغت</h3>
-      <p class="muted">لغت امروز را انتخاب کن (یا از لیست روزانه‌ی فلش‌کارت استفاده کن).</p>
+      <h3>📌 انتخاب واژه</h3>
+      <p class="muted">
+        می‌توانی واژه را دستی وارد کنی، یا از کلمه‌ای که در فلش‌کارت دیده‌ای استفاده کنی.
+      </p>
 
-      <input id="word-input" type="text" placeholder="مثلاً: migrate, exhausted, efficient..." />
+      <input id="word-input" type="text" placeholder="مثلاً: migrate, exhausted, efficient ..." />
 
-      <button id="load-word-btn" class="btn-primary">شروع تمرین لغت</button>
+      <div class="btn-row">
+        <button id="load-word-btn" class="btn-primary">شروع تولید با هوش مصنوعی</button>
+      </div>
+
       <p id="word-status" class="muted"></p>
     </div>
 
-    <!-- بخش A: مثال های هوشمند -->
-    <div class="section" id="example-section" style="display:none;">
-      <h3>📚 مثال‌های هوشمند</h3>
-      <p class="muted">سه مثال واقعی — سطح A2، سطح B1/B2 و مثال شخصی درباره خودت</p>
-
-      <div id="example-box" class="box"></div>
+    <!-- بخش A: معنی + مثال + توضیح + Hint -->
+    <div class="section">
+      <h3>📚 معنی، مثال و راهنمای حفظ</h3>
+      <p class="muted">این بخش با هوش مصنوعی تولید می‌شود و لازم نیست در اکسل چیزی جز خودِ لغت ذخیره کنی.</p>
+      <div id="example-box" class="box">
+        هنوز واژه‌ای انتخاب نشده است.
+      </div>
     </div>
 
-    <!-- بخش B: جمله‌سازی و اصلاح -->
-    <div class="section" id="sentence-section" style="display:none;">
-      <h3>✍ جمله‌سازی</h3>
-      <textarea id="sentence-input" placeholder="یک جمله با این لغت بنویس..."></textarea>
+    <!-- بخش B: جمله‌سازی -->
+    <div class="section">
+      <h3>✍ جمله‌سازی با این واژه</h3>
+      <p class="muted">یک جمله با این واژه بنویس؛ هوش مصنوعی آن را اصلاح و توضیح می‌دهد.</p>
+
+      <textarea id="sentence-input" placeholder="یک جمله با واژهٔ انتخاب‌شده بنویس..."></textarea>
 
       <div class="btn-row">
-        <button id="sentence-voice-btn" class="btn-secondary">🎙</button>
         <button id="sentence-check-btn" class="btn-primary">بررسی جمله</button>
       </div>
 
       <div id="sentence-result" class="box"></div>
     </div>
 
-    <!-- بخش C: داستان روزانه -->
-    <div class="section" id="story-section" style="display:none;">
-      <h3>📖 داستان کوتاه</h3>
-      <p class="muted">یک داستان ۵–۷ جمله‌ای که این لغت (و چند لغت مرتبط) را در متن واقعی استفاده می‌کند</p>
+    <!-- بخش C: داستان کوتاه -->
+    <div class="section">
+      <h3>📖 داستان کوتاه با واژه</h3>
+      <p class="muted">یک داستان ۵–۷ جمله‌ای با همین واژه بساز تا آن را در متن واقعی ببینی.</p>
 
-      <button id="story-btn" class="btn-primary">📘 ساخت داستان</button>
+      <button id="story-btn" class="btn-primary">ساخت داستان</button>
 
       <div id="story-box" class="box"></div>
     </div>
 
   </div>
 
-  <script src="ai-vocab.js"></script>
+  <!-- اسکریپت منطق صفحه؛ حتماً به صورت module تا بتواند از word_list.js ایمپورت کند -->
+  <script type="module" src="ai-vocab.js"></script>
 </body>
 </html>
