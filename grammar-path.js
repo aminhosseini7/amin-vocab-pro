@@ -16,7 +16,6 @@ function todayStr() {
 
 const placementDone = localStorage.getItem("placement_done");
 const placementCard = document.getElementById("placement-card");
-// اگر دکمه‌ای با این id در HTML تعریف کنی، از همین استفاده می‌شود
 const placementBtn = document.getElementById("placement-btn");
 
 if (placementCard) {
@@ -309,7 +308,7 @@ updateStatsUI();
 updateHistoryUI();
 
 // ---------------------------
-// درس امروز بر اساس سطح + آخرین آزمون روزانه
+// درس امروز بر اساس سطح + آخرین آزمون روزانه (درسنامه متنی)
 // ---------------------------
 
 const lessonBoxEl = document.getElementById("lesson-box");
@@ -586,12 +585,258 @@ however, although, in addition, moreover, nevertheless, on the other hand
 ۳) متن را در چند بخش به «📝 جمله بنویس» بده و خطاها را ببین.`;
 }
 
+// ---------------------------
+// برنامهٔ تمرین هدایت‌شده (step by step)
+// ---------------------------
 
-// دکمه شروع تمرین روزانه
+function buildGuidedPlan(level, focusTopic) {
+  // همیشه ۳ تمرین می‌سازیم: ساده → متوسط → آزاد
+  if (focusTopic === "tense") {
+    return {
+      title: "زمان‌ها – Past vs Present Perfect",
+      steps: [
+        {
+          id: "tense_1",
+          title: "Past Simple",
+          instruction:
+            "یک جمله دربارهٔ تجربه‌ای در گذشته بنویس که زمان آن مشخص است (yesterday, last year, in 2019 ...)\nمثال الهام‌بخش (خودت کپی نکن): I visited Istanbul last year."
+        },
+        {
+          id: "tense_2",
+          title: "Present Perfect (تجربه)",
+          instruction:
+            "یک جمله دربارهٔ تجربه‌ای بنویس که مهم است تا الان چه‌کار کرده‌ای (فقط نتیجه مهم است، نه زمان دقیق):\nمثال الهام‌بخش: I have visited many countries."
+        },
+        {
+          id: "tense_3",
+          title: "Present Perfect (مدت زمان)",
+          instruction:
+            "یک جمله بنویس که در آن از for یا since استفاده کنی و بگویی از چه زمانی تا الان کاری را انجام داده‌ای:\nمثال الهام‌بخش: I have lived in Tehran for five years."
+        }
+      ]
+    };
+  }
+
+  if (focusTopic === "prep") {
+    return {
+      title: "حروف اضافه – in / on / at / for / since",
+      steps: [
+        {
+          id: "prep_1",
+          title: "زمان تولد / تاریخ",
+          instruction:
+            "یک جمله بنویس که در آن از in + سال یا ماه استفاده شود.\nمثال الهام‌بخش: I was born in 1995."
+        },
+        {
+          id: "prep_2",
+          title: "برنامهٔ روزانه",
+          instruction:
+            "یک جمله دربارهٔ برنامهٔ روزانه‌ات بنویس و از on (برای روز) و at (برای ساعت) استفاده کن.\nمثال الهام‌بخش: I go to the gym on Mondays at 7 p.m."
+        },
+        {
+          id: "prep_3",
+          title: "for / since",
+          instruction:
+            "یک جمله بنویس که در آن از for یا since برای مدت زمان استفاده کنی.\nمثال الهام‌بخش: I have been studying English since 2020."
+        }
+      ]
+    };
+  }
+
+  if (focusTopic === "sv") {
+    return {
+      title: "تطابق فاعل و فعل",
+      steps: [
+        {
+          id: "sv_1",
+          title: "he/she/it + s",
+          instruction:
+            "یک جمله با فاعل he/she/it بنویس که فعلش s بگیرد.\nمثال الهام‌بخش: She works in a bank."
+        },
+        {
+          id: "sv_2",
+          title: "I/you/we/they بدون s",
+          instruction:
+            "یک جمله با فاعل we یا they بنویس که فعل s نگیرد.\nمثال الهام‌بخش: They live in London."
+        },
+        {
+          id: "sv_3",
+          title: "ترکیبی",
+          instruction:
+            "یک جمله طولانی‌تر بنویس که در آن هم یک فاعل مفرد باشد هم یک فاعل جمع.\nمثال الهام‌بخش: My brother works in a bank and my parents live in another city."
+        }
+      ]
+    };
+  }
+
+  if (focusTopic === "article") {
+    return {
+      title: "حروف تعریف – a/an/the",
+      steps: [
+        {
+          id: "art_1",
+          title: "a / an",
+          instruction:
+            "یک جمله بنویس که در آن از a یا an قبل از اسم استفاده کنی.\nمثال الهام‌بخش: I bought a new phone."
+        },
+        {
+          id: "art_2",
+          title: "معرفی دوباره با the",
+          instruction:
+            "دو جمله پشت سر هم بنویس؛ در جملهٔ اول از a/an و در جملهٔ دوم از the استفاده کن.\nمثال الهام‌بخش: I bought a car. The car is very fast."
+        },
+        {
+          id: "art_3",
+          title: "بدون حرف تعریف",
+          instruction:
+            "یک جمله بنویس که دربارهٔ یک مفهوم کلی مثل life, music, love باشد و هیچ حرف تعریفی نداشته باشد.\nمثال الهام‌بخش: Life is beautiful."
+        }
+      ]
+    };
+  }
+
+  if (focusTopic === "wordOrder") {
+    return {
+      title: "ترتیب کلمات و قیدهای بسامد",
+      steps: [
+        {
+          id: "wo_1",
+          title: "always / usually",
+          instruction:
+            "یک جمله بنویس که در آن از always یا usually در جای درست استفاده شده باشد.\nمثال الهام‌بخش: I usually drink coffee in the morning."
+        },
+        {
+          id: "wo_2",
+          title: "never / sometimes",
+          instruction:
+            "یک جمله با never یا sometimes بنویس.\nمثال الهام‌بخش: I never eat fast food."
+        },
+        {
+          id: "wo_3",
+          title: "جملهٔ طولانی‌تر",
+          instruction:
+            "یک جملهٔ طولانی‌تر بنویس که در آن از دو قید استفاده کرده باشی.\nمثال الهام‌بخش: I usually get up at 7, but I sometimes sleep until 9 on Fridays."
+        }
+      ]
+    };
+  }
+
+  // اگر فوکوس خاص نداریم، یک تمرین عمومی می‌سازیم
+  if (level === "A2") {
+    return {
+      title: "جمله‌سازی پایه",
+      steps: [
+        {
+          id: "A2_1",
+          title: "حال ساده",
+          instruction:
+            "یک جمله ساده دربارهٔ روتین روزانه‌ات در زمان حال بنویس.\nمثال: I go to work at 8."
+        },
+        {
+          id: "A2_2",
+          title: "گذشتهٔ ساده",
+          instruction:
+            "یک جمله دربارهٔ دیروزت در زمان گذشته بنویس.\nمثال: I watched a movie yesterday."
+        }
+      ]
+    };
+  }
+
+  if (level === "B1") {
+    return {
+      title: "Present Perfect / Continuous – تمرین هدایت‌شده",
+      steps: [
+        {
+          id: "B1_pp_1",
+          title: "تجربه",
+          instruction:
+            "یک جمله با Present Perfect دربارهٔ تجربه‌ای در زندگی‌ات بنویس.\nمثال: I have visited three countries."
+        },
+        {
+          id: "B1_pp_2",
+          title: "مدت زمان",
+          instruction:
+            "یک جمله با Present Perfect Continuous دربارهٔ کاری که مدتی انجام می‌دهی بنویس.\nمثال: I have been studying English for three years."
+        }
+      ]
+    };
+  }
+
+  if (level === "B2" || level === "C1") {
+    return {
+      title: "جملات پیچیده‌تر",
+      steps: [
+        {
+          id: "B2_rel_1",
+          title: "Relative Clause",
+          instruction:
+            "یک جمله بنویس که در آن از who/which/that استفاده کرده باشی.\nمثال: The book that I bought yesterday is very interesting."
+        },
+        {
+          id: "B2_link_2",
+          title: "Linking word",
+          instruction:
+            "یک جمله بنویس که در آن از however / although / in addition و... استفاده کنی.\nمثال: I was very tired; however, I finished my work."
+        }
+      ]
+    };
+  }
+
+  // اگر هیچ‌چیز مشخص نیست:
+  return {
+    title: "تمرین عمومی جمله‌نویسی",
+    steps: [
+      {
+        id: "GEN_1",
+        title: "جملهٔ آزاد",
+        instruction:
+          "یک جمله دربارهٔ امروزت بنویس. بعد با هوش مصنوعی آن را چک کن و ببین چه نکاتی می‌گوید."
+      }
+    ]
+  };
+}
+
+// ---------------------------
+// دکمه شروع تمرین روزانه + راه‌اندازی تمرین هدایت‌شده
+// ---------------------------
+
 const startPracticeBtn = document.getElementById("start-practice");
+
+// عناصر تمرین هدایت‌شده
+const guidedContainer = document.getElementById("guided-container");
+const guidedHeader = document.getElementById("guided-header");
+const guidedInstructionEl = document.getElementById("guided-instruction");
+const guidedInput = document.getElementById("guided-input");
+const guidedCheckBtn = document.getElementById("guided-check-btn");
+const guidedResultEl = document.getElementById("guided-result");
+const guidedNextBtn = document.getElementById("guided-next-btn");
+
+let guidedPlan = null;
+let guidedIndex = 0;
+
+function renderGuidedStep() {
+  if (!guidedContainer || !guidedPlan) return;
+  const steps = guidedPlan.steps || [];
+  if (!steps.length) {
+    guidedContainer.style.display = "none";
+    return;
+  }
+
+  const step = steps[guidedIndex];
+  guidedContainer.style.display = "block";
+  guidedHeader.textContent = `تمرین ${guidedIndex + 1} از ${steps.length} – ${step.title}`;
+  guidedInstructionEl.textContent = step.instruction;
+  guidedInput.value = "";
+  guidedResultEl.textContent = "";
+  guidedNextBtn.style.display = "none";
+}
+
 if (startPracticeBtn) {
   startPracticeBtn.addEventListener("click", () => {
-    const lesson = generateLesson(userLevel, hasFocusTopic ? dailyFocusTopic : null);
+    const lesson = generateLesson(
+      userLevel,
+      hasFocusTopic ? dailyFocusTopic : null
+    );
     if (lessonBoxEl) {
       lessonBoxEl.textContent = lesson;
     }
@@ -606,11 +851,19 @@ if (startPracticeBtn) {
           "تمرین امروز بر اساس سطح کلی فعلی شما تنظیم شد.";
       }
     }
+
+    // راه‌اندازی تمرین هدایت‌شده
+    guidedPlan = buildGuidedPlan(
+      userLevel,
+      hasFocusTopic ? dailyFocusTopic : null
+    );
+    guidedIndex = 0;
+    renderGuidedStep();
   });
 }
 
 // ---------------------------
-// بخش جمله‌نویسی + اتصال به بک‌اند
+// بخش جمله‌نویسی آزاد + اتصال به بک‌اند
 // ---------------------------
 
 const checkBtn = document.getElementById("check-btn");
@@ -697,6 +950,83 @@ ${data.suggested_practice}
         aiResultEl.textContent =
           "ارتباط با سرور یا اینترنت ناموفق بود. بعداً دوباره تلاش کن.";
       }
+    }
+  });
+}
+
+// ---------------------------
+// بررسی و تصحیح تمرین هدایت‌شده
+// ---------------------------
+
+if (guidedCheckBtn) {
+  guidedCheckBtn.addEventListener("click", async () => {
+    if (!guidedPlan) return;
+    const text = guidedInput ? guidedInput.value.trim() : "";
+    if (!text) return;
+
+    if (guidedResultEl) {
+      guidedResultEl.textContent = "در حال تحلیل این تمرین...";
+    }
+
+    try {
+      const res = await fetch(API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text, level: userLevel })
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || data.error) {
+        if (guidedResultEl) {
+          guidedResultEl.textContent =
+            "خطا در پاسخ سرور:\n" + JSON.stringify(data, null, 2);
+        }
+        return;
+      }
+
+      const resultText = `
+جملهٔ تصحیح‌شده:
+${data.corrected}
+
+توضیح خطاها (فارسی):
+${data.errors_explained_fa}
+
+Explanation (English):
+${data.errors_explained_en}
+      `.trim();
+
+      guidedResultEl.textContent = resultText;
+
+      // بعد از چک شدن، دکمهٔ «تمرین بعدی» فعال می‌شود
+      if (guidedNextBtn) {
+        guidedNextBtn.style.display = "inline-block";
+        if (guidedIndex === (guidedPlan.steps?.length || 1) - 1) {
+          guidedNextBtn.textContent = "اتمام تمرین امروز 🎉";
+        } else {
+          guidedNextBtn.textContent = "تمرین بعدی ⏭️";
+        }
+      }
+    } catch (e) {
+      if (guidedResultEl) {
+        guidedResultEl.textContent =
+          "ارتباط با سرور یا اینترنت ناموفق بود. بعداً دوباره تلاش کن.";
+      }
+    }
+  });
+}
+
+if (guidedNextBtn) {
+  guidedNextBtn.addEventListener("click", () => {
+    if (!guidedPlan) return;
+    const steps = guidedPlan.steps || [];
+    if (guidedIndex < steps.length - 1) {
+      guidedIndex += 1;
+      renderGuidedStep();
+    } else {
+      // تمام شد
+      guidedNextBtn.style.display = "none";
+      guidedResultEl.textContent += "\n\n✅ تمرین هدایت‌شدهٔ امروز تمام شد. آفرین!";
     }
   });
 }
