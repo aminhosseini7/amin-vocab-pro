@@ -1,10 +1,8 @@
 /* =======================================
-   Grammar Placement Test – Logic File
+   Grammar Placement Test – Frontend Only
    ======================================= */
 
-// ------------------------
-// مرحله 1 – سوالات گرامر
-// ------------------------
+// ---------- سوالات گرامر (همان قبلی) ----------
 
 const grammarQuestions = [
   {
@@ -79,12 +77,10 @@ let grammarIndex = 0;
 let grammarScore = 0;
 let selectedChoice = null;
 
-// ------------------------
-// مرحله 2 – نوشتاری
-// ------------------------
+// ---------- نوشتاری ----------
 
 const writingTasks = [
-  "Write one simple sentence using 'because'.",
+  "Write two simple sentences about yourself.",
   "Write one sentence in past simple about something you did yesterday.",
   "Write 2–3 sentences about your hobbies."
 ];
@@ -92,9 +88,7 @@ const writingTasks = [
 let writingIndex = 0;
 let writingAnswers = [];
 
-// ------------------------
-// عناصر DOM
-// ------------------------
+// ---------- عناصر DOM ----------
 
 const welcomeScreen = document.getElementById("welcome-screen");
 const questionScreen = document.getElementById("question-screen");
@@ -111,9 +105,10 @@ const wTitle = document.getElementById("w-title");
 const wText = document.getElementById("w-text");
 const wAnswer = document.getElementById("w-answer");
 
-// ------------------------
-// مرحله شروع آزمون
-// ------------------------
+const levelBox = document.getElementById("level-box");
+const finishBtn = document.getElementById("finish-btn");
+
+// ---------- شروع آزمون ----------
 
 document.getElementById("start-btn").onclick = () => {
   welcomeScreen.style.display = "none";
@@ -121,24 +116,18 @@ document.getElementById("start-btn").onclick = () => {
   loadGrammarQuestion();
 };
 
-// ------------------------
-// بارگذاری سؤال گرامر
-// ------------------------
-
 function loadGrammarQuestion() {
   const q = grammarQuestions[grammarIndex];
 
   qTitle.textContent = `سؤال ${grammarIndex + 1} از 10`;
   qText.textContent = q.text;
-
-  qProgress.style.width = `${((grammarIndex) / 10) * 100}%`;
+  qProgress.style.width = `${(grammarIndex / grammarQuestions.length) * 100}%`;
 
   qChoices.innerHTML = "";
-
   selectedChoice = null;
 
   q.choices.forEach((c, idx) => {
-    let div = document.createElement("div");
+    const div = document.createElement("div");
     div.className = "choice-option";
     div.textContent = c;
     div.onclick = () => {
@@ -155,8 +144,9 @@ function loadGrammarQuestion() {
 document.getElementById("next-question-btn").onclick = () => {
   if (selectedChoice === null) return;
 
-  if (selectedChoice === grammarQuestions[grammarIndex].correct)
+  if (selectedChoice === grammarQuestions[grammarIndex].correct) {
     grammarScore++;
+  }
 
   grammarIndex++;
 
@@ -169,9 +159,7 @@ document.getElementById("next-question-btn").onclick = () => {
   }
 };
 
-// ------------------------
-// بخش نوشتاری
-// ------------------------
+// ---------- بخش نوشتاری ----------
 
 function loadWritingTask() {
   wTitle.textContent = `بخش نوشتاری – سؤال ${writingIndex + 1} از 3`;
@@ -188,4 +176,110 @@ document.getElementById("next-writing-btn").onclick = () => {
   if (writingIndex < writingTasks.length) {
     loadWritingTask();
   } else {
-    writingScreen.
+    // شبیه لودینگ، ولی تصمیم‌گیری لوکال است
+    writingScreen.style.display = "none";
+    loadingScreen.style.display = "block";
+    setTimeout(finishPlacement, 600); // کمی تأخیر برای حس بهتر
+  }
+};
+
+// ---------- تعیین سطح لوکال ----------
+
+function finishPlacement() {
+  // نمره 0 تا 10
+  const score = grammarScore;
+  const percent = Math.round((score / 10) * 100);
+
+  // طول نوشتاری به‌عنوان تخمین خیلی ساده
+  const totalWords = writingAnswers
+    .join(" ")
+    .split(/\s+/)
+    .filter(Boolean).length;
+
+  let level = "B1";
+  let strengths = [];
+  let weaknesses = [];
+  let recommendation = "";
+
+  if (score <= 3) {
+    level = "A2";
+    strengths = [
+      "آشنایی اولیه با ساختار جملهٔ ساده انگلیسی.",
+      "توانایی نوشتن چند جملهٔ کوتاه دربارهٔ خودت."
+    ];
+    weaknesses = [
+      "نیاز به یادگیری زمان‌های پایه (Present Simple, Past Simple).",
+      "نیاز به تمرین روی حروف اضافه و ساختار کامل جمله (فاعل + فعل + مفعول)."
+    ];
+    recommendation =
+      "از درس‌های سطح A2 شروع کن: ساختار جمله، زمان حال ساده و گذشتهٔ ساده، و جملات روزمره. سعی کن هر روز چند جمله کوتاه دربارهٔ خودت بنویسی.";
+  } else if (score <= 7) {
+    level = "B1";
+    strengths = [
+      "درک کلی خوبی از زمان‌های ساده و ساختارهای پایه داری.",
+      "می‌توانی دربارهٔ خودت و علایقت چند جمله بنویسی."
+    ];
+    weaknesses = [
+      "نیاز به دقت بیشتر در زمان‌ها (به‌خصوص Present Perfect و ترکیب since/for).",
+      "نیاز به تقویت جمله‌های طولانی‌تر و استفاده از because, although, when و غیره."
+    ];
+    recommendation =
+      "روی درس‌های سطح B1 تمرکز کن: مرور زمان‌ها، جملات مرکب، و نوشتن پاراگراف‌های کوتاه. هر روز یک متن ۳–۵ جمله‌ای بنویس و با AI تصحیح کن.";
+  } else if (score <= 9) {
+    level = "B2";
+    strengths = [
+      "تسلط خوبی بر زمان‌های اصلی و ساختار جمله داری.",
+      "می‌توانی ایده‌هایت را نسبتاً روان به انگلیسی بنویسی."
+    ];
+    weaknesses = [
+      "نیاز به تمرین روی ساختارهای پیچیده‌تر (Relative clauses, Conditionals).",
+      "نیاز به دقت بیشتر در حروف اضافه و انتخاب واژهٔ دقیق."
+    ];
+    recommendation =
+      "از درس‌های سطح B2 استفاده کن: جملات موصولی، شرطی‌ها، و Linking words. سعی کن متن‌های تحلیلی‌تر بنویسی و دقت واژگانی را بالا ببری.";
+  } else {
+    level = "C1";
+    strengths = [
+      "درک بالایی از گرامر و ساختارهای پیچیده داری.",
+      "توانایی نوشتن متن‌های نسبتاً طولانی و منسجم."
+    ];
+    weaknesses = [
+      "نیاز به ظرافت بیشتر در سبک نوشتن (رسمی/غیررسمی) و انتخاب واژه‌های دقیق.",
+      "نیاز به تمرین روی متن‌های آکادمیک و essay."
+    ];
+    recommendation =
+      "از درس‌های سطح C1 استفاده کن: سبک نوشتن، linking devices پیشرفته، و essay writing. روی coherence و cohesion متن‌هایت کار کن.";
+  }
+
+  // نمایش نتیجه
+  loadingScreen.style.display = "none";
+  resultScreen.style.display = "block";
+
+  const summaryText = `
+نمرهٔ گرامر (سؤالات تستی): ${score} از 10 (${percent}%)
+
+برآورد سطح کلی: ${level}
+
+نقاط قوت:
+- ${strengths.join("\n- ")}
+
+نقاط قابل بهبود:
+- ${weaknesses.join("\n- ")}
+
+پیشنهاد مسیر یادگیری:
+${recommendation}
+  `.trim();
+
+  levelBox.textContent = summaryText;
+
+  // ذخیره در LocalStorage برای داشبورد
+  localStorage.setItem("grammar_level", level);
+  localStorage.setItem("placement_done", "true");
+}
+
+// دکمه پایان → برگشت به داشبورد گرامر
+if (finishBtn) {
+  finishBtn.addEventListener("click", () => {
+    window.location.href = "grammar-path.html";
+  });
+}
