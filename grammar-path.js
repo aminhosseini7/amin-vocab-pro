@@ -16,6 +16,7 @@ function todayStr() {
 
 const placementDone = localStorage.getItem("placement_done");
 const placementCard = document.getElementById("placement-card");
+// اگر دکمه‌ای با این id در HTML تعریف کنی، از همین استفاده می‌شود
 const placementBtn = document.getElementById("placement-btn");
 
 if (placementCard) {
@@ -35,10 +36,10 @@ if (placementBtn) {
 const dailyTestStatusEl = document.getElementById("daily-test-status");
 const dailyTestBtn = document.getElementById("daily-test-btn");
 
-const today = todayStr();
-const dailyTestDate = localStorage.getItem("daily_test_date");
+// الان دیگر تاریخ را چک نمی‌کنیم؛ هر وقت فوکوس وجود داشته باشد از آن استفاده می‌کنیم
 const dailyFocusTopic = localStorage.getItem("daily_focus_topic");
-const hasTodayFocus = dailyTestDate === today && !!dailyFocusTopic;
+const hasFocusTopic = !!dailyFocusTopic;
+const lastDailyDate = localStorage.getItem("daily_test_date");
 
 const DAILY_FOCUS_LABELS = {
   tense: "زمان‌ها (Tenses – مثل گذشته ساده، حال کامل و ...)",
@@ -50,15 +51,18 @@ const DAILY_FOCUS_LABELS = {
 };
 
 if (dailyTestStatusEl) {
-  if (hasTodayFocus) {
-    let txt = "آزمون روزانهٔ امروز را انجام داده‌ای.";
+  if (hasFocusTopic) {
+    let txt = "آخرین آزمون روزانه را انجام داده‌ای.";
+    if (lastDailyDate) {
+      txt += ` (تاریخ: ${lastDailyDate})`;
+    }
     if (DAILY_FOCUS_LABELS[dailyFocusTopic]) {
-      txt += " تمرکز پیشنهادی امروز: " + DAILY_FOCUS_LABELS[dailyFocusTopic];
+      txt += " – تمرکز پیشنهادی: " + DAILY_FOCUS_LABELS[dailyFocusTopic];
     }
     dailyTestStatusEl.textContent = txt;
   } else {
     dailyTestStatusEl.textContent =
-      "هنوز آزمون امروز را نداده‌ای. با یک تست ۵ سؤالی، مبحث مناسب امروز انتخاب می‌شود.";
+      "هنوز آزمون روزانه‌ای ذخیره نشده. با یک تست ۵ سؤالی، مبحث مناسب برای تمرین انتخاب می‌شود.";
   }
 }
 
@@ -305,7 +309,7 @@ updateStatsUI();
 updateHistoryUI();
 
 // ---------------------------
-// درس امروز بر اساس سطح + نتیجه آزمون روزانه
+// درس امروز بر اساس سطح + آخرین آزمون روزانه
 // ---------------------------
 
 const lessonBoxEl = document.getElementById("lesson-box");
@@ -313,7 +317,6 @@ const practiceStatusEl = document.getElementById("practice-status");
 
 function generateLesson(level, focusTopic) {
   if (!focusTopic || focusTopic === "general") {
-    // فقط براساس سطح
     if (level === "A2") {
       return `درس امروز (A2 – مرور کلی):
 - Present Simple و Present Continuous
@@ -321,16 +324,15 @@ function generateLesson(level, focusTopic) {
   I play football.
   I am playing football.
 - تمرین: ۵ جمله دربارهٔ روتین روزانه‌ات با Present Simple بنویس،
-  و ۳ جمله دربارهٔ کارهایی که «الان» انجام می‌دهی با Present Continuous.`;
+و ۳ جمله دربارهٔ کارهایی که «الان» انجام می‌دهی با Present Continuous.`;
     }
     if (level === "B1") {
       return `درس امروز (B1 – مرور کلی):
-- Present Perfect vs Past Simple
+- Present Perfect vs Present Perfect Continuous
 - مثال:
   I have lived here for 5 years.
-  I moved here in 2019.
-- تمرین: ۵ جمله دربارهٔ تجربه‌هایت با Present Perfect بنویس،
-  و ۵ جمله با Past Simple.`;
+  I have been living here for 5 years.
+- نکته: برای مدت زمان → از for و برای نقطهٔ شروع → از since استفاده کن.`;
     }
     if (level === "B2") {
       return `درس امروز (B2 – مرور کلی):
@@ -342,7 +344,6 @@ function generateLesson(level, focusTopic) {
 - تمرین: یک پاراگراف ۶–۸ جمله‌ای بنویس و حداقل از ۵ linking word مختلف استفاده کن.`;
   }
 
-  // فوکوس از آزمون روزانه
   if (focusTopic === "tense") {
     return `🎯 تمرکز امروز: زمان‌ها (Tenses)
 
@@ -420,12 +421,12 @@ function generateLesson(level, focusTopic) {
 const startPracticeBtn = document.getElementById("start-practice");
 if (startPracticeBtn) {
   startPracticeBtn.addEventListener("click", () => {
-    const lesson = generateLesson(userLevel, hasTodayFocus ? dailyFocusTopic : null);
+    const lesson = generateLesson(userLevel, hasFocusTopic ? dailyFocusTopic : null);
     if (lessonBoxEl) {
       lessonBoxEl.textContent = lesson;
     }
     if (practiceStatusEl) {
-      if (hasTodayFocus && DAILY_FOCUS_LABELS[dailyFocusTopic]) {
+      if (hasFocusTopic && DAILY_FOCUS_LABELS[dailyFocusTopic]) {
         practiceStatusEl.textContent =
           "تمرین امروز بر اساس نتیجهٔ آخرین آزمون روزانه تنظیم شد (" +
           DAILY_FOCUS_LABELS[dailyFocusTopic] +
@@ -439,7 +440,7 @@ if (startPracticeBtn) {
 }
 
 // ---------------------------
-// بخش «جمله بنویس» و اتصال به بک‌اند هوش مصنوعی
+// بخش جمله‌نویسی + اتصال به بک‌اند
 // ---------------------------
 
 const checkBtn = document.getElementById("check-btn");
