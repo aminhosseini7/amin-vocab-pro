@@ -1,129 +1,167 @@
-// ============================
-// API تنظیمات
-// ============================
+import WORD_LIST from "./data/word_list.js";
 
-const API_URL = "https://grammar-backend.vercel.app/api/grammar";
+const API_URL = "https://api-inference.huggingface.co/models/gpt2"; 
+// تو بعداً مدل دلخواهت را می‌گذاری
 
-// ============================
-// انتخاب لغت
-// ============================
-
+//--------------------------------------------------
+// UI Elements
+//--------------------------------------------------
 const wordInput = document.getElementById("word-input");
 const loadWordBtn = document.getElementById("load-word-btn");
-const wordStatus = document.getElementById("word-status");
-
-// بخش‌ها
-const exampleSection = document.getElementById("example-section");
-const sentenceSection = document.getElementById("sentence-section");
-const storySection = document.getElementById("story-section");
-
-// باکس‌های خروجی
 const exampleBox = document.getElementById("example-box");
-
-// ============================
-// مرحله A – تولید مثال‌های هوشمند
-// ============================
-
-async function generateExamples(word) {
-  exampleBox.textContent = "در حال ساخت مثال‌ها...";
-
-  const prompt = `
-I am Amin. I am 29. I am from Iran. My goal is migrating to Sydney University.
-
-Please generate 3 examples for the vocabulary "${word}":
-
-1) A2-level example.
-2) B1/B2 example.
-3) A personalized example about Amin’s life goals (Sydney, migration, supply chain, data analysis).
-
-Return result as:
-A2:
-...
-B1/B2:
-...
-Personal:
-...
-  `.trim();
-
-  try {
-    const res = await fetch(API_URL, {
-      method: "POST",
-      headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({ text: prompt, level: "B2" })
-    });
-
-    const data = await res.json();
-
-    if (!res.ok || data.error) {
-      exampleBox.textContent = "خطا در دریافت مثال‌ها:\n" + JSON.stringify(data, null, 2);
-      return;
-    }
-
-    exampleBox.textContent = data.corrected;  // خود مدل متن تولید می‌کند
-  } catch (e) {
-    exampleBox.textContent = "خطا در اتصال به سرور.";
-  }
-}
-
-// ============================
-// مرحله B – جمله‌سازی و بررسی
-// ============================
-
 const sentenceInput = document.getElementById("sentence-input");
 const sentenceCheckBtn = document.getElementById("sentence-check-btn");
 const sentenceResult = document.getElementById("sentence-result");
-
-sentenceCheckBtn.addEventListener("click", async () => {
-  const text = sentenceInput.value.trim();
-  if (!text) return;
-
-  sentenceResult.textContent = "در حال بررسی جمله...";
-
-  try {
-    const res = await fetch(API_URL, {
-      method: "POST",
-      headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({ text })
-    });
-
-    const data = await res.json();
-
-    if (!res.ok || data.error) {
-      sentenceResult.textContent = "خطا:\n" + JSON.stringify(data, null, 2);
-      return;
-    }
-
-    const resultText = `
-جملهٔ تصحیح‌شده:
-${data.corrected}
-
-توضیح (فارسی):
-${data.errors_explained_fa}
-
-Explanation:
-${data.errors_explained_en}
-
-مثال‌ها:
-${(data.examples || []).join("\n")}
-
-تمرین بیشتر:
-${data.suggested_practice}
-    `.trim();
-
-    sentenceResult.textContent = resultText;
-
-  } catch (e) {
-    sentenceResult.textContent = "خطا در اتصال.";
-  }
-});
-
-// ============================
-// مرحله C – داستان کوتاه
-// ============================
-
 const storyBtn = document.getElementById("story-btn");
 const storyBox = document.getElementById("story-box");
 
+//--------------------------------------------------
+// 1) تولید معنی + مثال + توضیح + Hint
+//--------------------------------------------------
+async function generateWordData(word) {
+  const prompt = `
+Provide JSON only.
+
+Word: "${word}"
+
+Required fields:
+- fa (Persian meaning)
+- example (English example)
+- usage (short description in English)
+- hint (creative mnemonic to remember the word)
+
+Example JSON format:
+{
+  "fa": "",
+  "example": "",
+  "usage": "",
+  "hint": ""
+}
+`;
+
+  const res = await fetch(API_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ inputs: prompt })
+  });
+
+  const data = await res.json();
+
+  let text = "";
+
+  if (Array.isArray(data) && data[0]?.generated_text) {
+    text = data[0].generated_text;
+  } else if (data.generated_text) {
+    text = data.generated_text;
+  } else {
+    return null;
+  }
+
+  // استخراج بخش JSON
+  let start = text.indexOf("{");
+  let end = text.lastIndexOf("}");
+
+  if (start === -1 || end === -1) return null;
+
+  try {
+    return JSON.parse(text.slice(start, end + 1));
+  } catch {
+    return null;
+  }
+}
+
+//--------------------------------------------------
+// دکمه شروع تمرین لغت
+//--------------------------------------------------
+loadWordBtn.addEventListener("click", async () => {
+  const word = wordInput.value.trim();
+  if (!word) return;
+
+  exampleBox.textContent = "در حال تولید...";
+
+  const result = await generateWordData(word);
+
+  if (!result) {
+    exampleBox.textContent = "خطا در دریافت اطلاعات از هوش مصنوعی.";
+    return;
+  }
+
+  exampleBox.innerHTML = `
+🔵 <b>${word}</b>
+
+📘 معنی:
+${result.fa}
+
+✏ مثال:
+${result.example}
+
+📌 کاربرد:
+${result.usage}
+
+💡 راهنمای حفظ:
+${result.hint}
+  `;
+});
+
+//--------------------------------------------------
+// 2) جمله‌سازی و بررسی
+//--------------------------------------------------
+sentenceCheckBtn.addEventListener("click", async () => {
+  const sentence = sentenceInput.value.trim();
+  if (!sentence) return;
+
+  sentenceResult.textContent = "در حال بررسی...";
+
+  const prompt = `
+Correct the sentence and explain errors:
+
+"${sentence}"
+
+Return JSON:
+{
+  "corrected": "",
+  "fa": "",
+  "en": ""
+}
+`;
+
+  const res = await fetch(API_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ inputs: prompt })
+  });
+
+  const data = await res.json();
+
+  let text = "";
+  if (Array.isArray(data) && data[0]?.generated_text) text = data[0].generated_text;
+  else if (data.generated_text) text = data.generated_text;
+
+  let start = text.indexOf("{");
+  let end = text.lastIndexOf("}");
+
+  if (start === -1 || end === -1) {
+    sentenceResult.textContent = "خطا در فرمت پاسخ.";
+    return;
+  }
+
+  const result = JSON.parse(text.slice(start, end + 1));
+
+  sentenceResult.innerHTML = `
+✔ جملهٔ صحیح:
+${result.corrected}
+
+🇮🇷 توضیح:
+${result.fa}
+
+🇬🇧 Explanation:
+${result.en}
+  `;
+});
+
+//--------------------------------------------------
+// 3) داستان کوتاه روزانه با لغت
+//--------------------------------------------------
 storyBtn.addEventListener("click", async () => {
   const word = wordInput.value.trim();
   if (!word) return;
@@ -131,112 +169,20 @@ storyBtn.addEventListener("click", async () => {
   storyBox.textContent = "در حال ساخت داستان...";
 
   const prompt = `
-Write a short story (5-7 sentences) that includes the word "${word}".
-The story should be simple, natural, and suitable for an intermediate learner.
-Use a friendly tone.
+Write a short story (6–7 sentences) in simple English using the word "${word}" at least 3 times. Return plain text only.
+`;
 
-Amin is 29, from Iran, interested in migrating to Sydney University and working in supply chain / data analysis. You can include these facts.
-
-Return only the story.
-  `.trim();
-
-  try {
-    const res = await fetch(API_URL, {
-      method: "POST",
-      headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({ text: prompt, level: "B1" })
-    });
-
-    const data = await res.json();
-
-    if (!res.ok || data.error) {
-      storyBox.textContent = "خطا:\n" + JSON.stringify(data, null, 2);
-      return;
-    }
-
-    storyBox.textContent = data.corrected;
-  } catch (e) {
-    storyBox.textContent = "خطا در اتصال.";
-  }
-});
-
-// ============================
-// فعال شدن همه‌ی بخش‌ها پس از انتخاب لغت
-// ============================
-
-loadWordBtn.addEventListener("click", () => {
-  const word = wordInput.value.trim();
-  if (!word) {
-    wordStatus.textContent = "لطفاً ابتدا یک لغت وارد کن.";
-    return;
-  }
-
-  wordStatus.textContent = `لغت انتخاب‌شده: ${word}`;
-
-  exampleSection.style.display = "block";
-  sentenceSection.style.display = "block";
-  storySection.style.display = "block";
-
-  generateExamples(word);
-});
-
-// ============================
-// 🎙 Voice Input + Auto-Punctuation
-// ============================
-
-const sentenceVoiceBtn = document.getElementById("sentence-voice-btn");
-
-function autoPunctuate(raw) {
-  if (!raw) return "";
-  let text = raw.trim();
-
-  function replaceWord(str, word, symbol) {
-    const re = new RegExp("\\b" + word + "\\b", "gi");
-    return str.replace(re, symbol);
-  }
-
-  text = replaceWord(text, "comma", ",");
-  text = replaceWord(text, "dot", ".");
-  text = replaceWord(text, "question mark", "?");
-  text = replaceWord(text, "period", ".");
-
-  text = text.replace(/\s+([,.!?])/g, "$1");
-
-  if (!/[.!?]$/.test(text)) {
-    const first = text.split(/\s+/)[0].toLowerCase();
-
-    const Q = ["why", "what", "how", "when", "where", "do", "does", "did", "is", "are", "can"];
-    if (Q.includes(first)) text += "?";
-    else text += ".";
-  }
-
-  text = text.replace(/^([a-z])/, (m) => m.toUpperCase());
-
-  return text;
-}
-
-(function initSpeech() {
-  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!SpeechRecognition) {
-    if (sentenceVoiceBtn) sentenceVoiceBtn.style.display = "none";
-    return;
-  }
-
-  const rec = new SpeechRecognition();
-  rec.lang = "en-US";
-  rec.interimResults = false;
-
-  sentenceVoiceBtn.addEventListener("click", () => {
-    sentenceVoiceBtn.textContent = "🎙 ضبط...";
-    try { rec.start(); } catch {}
+  const res = await fetch(API_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ inputs: prompt })
   });
 
-  rec.onresult = (e) => {
-    const processed = autoPunctuate(e.results[0][0].transcript);
-    sentenceInput.value = processed;
-  };
+  const data = await res.json();
 
-  rec.onend = () => {
-    sentenceVoiceBtn.textContent = "🎙";
-  };
-})();
+  let text = "";
+  if (Array.isArray(data) && data[0]?.generated_text) text = data[0].generated_text;
+  else if (data.generated_text) text = data.generated_text;
+
+  storyBox.textContent = text;
+});
