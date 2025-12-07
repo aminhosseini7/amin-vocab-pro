@@ -1,107 +1,47 @@
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <title>آزمون گرامر روزانه</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!-- تم مشکی/نئونی گرامر -->
-  <link rel="stylesheet" href="grammar-theme.css">
-  <style>
-    .section {
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid rgba(148, 163, 184, 0.4);
-      border-radius: 14px;
-      padding: 16px;
-      margin-top: 18px;
-      box-shadow: 0 0 14px rgba(15, 23, 42, 0.7);
-    }
-    .title-main {
-      text-align: center;
-      margin-bottom: 4px;
-      font-size: 20px;
-    }
-    .sub {
-      text-align: center;
-      color: #9CA3AF;
-      font-size: 13px;
-      margin-bottom: 10px;
-    }
-    .progress-bar {
-      width: 100%;
-      height: 10px;
-      background: rgba(253, 224, 71, 0.15);
-      border-radius: 999px;
-      overflow: hidden;
-      margin: 10px 0 18px;
-    }
-    .progress-fill {
-      height: 100%;
-      background: #FDE047;
-      width: 0%;
-      box-shadow: 0 0 10px rgba(253, 224, 71, 0.7);
-      transition: width 0.3s ease;
-    }
-    .choice-option {
-      background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(253, 224, 71, 0.35);
-      padding: 10px;
-      border-radius: 10px;
-      margin-top: 10px;
-      cursor: pointer;
-      transition: 0.25s;
-      font-size: 14px;
-    }
-    .choice-option:hover {
-      background: rgba(253, 224, 71, 0.15);
-    }
-    .choice-selected {
-      border-color: #FDE047;
-      background: rgba(253, 224, 71, 0.25);
-    }
-    .muted {
-      color: #9CA3AF;
-      font-size: 13px;
-    }
-    .result-box {
-      background: rgba(253, 224, 71, 0.1);
-      padding: 12px;
-      border-radius: 12px;
-      border: 1px solid rgba(253, 224, 71, 0.4);
-      margin-top: 15px;
-      color: #fff;
-      white-space: pre-line;
-      font-size: 14px;
-    }
-  </style>
+  <meta charset="UTF-8" />
+  <title>آزمون روزانهٔ گرامر</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="grammar-path.css" />
 </head>
 
 <body>
   <div class="container">
 
-    <!-- صفحه آزمون -->
+    <!-- صفحه سؤال‌ها -->
     <div id="test-screen" class="section">
-      <h1 class="title-main">🧪 آزمون روزانه گرامر (۵ سؤال)</h1>
-      <p class="sub">این آزمون کمک می‌کند بفهمیم امروز بهتر است روی چه مبحثی تمرکز کنی.</p>
+      <h3>📝 آزمون روزانهٔ گرامر (۵ سؤال)</h3>
+      <p class="muted">
+        به هر سؤال پاسخ بده تا بر اساس اشتباه‌ها، تمرکز امروزت در Grammar AI Tutor تعیین شود.
+      </p>
 
-      <h3 id="q-title">سؤال 1 از 5</h3>
-      <div class="progress-bar">
-        <div id="q-progress" class="progress-fill"></div>
+      <div style="height:6px; background:#020617; border-radius:999px; overflow:hidden; margin:10px 0 14px;">
+        <div id="q-progress" style="height:100%; width:0; background:#facc15;"></div>
       </div>
-      <p id="q-text"></p>
+
+      <h4 id="q-title" style="margin:0 0 8px; font-size:16px;"></h4>
+      <p id="q-text" style="white-space:pre-line; margin-top:0;"></p>
 
       <div id="q-choices"></div>
 
-      <button id="next-btn" class="btn" style="margin-top:18px;">سؤال بعد</button>
+      <div style="margin-top:14px; text-align:left;">
+        <button id="next-btn" class="btn-primary">سؤال بعدی</button>
+      </div>
     </div>
 
     <!-- صفحه نتیجه -->
     <div id="result-screen" class="section" style="display:none;">
-      <h1 class="title-main">نتیجه آزمون امروز ✔</h1>
-      <p class="sub">بر اساس پاسخ‌های امروز، این مبحث برای تمرکز امروز پیشنهاد می‌شود:</p>
-
-      <div id="focus-box" class="result-box"></div>
-
-      <button id="back-btn" class="btn" style="margin-top:18px;">بازگشت به صفحه گرامر</button>
+      <h3>🎯 نتیجه آزمون امروز</h3>
+      <pre id="focus-box" style="white-space:pre-line; font-size:13px; line-height:1.7; background:rgba(15,23,42,0.95); border-radius:14px; padding:10px 12px; border:1px solid rgba(148,163,184,0.45);"></pre>
+      <p class="muted">
+        این تمرکز امروز در صفحهٔ Grammar AI Tutor ذخیره شد. با زدن دکمهٔ زیر،
+        برگرد و روی «شروع تمرین امروز» کلیک کن تا درس امروز بر اساس همین نتیجه ساخته شود.
+      </p>
+      <button id="back-btn" class="btn-primary">
+        بازگشت به صفحهٔ گرامر
+      </button>
     </div>
 
   </div>
