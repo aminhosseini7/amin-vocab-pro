@@ -3,123 +3,74 @@
 <head>
   <meta charset="UTF-8">
   <title>Grammar AI Tutor</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="grammar-path.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
 
 <body>
+
   <div class="container">
 
-    <!-- کارت تعیین سطح -->
-    <div id="placement-card" class="card" style="display:none;">
-      <h3>🎯 شروع مسیر یادگیری</h3>
-      <p class="muted">
-        برای تعیین سطح اولیه و ساخت مسیر یادگیری شخصی، ابتدا آزمون تعیین سطح را انجام بده.
-      </p>
-      <a id="placement-btn" class="btn-primary" href="grammar-placement.html">
-        شروع آزمون تعیین سطح
-      </a>
-    </div>
-
     <h1>🎓 Grammar AI Tutor</h1>
-    <p class="sub">مسیر یادگیری گرامر هوشمند – مخصوص خودت</p>
+    <p class="sub">مسیر یادگیری گرامر – هوشمند و مرحله‌به‌مرحله</p>
 
-    <!-- سطح کاربر -->
-    <div id="level-box" class="section">
+    <!-- سطح -->
+    <div class="section">
       <h2>سطح فعلی شما: <span id="user-level">…</span></h2>
       <p id="level-desc"></p>
     </div>
 
-    <!-- استریک و امتیاز -->
-    <div class="section">
-      <div class="streak-box">
-        <div class="streak-main">
-          استریک گرامر: <span id="streak-current">0</span> روز 🔥
-        </div>
-        <div class="streak-sub">
-          بهترین استریک: <span id="streak-best">0</span> — امتیاز گرامر: <span id="grammar-points">0</span>
-        </div>
-      </div>
-    </div>
-
     <!-- آزمون روزانه -->
     <div class="section">
-      <h3>🧪 آزمون روزانهٔ گرامر</h3>
-      <p class="muted">
-        هر روز یک آزمون ۵ سؤالی کوچک → بر اساس نتیجه‌اش، تمرکز امروزت در تمرین گرامر مشخص می‌شود.
-      </p>
-      <button id="daily-test-btn" class="btn-secondary">شروع آزمون روزانه</button>
-      <p id="daily-test-status" class="muted"></p>
-    </div>
-
-    <!-- تمرین روزانه + تمرین هدایت‌شده -->
-    <div class="section">
       <h3>📌 تمرین روزانه</h3>
-      <button id="start-practice" class="btn-primary">شروع تمرین امروز</button>
+      <button id="start-practice" class="btn-primary">شروع درس و تمرین امروز</button>
       <p id="practice-status" class="muted"></p>
-
-      <!-- درسنامه متن کامل -->
-      <div id="lesson-box">
-        برای شروع تمرین، دکمهٔ «شروع تمرین امروز» را بزن.
-      </div>
-
-      <!-- تمرین هدایت‌شده مرحله‌به‌مرحله -->
-      <div id="guided-container" style="margin-top:12px; display:none;">
-        <h4 id="guided-header" style="margin:0 0 6px; font-size:15px;"></h4>
-        <p id="guided-instruction" class="muted" style="white-space:pre-line;"></p>
-
-        <div class="textarea-row">
-          <textarea
-            id="guided-input"
-            placeholder="پاسخ خودت به این تمرین را اینجا بنویس..."
-          ></textarea>
-          <button id="guided-voice-btn" class="btn-icon" title="صحبت کن">
-            🎙️
-          </button>
-        </div>
-
-        <button id="guided-check-btn" class="btn-secondary" style="margin-top:8px;">
-          بررسی این تمرین با هوش مصنوعی
-        </button>
-
-        <div
-          id="guided-result"
-          class="result-box"
-        ></div>
-
-        <div style="margin-top:8px; text-align:left;">
-          <button id="guided-next-btn" class="btn-primary" style="display:none;">
-            تمرین بعدی ⏭️
-          </button>
-        </div>
-      </div>
     </div>
 
-    <!-- جمله‌نویسی آزاد -->
+    <!-- درسنامه -->
     <div class="section">
-      <h3>📝 جمله بنویس (حالت آزاد)</h3>
-      <p class="muted">
-        این بخش برای وقتی است که خودت می‌خواهی هر جمله یا پاراگرافی را امتحان کنی؛
-        ربطی به تمرین امروز ندارد.
-      </p>
-
-      <div class="textarea-row">
-        <textarea id="user-sentence" placeholder="یک جمله‌ی انگلیسی بنویس..."></textarea>
-        <button id="voice-btn" class="btn-icon" title="صحبت کن">
-          🎙️
-        </button>
-      </div>
-
-      <button id="check-btn" class="btn-secondary">بررسی با هوش مصنوعی</button>
-      <div id="ai-result" class="result-box"></div>
+      <h3>📘 درس امروز</h3>
+      <div id="lesson-box" class="lesson-box">برای شروع روی دکمه بالا بزن.</div>
     </div>
 
-    <!-- آمار کلی -->
+    <!-- تمرین هدایت‌شونده -->
     <div class="section">
-      <h3>📊 آمار کلی گرامر شما</h3>
+      <h3>📝 تمرین هدایت‌شونده</h3>
+
+      <div id="exercise-box" class="exercise-box">
+        <div id="exercise-text"></div>
+
+        <textarea id="guided-input" placeholder="جواب خودت را بنویس یا از 🎙 استفاده کن..."></textarea>
+
+        <div class="btn-row">
+          <button id="guided-voice-btn" class="btn-secondary">🎙</button>
+          <button id="guided-check-btn" class="btn-primary">بررسی</button>
+        </div>
+
+        <div id="guided-result"></div>
+
+        <button id="guided-next-btn" class="btn" style="display:none;">تمرین بعدی ➡</button>
+      </div>
+
+    </div>
+
+    <!-- جمله آزاد -->
+    <div class="section">
+      <h3>✍ جمله آزاد</h3>
+      <textarea id="user-sentence" placeholder="یک جمله انگلیسی بنویس..."></textarea>
+      <div class="btn-row">
+        <button id="voice-btn" class="btn-secondary">🎙</button>
+        <button id="check-btn" class="btn-primary">بررسی با هوش مصنوعی</button>
+      </div>
+      <div id="ai-result"></div>
+    </div>
+
+    <!-- آمار -->
+    <div class="section">
+      <h3>📊 آمار کلی</h3>
       <div class="stats-grid">
         <div class="stat-item">
-          <div class="stat-label">تعداد کل جملات بررسی‌شده</div>
+          <div class="stat-label">کل جملات</div>
           <div class="stat-value" id="stat-total">0</div>
         </div>
         <div class="stat-item">
@@ -131,25 +82,6 @@
           <div class="stat-value" id="stat-last-date">-</div>
         </div>
       </div>
-      <p class="muted">این آمار فقط روی دستگاه خودت ذخیره می‌شود (LocalStorage).</p>
-    </div>
-
-    <!-- نقاط ضعف -->
-    <div class="section">
-      <h3>🎯 نقاط ضعف شما (بر اساس جمله‌های اخیر)</h3>
-      <p class="muted">
-        این بخش نشان می‌دهد در کدام مباحث بیشترین خطا را داشته‌ای. نوارهای پررنگ‌تر یعنی نیاز به تمرین بیشتر.
-      </p>
-      <ul id="weak-points-list" class="weak-list"></ul>
-    </div>
-
-    <!-- تاریخچه -->
-    <div class="section">
-      <h3>📚 تاریخچه جملات اخیر</h3>
-      <p class="muted">
-        آخرین جمله‌هایی که نوشتی، نسخهٔ تصحیح‌شده، و دستهٔ خطاها. (حداکثر ۱۵۰ رکورد آخر نگه‌داری می‌شود.)
-      </p>
-      <div id="history-list" class="history-list"></div>
     </div>
 
   </div>
