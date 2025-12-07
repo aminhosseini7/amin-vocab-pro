@@ -1,12 +1,12 @@
 // js/ai-meaning.js
-// آدرس بک‌اند برای واژگان – اگر فرق دارد این را عوض کن //
+
+// آدرس بک‌اند برای واژگان – اگر قبلاً تعریف نشده باشد
 if (!window.VOCAB_API_URL) {
   window.VOCAB_API_URL = "https://grammar-backend.vercel.app/api/vocab";
 }
 
-
-// کلید کش در localStorage
 const CACHE_KEY = "ai_vocab_cache_v1";
+
 
 function loadCache() {
   try {
