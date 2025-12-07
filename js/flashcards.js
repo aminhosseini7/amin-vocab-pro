@@ -8,6 +8,34 @@ const DAILY_TIME_GOAL_MIN = 30;   // ۳۰ دقیقه مطالعه
 const DAILY_NEW_WORD_GOAL = 20;   // ۲۰ لغت جدید
 const DAILY_HARD_GOAL = 5;        // ۵ لغت سخت
 
+// 🔗 آدرس بک‌اند هوش مصنوعی واژگان
+const VOCAB_AI_URL = "https://grammar-backend.vercel.app/api/vocab";
+
+// گرفتن معنی از هوش مصنوعی برای یک واژه
+async function fetchAiMeaning(word) {
+  const res = await fetch(VOCAB_AI_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ word })
+  });
+
+  const data = await res.json();
+
+  if (!res.ok || data.error) {
+    console.error("AI vocab error:", data);
+    throw new Error("AI error");
+  }
+
+  // انتظار داریم ساختار این‌طوری باشد:
+  // { fa: "...", example: "...", usage: "...", hint: "..." }
+  return {
+    fa: data.fa || "",
+    example: data.example || "",
+    usage: data.usage || "",
+    hint: data.hint || ""
+  };
+}
+
 // کپی از لیست لغات و شافل
 let words = (VOCAB || []).slice();
 
@@ -129,17 +157,42 @@ function renderCurrent() {
   updateStatsBox();
 }
 
-// --------- نمایش معنی ---------
+// --------- نمایش معنی (با هوش مصنوعی + فallback) ---------
 
-function showMeaning() {
+async function showMeaning() {
+  if (!dueOrder.length) return;
+
   const w = dueOrder[currentIndex];
   const box = document.getElementById("meaningBox");
   box.style.display = "block";
-  box.innerHTML =
-    "<b>معنی:</b> " + (w.meaning_fa || "") + "<br><br>" +
-    "<b>مثال:</b> " + (w.example_en || "") + "<br><br>" +
-    "<b>کاربرد:</b> " + (w.usage_fa || "") + "<br><br>" +
-    "<b>نکته:</b> " + (w.note || "");
+
+  // متن موقت
+  box.textContent = "در حال گرفتن معنی از هوش مصنوعی...";
+
+  let ai = null;
+
+  try {
+    ai = await fetchAiMeaning(w.word);
+  } catch (e) {
+    console.warn("AI vocab fetch failed, using local data if available.", e);
+  }
+
+  const fa = (ai && ai.fa) || w.meaning_fa || "";
+  const example = (ai && ai.example) || w.example_en || "";
+  const usage = (ai && ai.usage) || w.usage_fa || "";
+  const hint = (ai && ai.hint) || w.note || "";
+
+  if (!fa && !example && !usage && !hint) {
+    box.textContent =
+      "خطا در ارتباط با اینترنت یا سرور. لطفاً بعداً دوباره امتحان کن.";
+  } else {
+    box.innerHTML =
+      "<b>معنی:</b> " + fa +
+      "<br><br><b>مثال (EN):</b> " + example +
+      "<br><br><b>کاربرد:</b> " + usage +
+      "<br><br><b>نکته:</b> " + hint;
+  }
+
   document.getElementById("showMeaningBtn").style.display = "none";
 }
 
@@ -214,7 +267,10 @@ document.addEventListener("DOMContentLoaded", () => {
   renderCurrent();
   startTimer();
 
-  document.getElementById("showMeaningBtn").onclick = showMeaning;
+  document.getElementById("showMeaningBtn").onclick = () => {
+    // چون showMeaning الان async است، این‌طوری صدا می‌زنیم
+    showMeaning();
+  };
   document.getElementById("btnKnow").onclick = () => answerCurrent(true);
   document.getElementById("btnDontKnow").onclick = () => answerCurrent(false);
   document.getElementById("btnHard").onclick = markHardCurrent;
