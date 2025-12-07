@@ -1,5 +1,36 @@
 // ============ Flashcards main logic ============
 
+// 🔗 آدرس API برای گرفتن معنی/مثال/کاربرد/نکته از سرور
+const VOCAB_API_URL = "https://grammar-backend.vercel.app/api/vocab";
+
+// 🔐 کلید کش در localStorage
+const VOCAB_CACHE_KEY = "vocab_ai_cache_v1";
+
+// --- کش معنی لغات ---
+
+function loadVocabCache() {
+  try {
+    const raw = localStorage.getItem(VOCAB_CACHE_KEY);
+    if (!raw) return {};
+    return JSON.parse(raw);
+  } catch (e) {
+    console.warn("Failed to load vocab cache:", e);
+    return {};
+  }
+}
+
+function saveVocabCache(cache) {
+  try {
+    localStorage.setItem(VOCAB_CACHE_KEY, JSON.stringify(cache));
+  } catch (e) {
+    console.warn("Failed to save vocab cache:", e);
+  }
+}
+
+let vocabCache = loadVocabCache();
+
+// --- بقیه منطق فلش‌کارت‌ها ---
+
 let aminState = loadState();
 let meta = loadMeta();
 
@@ -7,34 +38,6 @@ let meta = loadMeta();
 const DAILY_TIME_GOAL_MIN = 30;   // ۳۰ دقیقه مطالعه
 const DAILY_NEW_WORD_GOAL = 20;   // ۲۰ لغت جدید
 const DAILY_HARD_GOAL = 5;        // ۵ لغت سخت
-
-// 🔗 آدرس بک‌اند هوش مصنوعی واژگان
-const VOCAB_AI_URL = "https://grammar-backend.vercel.app/api/vocab";
-
-// گرفتن معنی از هوش مصنوعی برای یک واژه
-async function fetchAiMeaning(word) {
-  const res = await fetch(VOCAB_AI_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ word })
-  });
-
-  const data = await res.json();
-
-  if (!res.ok || data.error) {
-    console.error("AI vocab error:", data);
-    throw new Error("AI error");
-  }
-
-  // انتظار داریم ساختار این‌طوری باشد:
-  // { fa: "...", example: "...", usage: "...", hint: "..." }
-  return {
-    fa: data.fa || "",
-    example: data.example || "",
-    usage: data.usage || "",
-    hint: data.hint || ""
-  };
-}
 
 // کپی از لیست لغات و شافل
 let words = (VOCAB || []).slice();
@@ -157,43 +160,77 @@ function renderCurrent() {
   updateStatsBox();
 }
 
-// --------- نمایش معنی (با هوش مصنوعی + فallback) ---------
+// --------- نمایش معنی با هوش مصنوعی + کش ---------
 
 async function showMeaning() {
   if (!dueOrder.length) return;
 
   const w = dueOrder[currentIndex];
+  if (!w || !w.word) return;
+
   const box = document.getElementById("meaningBox");
+  const btn = document.getElementById("showMeaningBtn");
+
   box.style.display = "block";
+  box.innerHTML = "در حال تولید معنی با هوش مصنوعی...";
+  if (btn) btn.style.display = "none";
 
-  // متن موقت
-  box.textContent = "در حال گرفتن معنی از هوش مصنوعی...";
+  const key = w.word.toLowerCase();
+  let data = vocabCache[key];
 
-  let ai = null;
-
-  try {
-    ai = await fetchAiMeaning(w.word);
-  } catch (e) {
-    console.warn("AI vocab fetch failed, using local data if available.", e);
-  }
-
-  const fa = (ai && ai.fa) || w.meaning_fa || "";
-  const example = (ai && ai.example) || w.example_en || "";
-  const usage = (ai && ai.usage) || w.usage_fa || "";
-  const hint = (ai && ai.hint) || w.note || "";
-
-  if (!fa && !example && !usage && !hint) {
-    box.textContent =
-      "خطا در ارتباط با اینترنت یا سرور. لطفاً بعداً دوباره امتحان کن.";
-  } else {
+  // ۱) اگر در کش داریم → همین را نمایش بده
+  if (data) {
     box.innerHTML =
-      "<b>معنی:</b> " + fa +
-      "<br><br><b>مثال (EN):</b> " + example +
-      "<br><br><b>کاربرد:</b> " + usage +
-      "<br><br><b>نکته:</b> " + hint;
+      "<b>معنی:</b> " + (data.meaning_fa || "") + "<br><br>" +
+      "<b>مثال (English):</b> " + (data.example_en || "") + "<br><br>" +
+      "<b>کاربرد:</b> " + (data.usage_fa || "") + "<br><br>" +
+      "<b>نکتهٔ حفظ کردن:</b> " + (data.note || "");
+    return;
   }
 
-  document.getElementById("showMeaningBtn").style.display = "none";
+  // ۲) اگر در کش نبود → برو سراغ سرور
+  try {
+    const res = await fetch(VOCAB_API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        word: w.word
+      })
+    });
+
+    const json = await res.json();
+
+    if (!res.ok || json.error) {
+      console.error("Vocab API error:", json);
+      box.innerHTML =
+        "خطا در پاسخ سرور.<br>" +
+        (json && json.error ? json.error : "لطفاً بعداً دوباره امتحان کن.");
+      if (btn) btn.style.display = "inline-block";
+      return;
+    }
+
+    data = {
+      meaning_fa: json.meaning_fa || json.meaning || "",
+      example_en: json.example_en || "",
+      usage_fa: json.usage_fa || "",
+      note: json.note || ""
+    };
+
+    vocabCache[key] = data;
+    saveVocabCache(vocabCache);
+
+    box.innerHTML =
+      "<b>معنی:</b> " + (data.meaning_fa || "") + "<br><br>" +
+      "<b>مثال (English):</b> " + (data.example_en || "") + "<br><br>" +
+      "<b>کاربرد:</b> " + (data.usage_fa || "") + "<br><br>" +
+      "<b>نکتهٔ حفظ کردن:</b> " + (data.note || "");
+
+  } catch (e) {
+    console.error("Vocab fetch failed:", e);
+    box.innerHTML =
+      "خطا در ارتباط با اینترنت یا سرور. لطفاً بعداً دوباره امتحان کن.";
+    if (btn) btn.style.display = "inline-block";
+  }
 }
 
 // --------- پاسخ کاربر ---------
@@ -268,7 +305,6 @@ document.addEventListener("DOMContentLoaded", () => {
   startTimer();
 
   document.getElementById("showMeaningBtn").onclick = () => {
-    // چون showMeaning الان async است، این‌طوری صدا می‌زنیم
     showMeaning();
   };
   document.getElementById("btnKnow").onclick = () => answerCurrent(true);
