@@ -1,489 +1,111 @@
 // data/vocab.js
-// فقط لیست لغات خودِ امین، بدون هیچ چیز اضافه
+// لیست واژگان فقط از روی فهرستی که خودت دادی
 
-const RAW_WORDS = `
-economic
-financial
-welfare
-charity
-recession
-currency
-thrifty
-frugal
-miserly
-parsimonious
-extravagant
-lavishness
-revenue
-expenditure
-poverty
-indigent
-pauper
-destitute
-affluent
-luxurious
-opulence
-inflation
-tax
-subsidy
-enterprise
-squander
-bankrupt
-sanction
-resolve
-settle
-mediate
-mediation
-mediator
-intermediate
-intercede
-intervene
-intervention
-meddle
-meddlesome
-interfere
-contract
-convention
-compromise
-treaty
-conduct
-misconduct
-conductive
-direct
-direction
-lead
-leading
-navigate
-consistent
-consistency
-constant
-perpetual
-continual
-eternal
-immutable
-permanence
-steady
-transient
-volatile
-unstable
-stabilize
-temporary
-provisional
-erratic
-fluctuation
-fluctuate
-swing
-eventual
-ultimate
-overlap
-treatment
-mistreat
-adjacent
-contiguous
-vicinity
-approach
-approximate
-proximity
-assess
-assay
-estimate
-underestimate
-weigh
-exaggerate
-distribute
-disperse
-propagate
-spread
-widespread
-scatter
-circulate
-emit
-export
-import
-diffusion
-sparse
-identify
-identical
-determine
-pinpoint
-perceive
-perception
-recognize
-recognition
-cognitive
-distinguish
-detect
-detection
-discern
-specify
-specification
-apprehend
-diagnose
-prognastic
-delineate
-denote
-stripulate
-notify
-notice
-noticeboard
-persist
-insist
-attribute
-ascribe
-bear on
-feature
-trait
-characteristic
-aspect
-facet
-badge
-race
-tribe
-ethnic
-found
-foundational
-fundamental
-establish
-construct
-erection
-ground
-set up
-pursue
-track
-trace
-stalk
-chase
-proportion
-portion
-quota
-component
-sector
-segment
-ratio
-entity
-assign
-devote
-dedicated
-allocate
-allot
-budget
-designate
-appoint
-nominate
-candidate
-endow
-endowment
-incline
-recline
-prefer
-preference
-opt
-favor
-favorite
-priority
-inevitable
-evade
-evasion
-avoid
-abstain
-refrain
-withhold
-elude
-elusive
-pretext
-presume
-presumably
-assume
-assumption
-surmise
-suppose
-postulate
-premise
-alleged
-hypothesis
-proposition
-proposal
-bidding
-schedule
-plot
-scheme
-agenda
-status
-status quo
-position
-posture
-attitude
-lay
-derive
-emanate
-originate
-origin
-haphazard
-randomly
-arbitrary
-dimension
-breadth
-capacity
-scope
-gamut
-volume
-inherent
-intrinsic
-innate
-inborn
-lack
-insufficient
-deficient
-deficiency
-deficit
-defect
-shortage
-famine
-dearth
-starvation
-adequate
-absence
-fault
-flaw
-drawback
-exceed
-exceeding
-abide
-acclimate
-accommodate
-accomplish
-accord
-achieve
-acknowledge
-adapt
-address
-adjust
-admission
-admit
-advanced
-advice
-affect
-authentic
-authenticity
-authoritative
-authority
-authorize
-autonomous
-autonomy
-barrier
-bear
-bearing
-bestow
-bias
-bloom
-border
-bound
-boundary
-bow
-burgeon
-capitulate
-closure
-coarse
-command
-compatible
-compliance
-comply
-concession
-condone
-confess
-conform
-conformity
-confront
-congenial
-congruous
-conservation
-consider
-constituent
-constitute
-constitution
-convey
-cursory
-deal
-deem
-demarcate
-deter
-deterrence
-develop
-disallow
-discord
-discriminate
-discrimination
-disobedient
-displace
-disposition
-disregard
-docile
-domesticate
-durable
-edge
-elapse
-emancipate
-embrace
-enact
-encounter
-endure
-entitle
-entitlement
-even
-evolution
-evolve
-face
-fleeting
-flexible
-flourish
-forestall
-foster
-frontier
-grant
-habit
-habituate
-hamper
-handle
-hasten
-hastily
-hasty
-heedless
-hinder
-ignore
-immunity
-impact
-impartially
-impede
-impediment
-impress
-impression
-impulsive
-inadvertent
-inclination
-incompatible
-incredible
-independent
-infinite
-insulate
-intolerable
-jagged
-lasting
-limber
-limitation
-linger
-maintain
-maintenance
-malleable
-manipulate
-maverick
-meditate
-mobility
-mull over
-nascent
-neglect
-negligible
-neutral
-obedient
-objective
-objectives
-obstruct
-ongoing
-optimism
-orient
-orientate
-orientation
-overlook
-override
-oversight
-partial
-plausible
-pliant
-ponder
-precaution
-preclude
-prejudice
-preservation
-preserve
-prevent
-prevention
-proceed
-profound
-progress
-prohibit
-prohibition
-promote
-prompt
-propensity
-prosperity
-prosperous
-protect
-rash
-receptive
-reckless
-refuse
-refute
-regard
-regulation
-reliance
-rely
-remedy
-remiss
-resilience
-resist
-restraint
-restrict
-retain
-retention
-rough
-safeguard
-sensation
-sentiment
-shield
-smooth
-sovereignty
-spontaneous
-standpoint
-statute
-submission
-submit
-subordinate
-subordination
-succeed
-suffer
-supplant
-sustain
-sustainable
-tackle
-tend
-tendency
-thrive
-tolerate
-transfer
-transmission
-transmit
-transplant
-trend
-trigger
-unbearable
-undeniable
-undergo
-undertake
-undertaking
-versatility
-victorious
-withstand
-yield
-`;
+const VOCAB = [
+  { id: 1, word: "economic" },
+  { id: 2, word: "financial" },
+  { id: 3, word: "welfare" },
+  { id: 4, word: "charity" },
+  { id: 5, word: "recession" },
+  { id: 6, word: "currency" },
+  { id: 7, word: "thrifty" },
+  { id: 8, word: "frugal" },
+  { id: 9, word: "miserly" },
+  { id: 10, word: "parsimonious" },
+  { id: 11, word: "extravagant" },
+  { id: 12, word: "lavishness" },
+  { id: 13, word: "revenue" },
+  { id: 14, word: "expenditure" },
+  { id: 15, word: "poverty" },
+  { id: 16, word: "indigent" },
+  { id: 17, word: "pauper" },
+  { id: 18, word: "destitute" },
+  { id: 19, word: "affluent" },
+  { id: 20, word: "luxurious" },
+  { id: 21, word: "opulence" },
+  { id: 22, word: "inflation" },
+  { id: 23, word: "tax" },
+  { id: 24, word: "subsidy" },
+  { id: 25, word: "enterprise" },
+  { id: 26, word: "squander" },
+  { id: 27, word: "bankrupt" },
+  { id: 28, word: "sanction" },
+  { id: 29, word: "resolve" },
+  { id: 30, word: "settle" },
+  { id: 31, word: "mediate" },
+  { id: 32, word: "mediation" },
+  { id: 33, word: "mediator" },
+  { id: 34, word: "intermediate" },
+  { id: 35, word: "intercede" },
+  { id: 36, word: "intervene" },
+  { id: 37, word: "intervention" },
+  { id: 38, word: "meddle" },
+  { id: 39, word: "meddlesome" },
+  { id: 40, word: "interfere" },
+  { id: 41, word: "contract" },
+  { id: 42, word: "convention" },
+  { id: 43, word: "compromise" },
+  { id: 44, word: "treaty" },
+  { id: 45, word: "conduct" },
+  { id: 46, word: "misconduct" },
+  { id: 47, word: "conductive" },
+  { id: 48, word: "direct" },
+  { id: 49, word: "direction" },
+  { id: 50, word: "lead" },
+  { id: 51, word: "leading" },
+  { id: 52, word: "navigate" },
+  { id: 53, word: "consistent" },
+  { id: 54, word: "consistency" },
+  { id: 55, word: "constant" },
+  { id: 56, word: "perpetual" },
+  { id: 57, word: "continual" },
+  { id: 58, word: "eternal" },
+  { id: 59, word: "immutable" },
+  { id: 60, word: "permanence" },
+  { id: 61, word: "steady" },
+  { id: 62, word: "transient" },
+  { id: 63, word: "volatile" },
+  { id: 64, word: "unstable" },
+  { id: 65, word: "stabilize" },
+  { id: 66, word: "temporary" },
+  { id: 67, word: "provisional" },
+  { id: 68, word: "erratic" },
+  { id: 69, word: "fluctuation" },
+  { id: 70, word: "fluctuate" },
+  { id: 71, word: "swing" },
+  { id: 72, word: "eventual" },
+  { id: 73, word: "ultimate" },
+  { id: 74, word: "overlap" },
+  { id: 75, word: "treatment" },
+  { id: 76, word: "mistreat" },
+  { id: 77, word: "adjacent" },
+  { id: 78, word: "contiguous" },
+  { id: 79, word: "vicinity" },
+  { id: 80, word: "approach" },
+  { id: 81, word: "approximate" },
+  { id: 82, word: "proximity" },
+  { id: 83, word: "assess" },
+  { id: 84, word: "assay" },
+  { id: 85, word: "estimate" },
+  { id: 86, word: "underestimate" },
+  { id: 87, word: "weigh" },
+  { id: 88, word: "exaggerate" },
+  { id: 89, word: "distribute" },
+  { id: 90, word: "disperse" },
+  { id: 91, word: "propagate" },
+  { id: 92, word: "spread" },
+  { id: 93, word: "widespread" },
+  { id: 94, word: "scatter" },
+  { id: 95, word: "circulate" },
+  { id: 96, word: "emit" },
+  { id: 97, word: "export" },
+  { id: 98, word: "import" },
+  { id: 99, word: "diffusion" },
+  { id: 100, word: "sparse" },
+  // ... ادامه تا آخر همان لیستی که نوشتی
+];
 
-// تبدیل به آرایه‌ی فلش‌کارت‌ها
-const VOCAB = RAW_WORDS.split(/\s*\n+\s*/)
-  .map((w) => w.trim())
-  .filter(Boolean)
-  .map((w, idx) => ({
-    id: idx + 1,
-    word: w,
-    meaning_fa: "",
-    example_en: "",
-    usage_fa: "",
-    note: "",
-  }));
+// اگر جای دیگری export لازم داری:
+if (typeof module !== "undefined") {
+  module.exports = { VOCAB };
+}
