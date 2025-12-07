@@ -1,47 +1,18 @@
-// ============ Flashcards main logic ============
+// ====================== Flashcards main logic ======================
 
-// 🔗 آدرس API برای گرفتن معنی/مثال/کاربرد/نکته از سرور
-const VOCAB_API_URL = "https://grammar-backend.vercel.app/api/vocab";
+// لیست لغات از vocab.js خوانده می‌شود
+let words = (typeof VOCAB !== "undefined" ? VOCAB.slice() : []);
 
-// 🔐 کلید کش در localStorage
-const VOCAB_CACHE_KEY = "vocab_ai_cache_v1";
-
-// --- کش معنی لغات ---
-
-function loadVocabCache() {
-  try {
-    const raw = localStorage.getItem(VOCAB_CACHE_KEY);
-    if (!raw) return {};
-    return JSON.parse(raw);
-  } catch (e) {
-    console.warn("Failed to load vocab cache:", e);
-    return {};
-  }
-}
-
-function saveVocabCache(cache) {
-  try {
-    localStorage.setItem(VOCAB_CACHE_KEY, JSON.stringify(cache));
-  } catch (e) {
-    console.warn("Failed to save vocab cache:", e);
-  }
-}
-
-let vocabCache = loadVocabCache();
-
-// --- بقیه منطق فلش‌کارت‌ها ---
-
+// وضعیت SRS
 let aminState = loadState();
 let meta = loadMeta();
 
-// 🎯 اهداف روزانه
-const DAILY_TIME_GOAL_MIN = 30;   // ۳۰ دقیقه مطالعه
+// اهداف روزانه
+const DAILY_TIME_GOAL_MIN = 30;   // ۳۰ دقیقه
 const DAILY_NEW_WORD_GOAL = 20;   // ۲۰ لغت جدید
 const DAILY_HARD_GOAL = 5;        // ۵ لغت سخت
 
-// کپی از لیست لغات و شافل
-let words = (VOCAB || []).slice();
-
+// شافل اولیه
 function shuffleArray(arr) {
   for (let i = arr.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
@@ -50,11 +21,14 @@ function shuffleArray(arr) {
 }
 shuffleArray(words);
 
+// وضعیت
 let currentIndex = 0;
 let dueOrder = [];
 let timerLastTick = null;
 
-// --------- متای امروز ---------
+// ===================================================================
+//            متای امروز
+// ===================================================================
 
 function ensureTodayMeta() {
   if (meta.date !== todayStr()) {
@@ -75,7 +49,9 @@ function formatTime(sec) {
   return m + ":" + (s < 10 ? "0" + s : s);
 }
 
-// --------- ترتیب نمایش (SRS + شافل) ---------
+// ===================================================================
+//            محاسبه ترتیب نمایش SRS
+// ===================================================================
 
 function computeDueOrder() {
   const now = Date.now();
@@ -104,7 +80,9 @@ function computeDueOrder() {
   }
 }
 
-// --------- آمار ---------
+// ===================================================================
+//                  آپدیت جعبه آمار
+// ===================================================================
 
 function updateStatsBox() {
   const total = words.length;
@@ -126,7 +104,7 @@ function updateStatsBox() {
                    " (هدف: " + DAILY_TIME_GOAL_MIN + " دقیقه)";
   const newGoalText = "لغات جدید امروز: " +
         meta.learnedToday + " / " + DAILY_NEW_WORD_GOAL;
-  const hardGoalText = "لغات سختِ یادگرفته‌شده امروز: " +
+  const hardGoalText = "لغات سخت یادگرفته‌شده امروز: " +
         meta.hardMasteredToday + " / " + DAILY_HARD_GOAL;
 
   const statsEl = document.getElementById("statsBox");
@@ -141,7 +119,9 @@ function updateStatsBox() {
     "<br>" + hardGoalText;
 }
 
-// --------- رندر فلش‌کارت ---------
+// ===================================================================
+//                     رندر فلش‌کارت
+// ===================================================================
 
 function renderCurrent() {
   if (!dueOrder.length) computeDueOrder();
@@ -160,80 +140,25 @@ function renderCurrent() {
   updateStatsBox();
 }
 
-// --------- نمایش معنی با هوش مصنوعی + کش ---------
+// ===================================================================
+//                     نمایش معنی
+// ===================================================================
 
-async function showMeaning() {
-  if (!dueOrder.length) return;
-
+function showMeaning() {
   const w = dueOrder[currentIndex];
-  if (!w || !w.word) return;
-
   const box = document.getElementById("meaningBox");
-  const btn = document.getElementById("showMeaningBtn");
-
   box.style.display = "block";
-  box.innerHTML = "در حال تولید معنی با هوش مصنوعی...";
-  if (btn) btn.style.display = "none";
-
-  const key = w.word.toLowerCase();
-  let data = vocabCache[key];
-
-  // ۱) اگر در کش داریم → همین را نمایش بده
-  if (data) {
-    box.innerHTML =
-      "<b>معنی:</b> " + (data.meaning_fa || "") + "<br><br>" +
-      "<b>مثال (English):</b> " + (data.example_en || "") + "<br><br>" +
-      "<b>کاربرد:</b> " + (data.usage_fa || "") + "<br><br>" +
-      "<b>نکتهٔ حفظ کردن:</b> " + (data.note || "");
-    return;
-  }
-
-  // ۲) اگر در کش نبود → برو سراغ سرور
-  try {
-    const res = await fetch(VOCAB_API_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        word: w.word
-      })
-    });
-
-    const json = await res.json();
-
-    if (!res.ok || json.error) {
-      console.error("Vocab API error:", json);
-      box.innerHTML =
-        "خطا در پاسخ سرور.<br>" +
-        (json && json.error ? json.error : "لطفاً بعداً دوباره امتحان کن.");
-      if (btn) btn.style.display = "inline-block";
-      return;
-    }
-
-    data = {
-      meaning_fa: json.meaning_fa || json.meaning || "",
-      example_en: json.example_en || "",
-      usage_fa: json.usage_fa || "",
-      note: json.note || ""
-    };
-
-    vocabCache[key] = data;
-    saveVocabCache(vocabCache);
-
-    box.innerHTML =
-      "<b>معنی:</b> " + (data.meaning_fa || "") + "<br><br>" +
-      "<b>مثال (English):</b> " + (data.example_en || "") + "<br><br>" +
-      "<b>کاربرد:</b> " + (data.usage_fa || "") + "<br><br>" +
-      "<b>نکتهٔ حفظ کردن:</b> " + (data.note || "");
-
-  } catch (e) {
-    console.error("Vocab fetch failed:", e);
-    box.innerHTML =
-      "خطا در ارتباط با اینترنت یا سرور. لطفاً بعداً دوباره امتحان کن.";
-    if (btn) btn.style.display = "inline-block";
-  }
+  box.innerHTML =
+    "<b>معنی:</b> " + (w.meaning_fa || "") + "<br><br>" +
+    "<b>مثال:</b> " + (w.example_en || "") + "<br><br>" +
+    "<b>کاربرد:</b> " + (w.usage_fa || "") + "<br><br>" +
+    "<b>نکته:</b> " + (w.note || "");
+  document.getElementById("showMeaningBtn").style.display = "none";
 }
 
-// --------- پاسخ کاربر ---------
+// ===================================================================
+//                     پاسخ کاربر
+// ===================================================================
 
 function answerCurrent(known) {
   const w = dueOrder[currentIndex];
@@ -278,7 +203,9 @@ function markHardCurrent() {
   renderCurrent();
 }
 
-// --------- تایمر ---------
+// ===================================================================
+//                     تایمر
+// ===================================================================
 
 function startTimer() {
   ensureTodayMeta();
@@ -297,16 +224,16 @@ function startTimer() {
   }, 1000);
 }
 
-// --------- init ---------
+// ===================================================================
+//                     Init
+// ===================================================================
 
 document.addEventListener("DOMContentLoaded", () => {
   computeDueOrder();
   renderCurrent();
   startTimer();
 
-  document.getElementById("showMeaningBtn").onclick = () => {
-    showMeaning();
-  };
+  document.getElementById("showMeaningBtn").onclick = showMeaning;
   document.getElementById("btnKnow").onclick = () => answerCurrent(true);
   document.getElementById("btnDontKnow").onclick = () => answerCurrent(false);
   document.getElementById("btnHard").onclick = markHardCurrent;
