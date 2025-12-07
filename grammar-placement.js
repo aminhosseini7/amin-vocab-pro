@@ -2,8 +2,6 @@
    Grammar Placement Test – Frontend Only
    ======================================= */
 
-// ---------- سوالات گرامر (همان قبلی) ----------
-
 const grammarQuestions = [
   {
     text: "کدام جمله صحیح است؟",
@@ -77,8 +75,6 @@ let grammarIndex = 0;
 let grammarScore = 0;
 let selectedChoice = null;
 
-// ---------- نوشتاری ----------
-
 const writingTasks = [
   "Write two simple sentences about yourself.",
   "Write one sentence in past simple about something you did yesterday.",
@@ -88,8 +84,7 @@ const writingTasks = [
 let writingIndex = 0;
 let writingAnswers = [];
 
-// ---------- عناصر DOM ----------
-
+// عناصر DOM
 const welcomeScreen = document.getElementById("welcome-screen");
 const questionScreen = document.getElementById("question-screen");
 const writingScreen = document.getElementById("writing-screen");
@@ -108,8 +103,7 @@ const wAnswer = document.getElementById("w-answer");
 const levelBox = document.getElementById("level-box");
 const finishBtn = document.getElementById("finish-btn");
 
-// ---------- شروع آزمون ----------
-
+// شروع آزمون
 document.getElementById("start-btn").onclick = () => {
   welcomeScreen.style.display = "none";
   questionScreen.style.display = "block";
@@ -121,7 +115,9 @@ function loadGrammarQuestion() {
 
   qTitle.textContent = `سؤال ${grammarIndex + 1} از 10`;
   qText.textContent = q.text;
-  qProgress.style.width = `${(grammarIndex / grammarQuestions.length) * 100}%`;
+  qProgress.style.width = `${
+    (grammarIndex / grammarQuestions.length) * 100
+  }%`;
 
   qChoices.innerHTML = "";
   selectedChoice = null;
@@ -159,8 +155,6 @@ document.getElementById("next-question-btn").onclick = () => {
   }
 };
 
-// ---------- بخش نوشتاری ----------
-
 function loadWritingTask() {
   wTitle.textContent = `بخش نوشتاری – سؤال ${writingIndex + 1} از 3`;
   wText.textContent = writingTasks[writingIndex];
@@ -176,21 +170,16 @@ document.getElementById("next-writing-btn").onclick = () => {
   if (writingIndex < writingTasks.length) {
     loadWritingTask();
   } else {
-    // شبیه لودینگ، ولی تصمیم‌گیری لوکال است
     writingScreen.style.display = "none";
     loadingScreen.style.display = "block";
-    setTimeout(finishPlacement, 600); // کمی تأخیر برای حس بهتر
+    setTimeout(finishPlacement, 600);
   }
 };
 
-// ---------- تعیین سطح لوکال ----------
-
 function finishPlacement() {
-  // نمره 0 تا 10
   const score = grammarScore;
   const percent = Math.round((score / 10) * 100);
 
-  // طول نوشتاری به‌عنوان تخمین خیلی ساده
   const totalWords = writingAnswers
     .join(" ")
     .split(/\s+/)
@@ -251,7 +240,6 @@ function finishPlacement() {
       "از درس‌های سطح C1 استفاده کن: سبک نوشتن، linking devices پیشرفته، و essay writing. روی coherence و cohesion متن‌هایت کار کن.";
   }
 
-  // نمایش نتیجه
   loadingScreen.style.display = "none";
   resultScreen.style.display = "block";
 
@@ -272,12 +260,10 @@ ${recommendation}
 
   levelBox.textContent = summaryText;
 
-  // ذخیره در LocalStorage برای داشبورد
   localStorage.setItem("grammar_level", level);
   localStorage.setItem("placement_done", "true");
 }
 
-// دکمه پایان → برگشت به داشبورد گرامر
 if (finishBtn) {
   finishBtn.addEventListener("click", () => {
     window.location.href = "grammar-path.html";
