@@ -1,8 +1,7 @@
-// ---------------------------
-// Grammar Learning Path – Dashboard + AI
-// ---------------------------
+// ===============================
+// ابزارهای مشترک
+// ===============================
 
-// تابع تاریخ امروز (استفاده هم در آمار، هم آزمون روزانه)
 function todayStr() {
   const d = new Date();
   const y = d.getFullYear();
@@ -12,17 +11,15 @@ function todayStr() {
 }
 
 // ---------------------------
-// کارت تعیین سطح
+// وضعیت آزمون تعیین سطح (Placement)
 // ---------------------------
 
 const placementDone = localStorage.getItem("placement_done");
 const placementCard = document.getElementById("placement-card");
 const placementBtn = document.getElementById("placement-btn");
 
-if (!placementDone) {
-  if (placementCard) placementCard.style.display = "block";
-} else {
-  if (placementCard) placementCard.style.display = "none";
+if (placementCard) {
+  placementCard.style.display = placementDone ? "none" : "block";
 }
 
 if (placementBtn) {
@@ -41,8 +38,8 @@ const dailyTestBtn = document.getElementById("daily-test-btn");
 const today = todayStr();
 const dailyTestDate = localStorage.getItem("daily_test_date");
 const dailyFocusTopic = localStorage.getItem("daily_focus_topic");
+const hasTodayFocus = dailyTestDate === today && !!dailyFocusTopic;
 
-// توضیحات فارسی برای تمرکز امروز
 const DAILY_FOCUS_LABELS = {
   tense: "زمان‌ها (Tenses – مثل گذشته ساده، حال کامل و ...)",
   sv: "تطابق فاعل و فعل (He goes / They go و ...)",
@@ -53,13 +50,10 @@ const DAILY_FOCUS_LABELS = {
 };
 
 if (dailyTestStatusEl) {
-  if (dailyTestDate === today) {
-    // امروز آزمون داده شده
+  if (hasTodayFocus) {
     let txt = "آزمون روزانهٔ امروز را انجام داده‌ای.";
-    if (dailyFocusTopic && DAILY_FOCUS_LABELS[dailyFocusTopic]) {
+    if (DAILY_FOCUS_LABELS[dailyFocusTopic]) {
       txt += " تمرکز پیشنهادی امروز: " + DAILY_FOCUS_LABELS[dailyFocusTopic];
-    } else {
-      txt += " امروز می‌توانی یک مرور کلی روی گرامر داشته باشی.";
     }
     dailyTestStatusEl.textContent = txt;
   } else {
@@ -75,47 +69,36 @@ if (dailyTestBtn) {
 }
 
 // ---------------------------
-// آدرس بک‌اند گرامر
+// سطح کاربر و توضیح سطح
 // ---------------------------
 
 const API_URL = "https://grammar-backend.vercel.app/api/grammar";
 
-// سطح پیش‌فرض (در صورت نبودن، B1)
 let userLevel = localStorage.getItem("grammar_level") || "B1";
 
-// المان‌ها
 const userLevelEl = document.getElementById("user-level");
 const levelDescEl = document.getElementById("level-desc");
-const lessonBoxEl = document.getElementById("lesson-box");
-const practiceStatusEl = document.getElementById("practice-status");
-const aiResultEl = document.getElementById("ai-result");
-const statTotalEl = document.getElementById("stat-total");
-const statTodayEl = document.getElementById("stat-today");
-const statLastDateEl = document.getElementById("stat-last-date");
-const weakPointsListEl = document.getElementById("weak-points-list");
-const historyListEl = document.getElementById("history-list");
 
-// نمایش سطح
 if (userLevelEl) userLevelEl.textContent = userLevel;
 
 const levelDescriptions = {
-  "A2": "نیاز به یادگیری پایه‌های جمله‌سازی و زمان‌های ساده.",
-  "B1": "سطح متوسط – نیاز به تقویت زمان‌ها، جملات مرکب و دقت گرامری.",
-  "B2": "نوشتن روان – تمرکز روی ساختارهای پیچیده‌تر و دقت بالا.",
-  "C1": "پیشرفته – تمرکز روی نوشتن آکادمیک و سبک‌سازی.",
+  A2: "سطح پایه – نیاز به یادگیری ساختار جمله و زمان‌های ساده.",
+  B1: "سطح متوسط – نیاز به تقویت زمان‌ها و جمله‌سازی.",
+  B2: "سطح نسبتا پیشرفته – نیاز به ساختارهای پیچیده‌تر.",
+  C1: "سطح پیشرفته – تمرکز روی نوشتن آکادمیک و ظرافت‌های گرامری."
 };
+
 if (levelDescEl) {
   levelDescEl.textContent = levelDescriptions[userLevel] || "";
 }
 
 // ---------------------------
-// ساختار آمار و تاریخچه در LocalStorage
+// آمار و تاریخچه در LocalStorage
 // ---------------------------
 
 const STATS_KEY = "grammar_stats_v1";
 const HISTORY_KEY = "grammar_history_v1";
 
-// خواندن آمار
 function loadStats() {
   const raw = localStorage.getItem(STATS_KEY);
   if (!raw) {
@@ -129,8 +112,8 @@ function loadStats() {
         prep: 0,
         article: 0,
         wordOrder: 0,
-        other: 0,
-      },
+        other: 0
+      }
     };
   }
   try {
@@ -146,18 +129,16 @@ function loadStats() {
         prep: 0,
         article: 0,
         wordOrder: 0,
-        other: 0,
-      },
+        other: 0
+      }
     };
   }
 }
 
-// ذخیره آمار
 function saveStats(stats) {
   localStorage.setItem(STATS_KEY, JSON.stringify(stats));
 }
 
-// خواندن تاریخچه
 function loadHistory() {
   const raw = localStorage.getItem(HISTORY_KEY);
   if (!raw) return [];
@@ -168,7 +149,6 @@ function loadHistory() {
   }
 }
 
-// ذخیره تاریخچه
 function saveHistory(history) {
   localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
 }
@@ -177,7 +157,7 @@ let stats = loadStats();
 let history = loadHistory();
 
 // ---------------------------
-// کمک‌تابع‌ها برای دسته‌بندی خطا
+// دسته‌بندی نوع خطا
 // ---------------------------
 
 function categorizeError(errorsFa, errorsEn) {
@@ -224,29 +204,31 @@ function categorizeError(errorsFa, errorsEn) {
     return "article";
   }
 
-  if (
-    en.includes("word order") ||
-    fa.includes("ترتیب کلمات")
-  ) {
+  if (en.includes("word order") || fa.includes("ترتیب کلمات")) {
     return "wordOrder";
   }
 
   return "other";
 }
 
-// نام فارسی دسته‌ها
 const CATEGORY_LABELS = {
   tense: "زمان‌ها (Tenses)",
   sv: "تطابق فاعل و فعل (Subject–Verb Agreement)",
   prep: "حرف اضافه (Prepositions)",
   article: "حروف تعریف (Articles)",
   wordOrder: "ترتیب کلمات (Word Order)",
-  other: "سایر خطاها",
+  other: "سایر خطاها"
 };
 
 // ---------------------------
-// به‌روزرسانی UI آمار و نقاط ضعف و تاریخچه
+// به‌روزرسانی UI آمار و تاریخچه
 // ---------------------------
+
+const statTotalEl = document.getElementById("stat-total");
+const statTodayEl = document.getElementById("stat-today");
+const statLastDateEl = document.getElementById("stat-last-date");
+const weakPointsListEl = document.getElementById("weak-points-list");
+const historyListEl = document.getElementById("history-list");
 
 function updateStatsUI() {
   if (statTotalEl) statTotalEl.textContent = stats.totalChecks;
@@ -263,7 +245,8 @@ function updateStatsUI() {
 
   if (items.length === 0) {
     const li = document.createElement("li");
-    li.textContent = "هنوز داده‌ای برای تحلیل وجود ندارد. چند جمله بنویس تا خطاها تحلیل شوند.";
+    li.textContent =
+      "هنوز داده‌ای برای تحلیل وجود ندارد. چند جمله بنویس تا خطاها تحلیل شوند.";
     weakPointsListEl.appendChild(li);
     return;
   }
@@ -318,70 +301,154 @@ function updateHistoryUI() {
   }
 }
 
-// بارگذاری UI اولیه
 updateStatsUI();
 updateHistoryUI();
 
 // ---------------------------
-// تولید درس روزانه ساده
+// درس امروز بر اساس سطح + نتیجه آزمون روزانه
 // ---------------------------
 
-function generateLesson(level) {
-  if (level === "A2") {
-    return `درس امروز (A2):
+const lessonBoxEl = document.getElementById("lesson-box");
+const practiceStatusEl = document.getElementById("practice-status");
+
+function generateLesson(level, focusTopic) {
+  if (!focusTopic || focusTopic === "general") {
+    // فقط براساس سطح
+    if (level === "A2") {
+      return `درس امروز (A2 – مرور کلی):
 - Present Simple و Present Continuous
 - مثال:
   I play football.
   I am playing football.
-- نکته: برای کاری که همین الان در حال انجام است، از am/is/are + فعل ing استفاده کن.`;
-  }
-
-  if (level === "B1") {
-    return `درس امروز (B1):
-- Present Perfect vs Present Perfect Continuous
+- تمرین: ۵ جمله دربارهٔ روتین روزانه‌ات با Present Simple بنویس،
+  و ۳ جمله دربارهٔ کارهایی که «الان» انجام می‌دهی با Present Continuous.`;
+    }
+    if (level === "B1") {
+      return `درس امروز (B1 – مرور کلی):
+- Present Perfect vs Past Simple
 - مثال:
   I have lived here for 5 years.
-  I have been living here for 5 years.
-- نکته: برای مدت زمان از for و برای نقطهٔ شروع از since استفاده کن.`;
-  }
-
-  if (level === "B2") {
-    return `درس امروز (B2):
-- جملات موصولی (Relative clauses: who / which / that)
-- مثال:
-  The book that I bought yesterday was great.
-- نکته: از that می‌توانی برای توصیف اشیا و افراد استفاده کنی.`;
-  }
-
-  return `درس امروز (پیشرفته – C1):
+  I moved here in 2019.
+- تمرین: ۵ جمله دربارهٔ تجربه‌هایت با Present Perfect بنویس،
+  و ۵ جمله با Past Simple.`;
+    }
+    if (level === "B2") {
+      return `درس امروز (B2 – مرور کلی):
+- Relative Clauses (who / which / that)
+- تمرین: ۵ جمله بساز که در آن‌ها از who / which / that استفاده کنی.`;
+    }
+    return `درس امروز (C1 – مرور کلی):
 - Linking words: however, although, moreover, in addition
-- تمرکز: نوشتن متن‌های آکادمیک با ساختار منسجم.`;
+- تمرین: یک پاراگراف ۶–۸ جمله‌ای بنویس و حداقل از ۵ linking word مختلف استفاده کن.`;
+  }
+
+  // فوکوس از آزمون روزانه
+  if (focusTopic === "tense") {
+    return `🎯 تمرکز امروز: زمان‌ها (Tenses)
+
+- یادآوری:
+  Present Simple: I work / She works
+  Past Simple: I worked
+  Present Perfect: I have worked
+  Present Perfect Continuous: I have been working
+
+- تمرین پیشنهادی:
+  1) ۳ جمله با Present Simple دربارهٔ روتین روزانه‌ات بنویس.
+  2) ۳ جمله با Past Simple دربارهٔ دیروزت بنویس.
+  3) ۳ جمله با Present Perfect یا Present Perfect Continuous دربارهٔ تجربه‌هایت بنویس.`;
+  }
+
+  if (focusTopic === "sv") {
+    return `🎯 تمرکز امروز: تطابق فاعل و فعل (Subject–Verb Agreement)
+
+- نکته:
+  I/you/we/they → فعل بدون s
+  he/she/it → فعل با s
+
+- تمرین پیشنهادی:
+  1) ۱۰ جمله بنویس که نیمی از آن‌ها با he/she/it و نیمی با I/you/we/they باشد.
+  2) دقت کن فعل‌ها در هر جمله درست باشند (با s / بدون s).`;
+  }
+
+  if (focusTopic === "prep") {
+    return `🎯 تمرکز امروز: حروف اضافه (Prepositions – in / on / at / for / since)
+
+- مثال:
+  in 1995, in July, in the morning
+  on Monday, on my birthday
+  at 5 o'clock, at night
+  for three years, since 2020
+
+- تمرین پیشنهادی:
+  1) ۵ جمله با in بنویس.
+  2) ۵ جمله با on بنویس.
+  3) ۵ جمله با for / since بنویس و تفاوت آن‌ها را حس کن.`;
+  }
+
+  if (focusTopic === "article") {
+    return `🎯 تمرکز امروز: حروف تعریف (Articles – a / an / the / zero article)
+
+- نکات:
+  a + اسم مفرد: a car
+  an + اسم مفرد با صدای vowel: an apple
+  the وقتی قبلاً از چیزی صحبت کرده‌ایم یا مشخص است.
+
+- تمرین پیشنهادی:
+  1) ۱۰ اسم انتخاب کن و یک جمله با a/an برای هرکدام بنویس.
+  2) ۵ جمله بنویس که جملهٔ دوم با the به همان چیز اشاره کند.`;
+  }
+
+  if (focusTopic === "wordOrder") {
+    return `🎯 تمرکز امروز: ترتیب کلمات (Word Order)
+
+- الگو:
+  Subject + (Adverb of frequency) + Verb
+  I always get up at 7.
+  She usually goes to work by bus.
+
+- تمرین پیشنهادی:
+  1) ۱۰ جمله بنویس که در آن‌ها از always / usually / often / sometimes / never استفاده کنی.
+  2) قید را در جای درست (قبل از فعل اصلی) قرار بده.`;
+  }
+
+  return `درس امروز (مرور کلی):
+- چند موضوع اصلی گرامر را مرور کن: زمان‌ها، حروف اضافه و ساختار جمله.
+- چند جمله بنویس و با بخش «جمله بنویس» در همین صفحه تصحیح کن.`;
 }
 
-// شروع تمرین روزانه
+// دکمه شروع تمرین روزانه
 const startPracticeBtn = document.getElementById("start-practice");
 if (startPracticeBtn) {
   startPracticeBtn.addEventListener("click", () => {
-    const lesson = generateLesson(userLevel);
+    const lesson = generateLesson(userLevel, hasTodayFocus ? dailyFocusTopic : null);
     if (lessonBoxEl) {
       lessonBoxEl.textContent = lesson;
     }
     if (practiceStatusEl) {
-      practiceStatusEl.textContent = "تمرین امروز فعال شد ✔";
+      if (hasTodayFocus && DAILY_FOCUS_LABELS[dailyFocusTopic]) {
+        practiceStatusEl.textContent =
+          "تمرین امروز بر اساس نتیجهٔ آخرین آزمون روزانه تنظیم شد (" +
+          DAILY_FOCUS_LABELS[dailyFocusTopic] +
+          ").";
+      } else {
+        practiceStatusEl.textContent =
+          "تمرین امروز بر اساس سطح کلی فعلی شما تنظیم شد.";
+      }
     }
   });
 }
 
 // ---------------------------
-// بررسی جمله با هوش مصنوعی
+// بخش «جمله بنویس» و اتصال به بک‌اند هوش مصنوعی
 // ---------------------------
 
 const checkBtn = document.getElementById("check-btn");
+const aiResultEl = document.getElementById("ai-result");
+
 if (checkBtn) {
   checkBtn.addEventListener("click", async () => {
     const textArea = document.getElementById("user-sentence");
     const text = textArea ? textArea.value.trim() : "";
-
     if (!text) return;
 
     if (aiResultEl) aiResultEl.textContent = "در حال تحلیل...";
@@ -389,8 +456,8 @@ if (checkBtn) {
     try {
       const res = await fetch(API_URL, {
         method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({ text, level: userLevel }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text, level: userLevel })
       });
 
       const data = await res.json();
@@ -436,9 +503,7 @@ ${data.suggested_practice}
         data.errors_explained_fa,
         data.errors_explained_en
       );
-      if (!stats.categories[cat]) {
-        stats.categories[cat] = 0;
-      }
+      if (!stats.categories[cat]) stats.categories[cat] = 0;
       stats.categories[cat] += 1;
 
       saveStats(stats);
@@ -447,7 +512,7 @@ ${data.suggested_practice}
         text,
         corrected: data.corrected,
         category: cat,
-        date: todayLocal,
+        date: todayLocal
       });
       if (history.length > 100) {
         history = history.slice(history.length - 100);
@@ -456,7 +521,6 @@ ${data.suggested_practice}
 
       updateStatsUI();
       updateHistoryUI();
-
     } catch (e) {
       if (aiResultEl) {
         aiResultEl.textContent =
