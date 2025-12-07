@@ -1,480 +1,489 @@
 // data/vocab.js
-// ONLY Amin's wordlist – 471 words
+// فقط لیست لغات خودِ امین، بدون هیچ چیز اضافه
 
-const VOCAB = [
-  { id: 1, word: 'economic' },
-  { id: 2, word: 'financial' },
-  { id: 3, word: 'welfare' },
-  { id: 4, word: 'charity' },
-  { id: 5, word: 'recession' },
-  { id: 6, word: 'currency' },
-  { id: 7, word: 'thrifty' },
-  { id: 8, word: 'frugal' },
-  { id: 9, word: 'miserly' },
-  { id: 10, word: 'parsimonious' },
-  { id: 11, word: 'extravagant' },
-  { id: 12, word: 'lavishness' },
-  { id: 13, word: 'revenue' },
-  { id: 14, word: 'expenditure' },
-  { id: 15, word: 'poverty' },
-  { id: 16, word: 'indigent' },
-  { id: 17, word: 'pauper' },
-  { id: 18, word: 'destitute' },
-  { id: 19, word: 'affluent' },
-  { id: 20, word: 'luxurious' },
-  { id: 21, word: 'opulence' },
-  { id: 22, word: 'inflation' },
-  { id: 23, word: 'tax' },
-  { id: 24, word: 'subsidy' },
-  { id: 25, word: 'enterprise' },
-  { id: 26, word: 'squander' },
-  { id: 27, word: 'bankrupt' },
-  { id: 28, word: 'sanction' },
-  { id: 29, word: 'resolve' },
-  { id: 30, word: 'settle' },
-  { id: 31, word: 'mediate' },
-  { id: 32, word: 'mediation' },
-  { id: 33, word: 'mediator' },
-  { id: 34, word: 'intermediate' },
-  { id: 35, word: 'intercede' },
-  { id: 36, word: 'intervene' },
-  { id: 37, word: 'intervention' },
-  { id: 38, word: 'meddle' },
-  { id: 39, word: 'meddlesome' },
-  { id: 40, word: 'interfere' },
-  { id: 41, word: 'contract' },
-  { id: 42, word: 'convention' },
-  { id: 43, word: 'compromise' },
-  { id: 44, word: 'treaty' },
-  { id: 45, word: 'conduct' },
-  { id: 46, word: 'misconduct' },
-  { id: 47, word: 'conductive' },
-  { id: 48, word: 'direct' },
-  { id: 49, word: 'direction' },
-  { id: 50, word: 'lead' },
-  { id: 51, word: 'leading' },
-  { id: 52, word: 'navigate' },
-  { id: 53, word: 'consistent' },
-  { id: 54, word: 'consistency' },
-  { id: 55, word: 'constant' },
-  { id: 56, word: 'perpetual' },
-  { id: 57, word: 'continual' },
-  { id: 58, word: 'eternal' },
-  { id: 59, word: 'immutable' },
-  { id: 60, word: 'permanence' },
-  { id: 61, word: 'steady' },
-  { id: 62, word: 'transient' },
-  { id: 63, word: 'volatile' },
-  { id: 64, word: 'unstable' },
-  { id: 65, word: 'stabilize' },
-  { id: 66, word: 'temporary' },
-  { id: 67, word: 'provisional' },
-  { id: 68, word: 'erratic' },
-  { id: 69, word: 'fluctuation' },
-  { id: 70, word: 'fluctuate' },
-  { id: 71, word: 'swing' },
-  { id: 72, word: 'eventual' },
-  { id: 73, word: 'ultimate' },
-  { id: 74, word: 'overlap' },
-  { id: 75, word: 'treatment' },
-  { id: 76, word: 'mistreat' },
-  { id: 77, word: 'adjacent' },
-  { id: 78, word: 'contiguous' },
-  { id: 79, word: 'vicinity' },
-  { id: 80, word: 'approach' },
-  { id: 81, word: 'approximate' },
-  { id: 82, word: 'proximity' },
-  { id: 83, word: 'assess' },
-  { id: 84, word: 'assay' },
-  { id: 85, word: 'estimate' },
-  { id: 86, word: 'underestimate' },
-  { id: 87, word: 'weigh' },
-  { id: 88, word: 'exaggerate' },
-  { id: 89, word: 'distribute' },
-  { id: 90, word: 'disperse' },
-  { id: 91, word: 'propagate' },
-  { id: 92, word: 'spread' },
-  { id: 93, word: 'widespread' },
-  { id: 94, word: 'scatter' },
-  { id: 95, word: 'circulate' },
-  { id: 96, word: 'emit' },
-  { id: 97, word: 'export' },
-  { id: 98, word: 'import' },
-  { id: 99, word: 'diffusion' },
-  { id: 100, word: 'sparse' },
-  { id: 101, word: 'identify' },
-  { id: 102, word: 'identical' },
-  { id: 103, word: 'determine' },
-  { id: 104, word: 'pinpoint' },
-  { id: 105, word: 'perceive' },
-  { id: 106, word: 'perception' },
-  { id: 107, word: 'recognize' },
-  { id: 108, word: 'recognition' },
-  { id: 109, word: 'cognitive' },
-  { id: 110, word: 'distinguish' },
-  { id: 111, word: 'detect' },
-  { id: 112, word: 'detection' },
-  { id: 113, word: 'discern' },
-  { id: 114, word: 'specify' },
-  { id: 115, word: 'specification' },
-  { id: 116, word: 'apprehend' },
-  { id: 117, word: 'diagnose' },
-  { id: 118, word: 'prognastic' },
-  { id: 119, word: 'delineate' },
-  { id: 120, word: 'denote' },
-  { id: 121, word: 'stripulate' },
-  { id: 122, word: 'notify' },
-  { id: 123, word: 'notice' },
-  { id: 124, word: 'noticeboard' },
-  { id: 125, word: 'persist' },
-  { id: 126, word: 'insist' },
-  { id: 127, word: 'attribute' },
-  { id: 128, word: 'ascribe' },
-  { id: 129, word: 'bear on' },
-  { id: 130, word: 'feature' },
-  { id: 131, word: 'trait' },
-  { id: 132, word: 'characteristic' },
-  { id: 133, word: 'aspect' },
-  { id: 134, word: 'facet' },
-  { id: 135, word: 'badge' },
-  { id: 136, word: 'race' },
-  { id: 137, word: 'tribe' },
-  { id: 138, word: 'ethnic' },
-  { id: 139, word: 'found' },
-  { id: 140, word: 'foundational' },
-  { id: 141, word: 'fundamental' },
-  { id: 142, word: 'establish' },
-  { id: 143, word: 'construct' },
-  { id: 144, word: 'erection' },
-  { id: 145, word: 'ground' },
-  { id: 146, word: 'set up' },
-  { id: 147, word: 'pursue' },
-  { id: 148, word: 'track' },
-  { id: 149, word: 'trace' },
-  { id: 150, word: 'stalk' },
-  { id: 151, word: 'chase' },
-  { id: 152, word: 'proportion' },
-  { id: 153, word: 'portion' },
-  { id: 154, word: 'quota' },
-  { id: 155, word: 'component' },
-  { id: 156, word: 'sector' },
-  { id: 157, word: 'segment' },
-  { id: 158, word: 'ratio' },
-  { id: 159, word: 'entity' },
-  { id: 160, word: 'assign' },
-  { id: 161, word: 'devote' },
-  { id: 162, word: 'dedicated' },
-  { id: 163, word: 'allocate' },
-  { id: 164, word: 'allot' },
-  { id: 165, word: 'budget' },
-  { id: 166, word: 'designate' },
-  { id: 167, word: 'appoint' },
-  { id: 168, word: 'nominate' },
-  { id: 169, word: 'candidate' },
-  { id: 170, word: 'endow' },
-  { id: 171, word: 'endowment' },
-  { id: 172, word: 'incline' },
-  { id: 173, word: 'recline' },
-  { id: 174, word: 'prefer' },
-  { id: 175, word: 'preference' },
-  { id: 176, word: 'opt' },
-  { id: 177, word: 'favor' },
-  { id: 178, word: 'favorite' },
-  { id: 179, word: 'priority' },
-  { id: 180, word: 'inevitable' },
-  { id: 181, word: 'evade' },
-  { id: 182, word: 'evasion' },
-  { id: 183, word: 'avoid' },
-  { id: 184, word: 'abstain' },
-  { id: 185, word: 'refrain' },
-  { id: 186, word: 'withhold' },
-  { id: 187, word: 'elude' },
-  { id: 188, word: 'elusive' },
-  { id: 189, word: 'pretext' },
-  { id: 190, word: 'presume' },
-  { id: 191, word: 'presumably' },
-  { id: 192, word: 'assume' },
-  { id: 193, word: 'assumption' },
-  { id: 194, word: 'surmise' },
-  { id: 195, word: 'suppose' },
-  { id: 196, word: 'postulate' },
-  { id: 197, word: 'premise' },
-  { id: 198, word: 'alleged' },
-  { id: 199, word: 'hypothesis' },
-  { id: 200, word: 'proposition' },
-  { id: 201, word: 'proposal' },
-  { id: 202, word: 'bidding' },
-  { id: 203, word: 'schedule' },
-  { id: 204, word: 'plot' },
-  { id: 205, word: 'scheme' },
-  { id: 206, word: 'agenda' },
-  { id: 207, word: 'status' },
-  { id: 208, word: 'status quo' },
-  { id: 209, word: 'position' },
-  { id: 210, word: 'posture' },
-  { id: 211, word: 'attitude' },
-  { id: 212, word: 'lay' },
-  { id: 213, word: 'derive' },
-  { id: 214, word: 'emanate' },
-  { id: 215, word: 'originate' },
-  { id: 216, word: 'origin' },
-  { id: 217, word: 'haphazard' },
-  { id: 218, word: 'randomly' },
-  { id: 219, word: 'arbitrary' },
-  { id: 220, word: 'dimension' },
-  { id: 221, word: 'breadth' },
-  { id: 222, word: 'capacity' },
-  { id: 223, word: 'scope' },
-  { id: 224, word: 'gamut' },
-  { id: 225, word: 'volume' },
-  { id: 226, word: 'inherent' },
-  { id: 227, word: 'intrinsic' },
-  { id: 228, word: 'innate' },
-  { id: 229, word: 'inborn' },
-  { id: 230, word: 'lack' },
-  { id: 231, word: 'insufficient' },
-  { id: 232, word: 'deficient' },
-  { id: 233, word: 'deficiency' },
-  { id: 234, word: 'deficit' },
-  { id: 235, word: 'defect' },
-  { id: 236, word: 'shortage' },
-  { id: 237, word: 'famine' },
-  { id: 238, word: 'dearth' },
-  { id: 239, word: 'starvation' },
-  { id: 240, word: 'adequate' },
-  { id: 241, word: 'absence' },
-  { id: 242, word: 'fault' },
-  { id: 243, word: 'flaw' },
-  { id: 244, word: 'drawback' },
-  { id: 245, word: 'exceed' },
-  { id: 246, word: 'exceeding' },
-  { id: 247, word: 'abide' },
-  { id: 248, word: 'acclimate' },
-  { id: 249, word: 'accommodate' },
-  { id: 250, word: 'accomplish' },
-  { id: 251, word: 'accord' },
-  { id: 252, word: 'achieve' },
-  { id: 253, word: 'acknowledge' },
-  { id: 254, word: 'adapt' },
-  { id: 255, word: 'address' },
-  { id: 256, word: 'adjust' },
-  { id: 257, word: 'admission' },
-  { id: 258, word: 'admit' },
-  { id: 259, word: 'advanced' },
-  { id: 260, word: 'advice' },
-  { id: 261, word: 'affect' },
-  { id: 262, word: 'authentic' },
-  { id: 263, word: 'authenticity' },
-  { id: 264, word: 'authoritative' },
-  { id: 265, word: 'authority' },
-  { id: 266, word: 'authorize' },
-  { id: 267, word: 'autonomous' },
-  { id: 268, word: 'autonomy' },
-  { id: 269, word: 'barrier' },
-  { id: 270, word: 'bear' },
-  { id: 271, word: 'bearing' },
-  { id: 272, word: 'bestow' },
-  { id: 273, word: 'bias' },
-  { id: 274, word: 'bloom' },
-  { id: 275, word: 'border' },
-  { id: 276, word: 'bound' },
-  { id: 277, word: 'boundary' },
-  { id: 278, word: 'bow' },
-  { id: 279, word: 'burgeon' },
-  { id: 280, word: 'capitulate' },
-  { id: 281, word: 'closure' },
-  { id: 282, word: 'coarse' },
-  { id: 283, word: 'command' },
-  { id: 284, word: 'compatible' },
-  { id: 285, word: 'compliance' },
-  { id: 286, word: 'comply' },
-  { id: 287, word: 'concession' },
-  { id: 288, word: 'condone' },
-  { id: 289, word: 'confess' },
-  { id: 290, word: 'conform' },
-  { id: 291, word: 'conformity' },
-  { id: 292, word: 'confront' },
-  { id: 293, word: 'congenial' },
-  { id: 294, word: 'congruous' },
-  { id: 295, word: 'conservation' },
-  { id: 296, word: 'consider' },
-  { id: 297, word: 'constituent' },
-  { id: 298, word: 'constitute' },
-  { id: 299, word: 'constitution' },
-  { id: 300, word: 'convey' },
-  { id: 301, word: 'cursory' },
-  { id: 302, word: 'deal' },
-  { id: 303, word: 'deem' },
-  { id: 304, word: 'demarcate' },
-  { id: 305, word: 'deter' },
-  { id: 306, word: 'deterrence' },
-  { id: 307, word: 'develop' },
-  { id: 308, word: 'disallow' },
-  { id: 309, word: 'discord' },
-  { id: 310, word: 'discriminate' },
-  { id: 311, word: 'discrimination' },
-  { id: 312, word: 'disobedient' },
-  { id: 313, word: 'displace' },
-  { id: 314, word: 'disposition' },
-  { id: 315, word: 'disregard' },
-  { id: 316, word: 'docile' },
-  { id: 317, word: 'domesticate' },
-  { id: 318, word: 'durable' },
-  { id: 319, word: 'edge' },
-  { id: 320, word: 'elapse' },
-  { id: 321, word: 'emancipate' },
-  { id: 322, word: 'embrace' },
-  { id: 323, word: 'enact' },
-  { id: 324, word: 'encounter' },
-  { id: 325, word: 'endure' },
-  { id: 326, word: 'entitle' },
-  { id: 327, word: 'entitlement' },
-  { id: 328, word: 'even' },
-  { id: 329, word: 'evolution' },
-  { id: 330, word: 'evolve' },
-  { id: 331, word: 'face' },
-  { id: 332, word: 'fleeting' },
-  { id: 333, word: 'flexible' },
-  { id: 334, word: 'flourish' },
-  { id: 335, word: 'forestall' },
-  { id: 336, word: 'foster' },
-  { id: 337, word: 'frontier' },
-  { id: 338, word: 'grant' },
-  { id: 339, word: 'habit' },
-  { id: 340, word: 'habituate' },
-  { id: 341, word: 'hamper' },
-  { id: 342, word: 'handle' },
-  { id: 343, word: 'hasten' },
-  { id: 344, word: 'hastily' },
-  { id: 345, word: 'hasty' },
-  { id: 346, word: 'heedless' },
-  { id: 347, word: 'hinder' },
-  { id: 348, word: 'ignore' },
-  { id: 349, word: 'immunity' },
-  { id: 350, word: 'impact' },
-  { id: 351, word: 'impartially' },
-  { id: 352, word: 'impede' },
-  { id: 353, word: 'impediment' },
-  { id: 354, word: 'impress' },
-  { id: 355, word: 'impression' },
-  { id: 356, word: 'impulsive' },
-  { id: 357, word: 'inadvertent' },
-  { id: 358, word: 'inclination' },
-  { id: 359, word: 'incompatible' },
-  { id: 360, word: 'incredible' },
-  { id: 361, word: 'independent' },
-  { id: 362, word: 'infinite' },
-  { id: 363, word: 'insulate' },
-  { id: 364, word: 'intolerable' },
-  { id: 365, word: 'jagged' },
-  { id: 366, word: 'lasting' },
-  { id: 367, word: 'limber' },
-  { id: 368, word: 'limitation' },
-  { id: 369, word: 'linger' },
-  { id: 370, word: 'maintain' },
-  { id: 371, word: 'maintenance' },
-  { id: 372, word: 'malleable' },
-  { id: 373, word: 'manipulate' },
-  { id: 374, word: 'maverick' },
-  { id: 375, word: 'meditate' },
-  { id: 376, word: 'mobility' },
-  { id: 377, word: 'mull over' },
-  { id: 378, word: 'nascent' },
-  { id: 379, word: 'neglect' },
-  { id: 380, word: 'negligible' },
-  { id: 381, word: 'neutral' },
-  { id: 382, word: 'obedient' },
-  { id: 383, word: 'objective' },
-  { id: 384, word: 'objectives' },
-  { id: 385, word: 'obstruct' },
-  { id: 386, word: 'ongoing' },
-  { id: 387, word: 'optimism' },
-  { id: 388, word: 'orient' },
-  { id: 389, word: 'orientate' },
-  { id: 390, word: 'orientation' },
-  { id: 391, word: 'overlook' },
-  { id: 392, word: 'override' },
-  { id: 393, word: 'oversight' },
-  { id: 394, word: 'partial' },
-  { id: 395, word: 'plausible' },
-  { id: 396, word: 'pliant' },
-  { id: 397, word: 'ponder' },
-  { id: 398, word: 'precaution' },
-  { id: 399, word: 'preclude' },
-  { id: 400, word: 'prejudice' },
-  { id: 401, word: 'preservation' },
-  { id: 402, word: 'preserve' },
-  { id: 403, word: 'prevent' },
-  { id: 404, word: 'prevention' },
-  { id: 405, word: 'proceed' },
-  { id: 406, word: 'profound' },
-  { id: 407, word: 'progress' },
-  { id: 408, word: 'prohibit' },
-  { id: 409, word: 'prohibition' },
-  { id: 410, word: 'promote' },
-  { id: 411, word: 'prompt' },
-  { id: 412, word: 'propensity' },
-  { id: 413, word: 'prosperity' },
-  { id: 414, word: 'prosperous' },
-  { id: 415, word: 'protect' },
-  { id: 416, word: 'rash' },
-  { id: 417, word: 'receptive' },
-  { id: 418, word: 'reckless' },
-  { id: 419, word: 'refuse' },
-  { id: 420, word: 'refute' },
-  { id: 421, word: 'regard' },
-  { id: 422, word: 'regulation' },
-  { id: 423, word: 'reliance' },
-  { id: 424, word: 'rely' },
-  { id: 425, word: 'remedy' },
-  { id: 426, word: 'remiss' },
-  { id: 427, word: 'resilience' },
-  { id: 428, word: 'resist' },
-  { id: 429, word: 'restraint' },
-  { id: 430, word: 'restrict' },
-  { id: 431, word: 'retain' },
-  { id: 432, word: 'retention' },
-  { id: 433, word: 'rough' },
-  { id: 434, word: 'safeguard' },
-  { id: 435, word: 'sensation' },
-  { id: 436, word: 'sentiment' },
-  { id: 437, word: 'shield' },
-  { id: 438, word: 'smooth' },
-  { id: 439, word: 'sovereignty' },
-  { id: 440, word: 'spontaneous' },
-  { id: 441, word: 'standpoint' },
-  { id: 442, word: 'statute' },
-  { id: 443, word: 'submission' },
-  { id: 444, word: 'submit' },
-  { id: 445, word: 'subordinate' },
-  { id: 446, word: 'subordination' },
-  { id: 447, word: 'succeed' },
-  { id: 448, word: 'suffer' },
-  { id: 449, word: 'supplant' },
-  { id: 450, word: 'sustain' },
-  { id: 451, word: 'sustainable' },
-  { id: 452, word: 'tackle' },
-  { id: 453, word: 'tend' },
-  { id: 454, word: 'tendency' },
-  { id: 455, word: 'thrive' },
-  { id: 456, word: 'tolerate' },
-  { id: 457, word: 'transfer' },
-  { id: 458, word: 'transmission' },
-  { id: 459, word: 'transmit' },
-  { id: 460, word: 'transplant' },
-  { id: 461, word: 'trend' },
-  { id: 462, word: 'trigger' },
-  { id: 463, word: 'unbearable' },
-  { id: 464, word: 'undeniable' },
-  { id: 465, word: 'undergo' },
-  { id: 466, word: 'undertake' },
-  { id: 467, word: 'undertaking' },
-  { id: 468, word: 'versatility' },
-  { id: 469, word: 'victorious' },
-  { id: 470, word: 'withstand' },
-  { id: 471, word: 'yield' },
-];
+const RAW_WORDS = `
+economic
+financial
+welfare
+charity
+recession
+currency
+thrifty
+frugal
+miserly
+parsimonious
+extravagant
+lavishness
+revenue
+expenditure
+poverty
+indigent
+pauper
+destitute
+affluent
+luxurious
+opulence
+inflation
+tax
+subsidy
+enterprise
+squander
+bankrupt
+sanction
+resolve
+settle
+mediate
+mediation
+mediator
+intermediate
+intercede
+intervene
+intervention
+meddle
+meddlesome
+interfere
+contract
+convention
+compromise
+treaty
+conduct
+misconduct
+conductive
+direct
+direction
+lead
+leading
+navigate
+consistent
+consistency
+constant
+perpetual
+continual
+eternal
+immutable
+permanence
+steady
+transient
+volatile
+unstable
+stabilize
+temporary
+provisional
+erratic
+fluctuation
+fluctuate
+swing
+eventual
+ultimate
+overlap
+treatment
+mistreat
+adjacent
+contiguous
+vicinity
+approach
+approximate
+proximity
+assess
+assay
+estimate
+underestimate
+weigh
+exaggerate
+distribute
+disperse
+propagate
+spread
+widespread
+scatter
+circulate
+emit
+export
+import
+diffusion
+sparse
+identify
+identical
+determine
+pinpoint
+perceive
+perception
+recognize
+recognition
+cognitive
+distinguish
+detect
+detection
+discern
+specify
+specification
+apprehend
+diagnose
+prognastic
+delineate
+denote
+stripulate
+notify
+notice
+noticeboard
+persist
+insist
+attribute
+ascribe
+bear on
+feature
+trait
+characteristic
+aspect
+facet
+badge
+race
+tribe
+ethnic
+found
+foundational
+fundamental
+establish
+construct
+erection
+ground
+set up
+pursue
+track
+trace
+stalk
+chase
+proportion
+portion
+quota
+component
+sector
+segment
+ratio
+entity
+assign
+devote
+dedicated
+allocate
+allot
+budget
+designate
+appoint
+nominate
+candidate
+endow
+endowment
+incline
+recline
+prefer
+preference
+opt
+favor
+favorite
+priority
+inevitable
+evade
+evasion
+avoid
+abstain
+refrain
+withhold
+elude
+elusive
+pretext
+presume
+presumably
+assume
+assumption
+surmise
+suppose
+postulate
+premise
+alleged
+hypothesis
+proposition
+proposal
+bidding
+schedule
+plot
+scheme
+agenda
+status
+status quo
+position
+posture
+attitude
+lay
+derive
+emanate
+originate
+origin
+haphazard
+randomly
+arbitrary
+dimension
+breadth
+capacity
+scope
+gamut
+volume
+inherent
+intrinsic
+innate
+inborn
+lack
+insufficient
+deficient
+deficiency
+deficit
+defect
+shortage
+famine
+dearth
+starvation
+adequate
+absence
+fault
+flaw
+drawback
+exceed
+exceeding
+abide
+acclimate
+accommodate
+accomplish
+accord
+achieve
+acknowledge
+adapt
+address
+adjust
+admission
+admit
+advanced
+advice
+affect
+authentic
+authenticity
+authoritative
+authority
+authorize
+autonomous
+autonomy
+barrier
+bear
+bearing
+bestow
+bias
+bloom
+border
+bound
+boundary
+bow
+burgeon
+capitulate
+closure
+coarse
+command
+compatible
+compliance
+comply
+concession
+condone
+confess
+conform
+conformity
+confront
+congenial
+congruous
+conservation
+consider
+constituent
+constitute
+constitution
+convey
+cursory
+deal
+deem
+demarcate
+deter
+deterrence
+develop
+disallow
+discord
+discriminate
+discrimination
+disobedient
+displace
+disposition
+disregard
+docile
+domesticate
+durable
+edge
+elapse
+emancipate
+embrace
+enact
+encounter
+endure
+entitle
+entitlement
+even
+evolution
+evolve
+face
+fleeting
+flexible
+flourish
+forestall
+foster
+frontier
+grant
+habit
+habituate
+hamper
+handle
+hasten
+hastily
+hasty
+heedless
+hinder
+ignore
+immunity
+impact
+impartially
+impede
+impediment
+impress
+impression
+impulsive
+inadvertent
+inclination
+incompatible
+incredible
+independent
+infinite
+insulate
+intolerable
+jagged
+lasting
+limber
+limitation
+linger
+maintain
+maintenance
+malleable
+manipulate
+maverick
+meditate
+mobility
+mull over
+nascent
+neglect
+negligible
+neutral
+obedient
+objective
+objectives
+obstruct
+ongoing
+optimism
+orient
+orientate
+orientation
+overlook
+override
+oversight
+partial
+plausible
+pliant
+ponder
+precaution
+preclude
+prejudice
+preservation
+preserve
+prevent
+prevention
+proceed
+profound
+progress
+prohibit
+prohibition
+promote
+prompt
+propensity
+prosperity
+prosperous
+protect
+rash
+receptive
+reckless
+refuse
+refute
+regard
+regulation
+reliance
+rely
+remedy
+remiss
+resilience
+resist
+restraint
+restrict
+retain
+retention
+rough
+safeguard
+sensation
+sentiment
+shield
+smooth
+sovereignty
+spontaneous
+standpoint
+statute
+submission
+submit
+subordinate
+subordination
+succeed
+suffer
+supplant
+sustain
+sustainable
+tackle
+tend
+tendency
+thrive
+tolerate
+transfer
+transmission
+transmit
+transplant
+trend
+trigger
+unbearable
+undeniable
+undergo
+undertake
+undertaking
+versatility
+victorious
+withstand
+yield
+`;
 
-if (typeof module !== 'undefined') {
-  module.exports = { VOCAB };
-}
+// تبدیل به آرایه‌ی فلش‌کارت‌ها
+const VOCAB = RAW_WORDS.split(/\s*\n+\s*/)
+  .map((w) => w.trim())
+  .filter(Boolean)
+  .map((w, idx) => ({
+    id: idx + 1,
+    word: w,
+    meaning_fa: "",
+    example_en: "",
+    usage_fa: "",
+    note: "",
+  }));
