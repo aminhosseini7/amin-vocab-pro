@@ -1,14 +1,10 @@
 // js/ai-meaning.js
+// فقط مسئول صحبت با بک‌اند و کش کردن جواب‌ها
 
-// آدرس بک‌اند برای واژگان – اگر قبلاً تعریف نشده باشد
-if (!window.VOCAB_API_URL) {
-  window.VOCAB_API_URL = "https://grammar-backend.vercel.app/api/vocab";
-}
-
+const VOCAB_API_URL = "https://grammar-backend.vercel.app/api/vocab";
 const CACHE_KEY = "ai_vocab_cache_v1";
 
-
-function loadCache() {
+function loadAICache() {
   try {
     const raw = localStorage.getItem(CACHE_KEY);
     return raw ? JSON.parse(raw) : {};
@@ -17,98 +13,57 @@ function loadCache() {
   }
 }
 
-function saveCache(cache) {
+function saveAICache(cache) {
   try {
     localStorage.setItem(CACHE_KEY, JSON.stringify(cache));
   } catch (e) {
-    // اگر مثلاً ظرفیت پر شد، کاری نمی‌کنیم
+    // ignore
   }
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-  let btn = document.getElementById("showMeaningBtn");
-  const wordBox = document.getElementById("wordBox");
-  const meaningBox = document.getElementById("meaningBox");
+let aiVocabCache = loadAICache();
 
-  if (!btn || !wordBox || !meaningBox) return;
+/**
+ * گرفتن معنی/مثال/کاربرد/نکته برای یک واژه از بک‌اند
+ * و ذخیره در لوکال‌استوریج
+ */
+async function getAIMeaningForWord(word) {
+  const key = String(word || "").toLowerCase().trim();
+  if (!key) {
+    throw new Error("Empty word");
+  }
 
-  // تمام لیسنرهای قبلی دکمه را حذف می‌کنیم که فقط این رفتار اجرا شود
-  const newBtn = btn.cloneNode(true);
-  btn.parentNode.replaceChild(newBtn, btn);
-  btn = newBtn;
+  // اگر قبلاً از سرور گرفته‌ایم، از کش بخوان
+  if (aiVocabCache[key]) {
+    return aiVocabCache[key];
+  }
 
-  let cache = loadCache();
-
-  btn.addEventListener("click", async () => {
-    const word = (wordBox.textContent || "").trim();
-    if (!word) return;
-
-    // اگر از قبل در کش داریم، همون رو نمایش بده
-    if (cache[word]) {
-      const data = cache[word];
-      meaningBox.style.display = "block";
-      meaningBox.innerText = [
-        `📘 معنی:`,
-        data.fa || "-",
-        "",
-        `✏ مثال (English):`,
-        data.example || "-",
-        "",
-        `📌 کاربرد:`,
-        data.usage || "-",
-        "",
-        `💡 نکتهٔ حفظ:`,
-        data.hint || "-"
-      ].join("\n");
-      return;
-    }
-
-    // اگر کش نداریم، از سرور بگیر
-    meaningBox.style.display = "block";
-    meaningBox.innerText = "در حال گرفتن معنی از هوش مصنوعی...";
-
-    try {
-      const res = await fetch(window.VOCAB_API_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ word })
-      });
-
-      const data = await res.json();
-
-      if (!res.ok || data.error) {
-        meaningBox.innerText =
-          "خطا در پاسخ سرور.\n" +
-          (data.error || data.detail || "لطفاً بعداً دوباره امتحان کن.");
-        return;
-      }
-
-      // ذخیره در کش
-      cache[word] = {
-        fa: data.fa || "",
-        example: data.example || "",
-        usage: data.usage || "",
-        hint: data.hint || ""
-      };
-      saveCache(cache);
-
-      // نمایش قشنگ
-      meaningBox.innerText = [
-        `📘 معنی:`,
-        cache[word].fa || "-",
-        "",
-        `✏ مثال (English):`,
-        cache[word].example || "-",
-        "",
-        `📌 کاربرد:`,
-        cache[word].usage || "-",
-        "",
-        `💡 نکتهٔ حفظ:`,
-        cache[word].hint || "-"
-      ].join("\n");
-    } catch (e) {
-      meaningBox.innerText =
-        "خطا در ارتباط با اینترنت یا سرور. لطفاً بعداً دوباره امتحان کن.";
-    }
+  const res = await fetch(VOCAB_API_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ word })
   });
-});
+
+  const data = await res.json();
+
+  if (!res.ok || data.error) {
+    throw new Error(data.error || "Vocab API error");
+  }
+
+  const cleaned = {
+    meaning_fa: data.meaning_fa || "",
+    example_en: data.example_en || "",
+    usage_fa: data.usage_fa || "",
+    note: data.note || ""
+  };
+
+  aiVocabCache[key] = cleaned;
+  saveAICache(aiVocabCache);
+
+  return cleaned;
+}
+
+// در دسترس قرار دادن برای سایر فایل‌ها
+window.getAIMeaningForWord = getAIMeaningForWord;
