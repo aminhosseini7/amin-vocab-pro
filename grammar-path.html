@@ -87,5 +87,53 @@
   </div>
 
   <script src="grammar-path.js"></script>
+
+
+
+  <!-- ----------------- Bottom Navigation ----------------- -->
+<div class="bottom-nav">
+  <a class="nav-item" href="grammar-path.html"><span>🎓</span>گرامر</a>
+  <a class="nav-item" href="progress.html"><span>📊</span>پیشرفت</a>
+  <a class="nav-item" href="words.html"><span>📚</span>کلمات</a>
+  <a class="nav-item" href="test.html"><span>📝</span>تست</a>
+  <a class="nav-item" href="hard.html"><span>🔥</span>سخت‌ها</a>
+  <a class="nav-item" href="index.html"><span>🏠</span>یادگیری</a>
+</div>
+
+<style>
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(10,10,20,0.9);
+  border-top: 1px solid rgba(148,163,184,0.4);
+  display: flex;
+  justify-content: space-around;
+  padding: 8px 0 10px;
+  backdrop-filter: blur(16px);
+  z-index: 20;
+}
+
+.nav-item {
+  font-size: 11px;
+  color: #9ca3af;
+  text-align: center;
+  text-decoration: none;
+}
+
+.nav-item span {
+  display: block;
+  font-size: 18px;
+}
+
+.nav-item.active {
+  color: #fbbf24;
+  text-shadow: 0 0 8px rgba(251,191,36,0.8);
+}
+</style>
+
+
+  
 </body>
 </html>
