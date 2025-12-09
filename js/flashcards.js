@@ -1,6 +1,6 @@
 // ====================== Flashcards main logic ======================
 
-// لیست لغات از vocab.js خوانده می‌شود
+// لیست لغات از vocab.js خوانده می‌شود (ثابت، بدون هوش مصنوعی)
 let words = (typeof VOCAB !== "undefined" ? VOCAB.slice() : []);
 
 // وضعیت SRS
@@ -141,13 +141,10 @@ function renderCurrent() {
 }
 
 // ===================================================================
-//                     نمایش معنی
+//                     نمایش معنی (کاملًا آفلاین)
 // ===================================================================
 
-
-// --------- نمایش معنی (با هوش مصنوعی + کش) ---------
-
-async function showMeaning() {
+function showMeaning() {
   const w = dueOrder[currentIndex];
   const box = document.getElementById("meaningBox");
   const btn = document.getElementById("showMeaningBtn");
@@ -155,40 +152,19 @@ async function showMeaning() {
   if (!w || !box || !btn) return;
 
   box.style.display = "block";
-  // پیام لودینگ
-  box.innerHTML = "در حال دریافت معنی از هوش مصنوعی...";
+
+  box.innerHTML =
+    "📘 معنی:<br>" +
+    (w.meaning_fa || "-") +
+    "<br><br>✏ مثال (English):<br>" +
+    (w.example_en || "-") +
+    "<br><br>📌 کاربرد:<br>" +
+    (w.usage_fa || "-") +
+    "<br><br>💡 نکتهٔ حفظ:<br>" +
+    (w.note || "-");
+
   btn.style.display = "none";
-
-  try {
-    // اگر هنوز معنی برای این واژه نگرفتیم، از API بگیر
-    if (!w.meaning_fa && window.getAIMeaningForWord) {
-      const info = await window.getAIMeaningForWord(w.word);
-
-      w.meaning_fa = info.meaning_fa;
-      w.example_en = info.example_en;
-      w.usage_fa = info.usage_fa;
-      w.note = info.note;
-    }
-
-    // رندر نهایی در کارت
-    box.innerHTML =
-      "📘 معنی:<br>" +
-      (w.meaning_fa || "-") +
-      "<br><br>✏ مثال (English):<br>" +
-      (w.example_en || "-") +
-      "<br><br>📌 کاربرد:<br>" +
-      (w.usage_fa || "-") +
-      "<br><br>💡 نکتهٔ حفظ:<br>" +
-      (w.note || "-");
-  } catch (e) {
-    console.error("AI meaning error:", e);
-    box.innerHTML =
-      "خطا در پاسخ سرور یا اینترنت. لطفاً بعداً دوباره امتحان کن.";
-    // اگر خواستی کاربر بتواند دوباره تلاش کند، این خط را فعال نگه‌دار
-    btn.style.display = "inline-block";
-  }
 }
-
 
 // ===================================================================
 //                     پاسخ کاربر
@@ -280,7 +256,12 @@ document.addEventListener("DOMContentLoaded", () => {
       if (!dueOrder.length) return;
       const w = dueOrder[currentIndex];
       if (w && w.word) {
-        speakTextEn(w.word);
+        // تابع تلفظ، اگر جایی تعریف شده باشد:
+        try {
+          speakTextEn(w.word);
+        } catch (e) {
+          console.warn("speakTextEn not defined:", e);
+        }
       }
     };
   }
