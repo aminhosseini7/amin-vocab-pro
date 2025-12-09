@@ -14,101 +14,101 @@
   <link rel="apple-touch-icon" href="icon-192.png" />
 
   <style>
-body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  margin: 0;
-  padding: 0;
-  background: radial-gradient(circle at top, #3a0ca3, #000);
-  color: #f8f8ff;
-}
-.container {
-  max-width: 720px;
-  margin: 70px auto 80px;
-  padding: 16px;
-}
-.card {
-  background: rgba(15, 15, 25, 0.85);
-  border-radius: 18px;
-  padding: 18px;
-  box-shadow: 0 0 18px rgba(114, 9, 183, 0.5);
-}
-h1 {
-  font-size: 22px;
-  margin-top: 0;
-  text-align: center;
-}
-.word {
-  font-size: 30px;
-  font-weight: 700;
-  text-align: center;
-  margin-bottom: 12px;
-}
-.btn-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  justify-content: center;
-  margin-top: 10px;
-}
-button {
-  border: none;
-  border-radius: 999px;
-  padding: 10px 14px;
-  font-size: 14px;
-  cursor: pointer;
-  background: #4c1d95;
-  color: #fff;
-  box-shadow: 0 0 10px rgba(76, 29, 149, 0.7);
-}
-button.primary { background: #3b82f6; }
-button.good { background: #16a34a; }
-button.bad { background: #dc2626; }
-button.hard-mark { background: #f97316; }
-button:active { transform: scale(0.96); }
-#meaningBox {
-  margin-top: 10px;
-  padding: 10px;
-  border-radius: 14px;
-  background: rgba(0,0,0,0.35);
-  font-size: 14px;
-  line-height: 1.7;
-}
-.stats {
-  margin-top: 14px;
-  font-size: 13px;
-  opacity: 0.9;
-}
-.bottom-nav {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: rgba(10,10,20,0.9);
-  border-top: 1px solid rgba(148,163,184,0.4);
-  display: flex;
-  justify-content: space-around;
-  padding: 8px 0 10px;
-  backdrop-filter: blur(16px);
-  z-index: 20;
-}
-.nav-item {
-  font-size: 11px;
-  color: #9ca3af;
-  text-align: center;
-  text-decoration: none;
-}
-.nav-item span {
-  display: block;
-  font-size: 18px;
-}
-.nav-item.active {
-  color: #fbbf24;
-  text-shadow: 0 0 8px rgba(251, 191, 36, 0.8);
-}
-@media (max-width: 640px) {
-  .container { margin-top: 60px; padding: 12px; }
-  .word { font-size: 24px; }
-}
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 0;
+      background: radial-gradient(circle at top, #3a0ca3, #000);
+      color: #f8f8ff;
+    }
+    .container {
+      max-width: 720px;
+      margin: 70px auto 80px;
+      padding: 16px;
+    }
+    .card {
+      background: rgba(15, 15, 25, 0.85);
+      border-radius: 18px;
+      padding: 18px;
+      box-shadow: 0 0 18px rgba(114, 9, 183, 0.5);
+    }
+    h1 {
+      font-size: 22px;
+      margin-top: 0;
+      text-align: center;
+    }
+    .word {
+      font-size: 30px;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 12px;
+    }
+    .btn-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+      margin-top: 10px;
+    }
+    button {
+      border: none;
+      border-radius: 999px;
+      padding: 10px 14px;
+      font-size: 14px;
+      cursor: pointer;
+      background: #4c1d95;
+      color: #fff;
+      box-shadow: 0 0 10px rgba(76, 29, 149, 0.7);
+    }
+    button.primary { background: #3b82f6; }
+    button.good { background: #16a34a; }
+    button.bad { background: #dc2626; }
+    button.hard-mark { background: #f97316; }
+    button:active { transform: scale(0.96); }
+    #meaningBox {
+      margin-top: 10px;
+      padding: 10px;
+      border-radius: 14px;
+      background: rgba(0,0,0,0.35);
+      font-size: 14px;
+      line-height: 1.7;
+    }
+    .stats {
+      margin-top: 14px;
+      font-size: 13px;
+      opacity: 0.9;
+    }
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(10,10,20,0.9);
+      border-top: 1px solid rgba(148,163,184,0.4);
+      display: flex;
+      justify-content: space-around;
+      padding: 8px 0 10px;
+      backdrop-filter: blur(16px);
+      z-index: 20;
+    }
+    .nav-item {
+      font-size: 11px;
+      color: #9ca3af;
+      text-align: center;
+      text-decoration: none;
+    }
+    .nav-item span {
+      display: block;
+      font-size: 18px;
+    }
+    .nav-item.active {
+      color: #fbbf24;
+      text-shadow: 0 0 8px rgba(251, 191, 36, 0.8);
+    }
+    @media (max-width: 640px) {
+      .container { margin-top: 60px; padding: 12px; }
+      .word { font-size: 24px; }
+    }
   </style>
 </head>
 <body>
@@ -145,7 +145,7 @@ button:active { transform: scale(0.96); }
     <a class="nav-item" href="grammar-path.html"><span>🎓</span>گرامر</a>
   </div>
 
-
+  <!-- ترتیب: اول لغت‌ها، بعد استوریج/SRS، بعد فلش‌کارت -->
   <script src="data/vocab.js"></script>
   <script src="js/storage.js"></script>
   <script src="js/srs.js"></script>
@@ -166,8 +166,5 @@ button:active { transform: scale(0.96); }
       });
     }
   </script>
-    <script src="js/ai-meaning.js"></script>
 </body>
 </html>
-
-
