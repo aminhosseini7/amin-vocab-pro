@@ -12,7 +12,7 @@ function todayStr() {
 }
 
 function wordKeyFromObj(w) {
-  // ترجیحاً بر اساس id، اگر نبود، بر اساس خود کلمه
+  // ترجیح: id اگر وجود داشت، وگرنه خود کلمه
   if (w && typeof w.id !== "undefined") return String(w.id);
   if (w && typeof w.word === "string") return `w:${w.word}`;
   return String(w);
@@ -32,7 +32,7 @@ function defaultWordState() {
   };
 }
 
-// state یک آبجکت گلوبال است که در storage.js لود می‌شود
+// state در storage.js لود می‌شود
 function getWordState(state, w) {
   const key = wordKeyFromObj(w);
   if (!state[key]) {
@@ -41,8 +41,9 @@ function getWordState(state, w) {
 
   const s = state[key];
 
-  // مایگریشن: اگر قبلاً باگ داشتیم و همه را hard=true ذخیره کرده بودیم
-  // ولی هنوز اصلاً دیده نشده‌اند، اینجا آن را اصلاح می‌کنیم.
+  // مایگریشن باگ‌های قدیمی:
+  // اگر قبلاً همه را hard=true ذخیره کرده بودیم
+  // ولی هنوز اصلاً دیده نشده‌اند، اینجا اصلاح می‌کنیم.
   if (s.seen === 0 && s.correct === 0 && s.wrong === 0 && s.hard) {
     s.hard = false;
   }
@@ -51,29 +52,32 @@ function getWordState(state, w) {
 }
 
 // ===================== طبقه‌بندی لغت =====================
-// خروجی: "new" | "hard" | "known" | "learning"
+// فقط سه حالت: "new" | "hard" | "known"
+// «در حال یادگیری» حذف شد
 
 function classifyWord(s) {
   if (!s) return "new";
 
-  // لغت کاملاً جدید
+  // کاملاً جدید
   if (s.seen === 0) return "new";
 
-  // اگر کاربر خودش hard را زده یا زیاد خطا داشته
-  if (s.hard || s.wrong >= 2) return "hard";
+  // هر لغتی که حداقل یک‌بار غلط زده شده
+  // یا عمداً hard علامت شده → سخت
+  if (s.hard || s.wrong >= 1) return "hard";
 
-  // اگر چند بار درست پشت سر هم جواب داده
-  if (s.correct >= 3 && s.wrong === 0) return "known";
+  // اگر حداقل یک‌بار درست جواب داده شده و غلطی هم نخورده → بلد
+  if (s.correct >= 1 && s.wrong === 0) return "known";
 
-  // بقیه در حال یادگیری
-  return "learning";
+  // حالت‌های مرزی را هم به عنوان جدید در نظر بگیر
+  return "new";
 }
 
 // ===================== به‌روزرسانی SRS =====================
 // الگوریتم ساده‌شده‌ی SM-2
 
 function updateSRSState(s, grade) {
-  // grade: از 0 تا 5 – در این پروژه:
+  // grade: از 0 تا 5
+  // در پروژه ما:
   // 5 = بلد بودم
   // 2 = بلد نبودم / سخت
 
