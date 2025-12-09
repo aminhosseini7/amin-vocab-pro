@@ -1,94 +1,158 @@
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
-<meta charset="UTF-8" />
-<title>لغات سخت – Amin Vocab Pro</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8" />
+  <title>Amin Vocab Pro – سخت‌ها</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-<link rel="manifest" href="manifest.json" />
-<meta name="theme-color" content="#7209B7" />
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#7209B7" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Amin Vocab Pro" />
+  <link rel="apple-touch-icon" href="icon-192.png" />
 
-<style>
-body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  margin: 0; padding: 0;
-  background: radial-gradient(circle at top, #3a0ca3, #000);
-  color: #fff;
-}
-.container {
-  max-width: 720px;
-  margin: 70px auto 80px;
-  padding: 16px;
-}
-.card {
-  background: rgba(15,15,25,0.85);
-  padding: 18px;
-  border-radius: 18px;
-  box-shadow: 0 0 18px rgba(114,9,183,0.5);
-}
-.word {
-  font-size: 32px;
-  font-weight: bold;
-  text-align: center;
-  margin-bottom: 12px;
-}
-.meaning {
-  margin-top: 10px;
-  padding: 12px;
-  border-radius: 14px;
-  background: rgba(0,0,0,0.35);
-  font-size: 15px;
-  line-height: 1.8;
-}
-.btn-row {
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-  margin-top: 14px;
-}
-button {
-  border: none;
-  border-radius: 999px;
-  background: #4c1d95;
-  padding: 10px 18px;
-  font-size: 14px;
-  color: white;
-  cursor: pointer;
-}
-button:active { transform: scale(0.96); }
-</style>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 0;
+      background: radial-gradient(circle at top, #3a0ca3, #000);
+      color: #f8f8ff;
+    }
+    .container {
+      max-width: 720px;
+      margin: 70px auto 80px;
+      padding: 16px;
+    }
+    .card {
+      background: rgba(15, 15, 25, 0.85);
+      border-radius: 18px;
+      padding: 18px;
+      box-shadow: 0 0 18px rgba(114, 9, 183, 0.5);
+    }
+    h1 {
+      font-size: 22px;
+      margin-top: 0;
+      text-align: center;
+    }
+    .word {
+      font-size: 30px;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 12px;
+    }
+    .btn-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+      margin-top: 10px;
+    }
+    button {
+      border: none;
+      border-radius: 999px;
+      padding: 10px 14px;
+      font-size: 14px;
+      cursor: pointer;
+      background: #4c1d95;
+      color: #fff;
+      box-shadow: 0 0 10px rgba(76, 29, 149, 0.7);
+    }
+    button.primary { background: #3b82f6; }
+    button.good { background: #16a34a; }
+    button.bad { background: #dc2626; }
+    button:active { transform: scale(0.96); }
+    #hardMeaningBox {
+      margin-top: 10px;
+      padding: 10px;
+      border-radius: 14px;
+      background: rgba(0,0,0,0.35);
+      font-size: 14px;
+      line-height: 1.7;
+      display: none;
+    }
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(10,10,20,0.9);
+      border-top: 1px solid rgba(148,163,184,0.4);
+      display: flex;
+      justify-content: space-around;
+      padding: 8px 0 10px;
+      backdrop-filter: blur(16px);
+      z-index: 20;
+    }
+    .nav-item {
+      font-size: 11px;
+      color: #9ca3af;
+      text-align: center;
+      text-decoration: none;
+    }
+    .nav-item span {
+      display: block;
+      font-size: 18px;
+    }
+    .nav-item.active {
+      color: #fbbf24;
+      text-shadow: 0 0 8px rgba(251, 191, 36, 0.8);
+    }
+    @media (max-width: 640px) {
+      .container { margin-top: 60px; padding: 12px; }
+      .word { font-size: 24px; }
+    }
+  </style>
 </head>
-
 <body>
-<div class="container">
-  <div class="card">
-    <div id="hardWord" class="word">...</div>
+  <div class="container">
+    <div class="card">
+      <h1>فلش‌کارت لغات سخت</h1>
+      <div class="word" id="hardWord">...</div>
 
-    <div id="hardMeaning" class="meaning">
-      ...
-    </div>
+      <div class="btn-row">
+        <button id="btnSpeakHard">🔊 تلفظ</button>
+        <button class="primary" id="btnShowHardMeaning">نمایش معنی</button>
+      </div>
 
-    <div class="btn-row">
-      <button id="btnHardPrev">⬅ قبلی</button>
-      <button id="btnSpeakHard">🔊 تلفظ</button>
-      <button id="btnHardNext">بعدی ➡</button>
+      <div id="hardMeaningBox"></div>
+
+      <div class="btn-row">
+        <button id="btnHardPrev">⬅ قبلی</button>
+        <button id="btnHardNext">بعدی ➡</button>
+      </div>
     </div>
   </div>
-</div>
 
-<div class="bottom-nav">
-  <a class="nav-item" href="index.html"><span>🏠</span>یادگیری</a>
-  <a class="nav-item active" href="hard.html"><span>🔥</span>سخت‌ها</a>
-  <a class="nav-item" href="test.html"><span>📝</span>تست</a>
-  <a class="nav-item" href="words.html"><span>📚</span>کلمات</a>
-  <a class="nav-item" href="progress.html"><span>📊</span>پیشرفت</a>
-  <a class="nav-item" href="grammar-path.html"><span>🎓</span>گرامر</a>
-</div>
+  <!-- ناوبری پایین، دقیقا مثل index.html فقط active روی سخت‌ها -->
+  <div class="bottom-nav">
+    <a class="nav-item" href="index.html"><span>🏠</span>یادگیری</a>
+    <a class="nav-item active" href="hard.html"><span>🔥</span>سخت‌ها</a>
+    <a class="nav-item" href="test.html"><span>📝</span>تست</a>
+    <a class="nav-item" href="words.html"><span>📚</span>کلمات</a>
+    <a class="nav-item" href="progress.html"><span>📊</span>پیشرفت</a>
+    <a class="nav-item" href="grammar-path.html"><span>🎓</span>گرامر</a>
+  </div>
 
-<script src="data/vocab.js"></script>
-<script src="js/storage.js"></script>
-<script src="js/srs.js"></script>
-<script src="js/hard.js"></script>
+  <script src="data/vocab.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/srs.js"></script>
+  <script src="js/hard.js"></script>
 
+  <script>
+    if (
+      "serviceWorker" in navigator &&
+      (location.protocol === "https:" || location.hostname === "localhost")
+    ) {
+      window.addEventListener("load", function () {
+        navigator.serviceWorker
+          .register("service-worker.js")
+          .catch(function (err) {
+            console.log("Service Worker registration failed:", err);
+          });
+      });
+    }
+  </script>
 </body>
 </html>
