@@ -1,6 +1,6 @@
 // service-worker.js  – نسخه تمیز برای GitHub Pages
 
-const CACHE_NAME = "amin-vocab-pro-v1";
+const CACHE_NAME = "amin-vocab-pro-v4";
 const OFFLINE_RESOURCES = [
   "./",
   "./index.html",
