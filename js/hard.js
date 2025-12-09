@@ -1,5 +1,5 @@
 // js/hard.js
-// فلش‌کارت برای کلمات سخت (hard) با دکمه «نمایش معنی»
+// فلش‌کارت برای کلمات سخت (hard) با دکمه «نمایش معنی» و «یاد گرفتم»
 
 let aminStateHard = loadState();
 const ALL_WORDS_HARD = VOCAB || [];
@@ -27,6 +27,7 @@ function computeHardList() {
   const wordEl = document.getElementById("hardWord");
   const box = document.getElementById("hardMeaningBox");
   const btnShow = document.getElementById("btnShowHardMeaning");
+  const btnMark = document.getElementById("btnHardMarkKnown");
 
   if (!hardList.length) {
     if (wordEl) wordEl.textContent = "فعلاً هیچ لغت سختی نداری 👌";
@@ -36,13 +37,16 @@ function computeHardList() {
         "از بخش «یادگیری» لغات را با دکمه ⭐ سخت علامت بزن یا در تست، چند بار غلط بزن تا اینجا ظاهر شوند.";
     }
     if (btnShow) btnShow.style.display = "none";
+    if (btnMark) btnMark.style.display = "none";
     return false;
   }
 
   shuffleHard(hardList);
   hardIndex = 0;
   hardMeaningVisible = false;
+
   if (btnShow) btnShow.style.display = "inline-block";
+  if (btnMark) btnMark.style.display = "inline-block";
   return true;
 }
 
@@ -100,6 +104,33 @@ function prevHard() {
   renderHard();
 }
 
+// لغت فعلی را از «سخت» خارج و به «بلد» تبدیل می‌کند
+function markHardAsKnown() {
+  if (!hardList.length) return;
+
+  const w = hardList[hardIndex];
+  const s = getWordState(aminStateHard, w);
+
+  // از سخت‌ها خارج شود
+  s.hard = false;
+  s.wrong = 0;
+
+  // حتماً حداقل یک بار درست داشته باشد تا در classifyWord → known شود
+  if (s.correct < 1) s.correct = 1;
+
+  // یک آپدیت SRS با نمره خوب
+  updateSRSState(s, 5);
+
+  saveState(aminStateHard);
+
+  // لیست سخت‌ها را دوباره بساز
+  if (!computeHardList()) {
+    // یعنی دیگر لغت سختی نداریم
+    return;
+  }
+  renderHard();
+}
+
 // ---------- init ----------
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -111,10 +142,12 @@ document.addEventListener("DOMContentLoaded", () => {
   const prevBtn = document.getElementById("btnHardPrev");
   const speakBtn = document.getElementById("btnSpeakHard");
   const showBtn = document.getElementById("btnShowHardMeaning");
+  const markBtn = document.getElementById("btnHardMarkKnown");
 
   if (nextBtn) nextBtn.onclick = nextHard;
   if (prevBtn) prevBtn.onclick = prevHard;
   if (showBtn) showBtn.onclick = toggleHardMeaning;
+  if (markBtn) markBtn.onclick = markHardAsKnown;
 
   if (speakBtn) {
     speakBtn.onclick = () => {
