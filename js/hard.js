@@ -1,10 +1,8 @@
 // ====================== HARD WORDS VIEW ======================
 
-// داده‌ها
 let aminStateHard = loadState();
 const ALL_WORDS = VOCAB || [];
 
-// سخت‌ها را ذخیره می‌کنیم
 let hardList = [];
 let hardIndex = 0;
 
@@ -17,7 +15,7 @@ function shuffle(arr) {
   }
 }
 
-// لیست سخت‌ها را بازسازی می‌کند
+// ساخت لیست به‌روز سخت‌ها
 function computeHardList() {
   hardList = ALL_WORDS.filter((w) => {
     const s = getWordState(aminStateHard, w);
@@ -25,27 +23,18 @@ function computeHardList() {
   });
 
   if (!hardList.length) {
-    document.getElementById("hardWord").textContent = "فعلاً هیچ لغت سختی نداری 👌";
+    document.getElementById("hardWord").textContent =
+      "هیچ لغت سختی هنوز وجود ندارد 👌";
     document.getElementById("hardMeaning").innerHTML =
-      "از بخش یادگیری، لغات را با دکمه ⭐ سخت علامت بزن!";
+      "در بخش یادگیری، لغات اشتباه را با ⭐ سخت علامت بزن.";
     return false;
   }
 
-  // اگر بار اول است، shuffle و ذخیره index
-  if (!localStorage.hard_order_created) {
-    shuffle(hardList);
-    hardIndex = 0;
-    localStorage.hard_order_created = "yes";
-    localStorage.hard_current_index = "0";
-  } else {
-    hardIndex = Number(localStorage.hard_current_index || 0);
-    if (hardIndex >= hardList.length) hardIndex = 0;
-  }
-
+  shuffle(hardList);
+  hardIndex = 0;
   return true;
 }
 
-// نمایش یک لغت سخت
 function renderHard() {
   if (!hardList.length) return;
 
@@ -54,28 +43,21 @@ function renderHard() {
   document.getElementById("hardWord").textContent = w.word;
 
   document.getElementById("hardMeaning").innerHTML =
-    "<b>📘 معنی:</b> " +
-    (w.meaning_fa || "-") +
-    "<br><br><b>✏ مثال:</b> " +
-    (w.example_en || "-") +
-    "<br><br><b>📌 کاربرد:</b> " +
-    (w.usage_fa || "-") +
-    "<br><br><b>💡 نکته:</b> " +
-    (w.note || "-");
+    "<b>📘 معنی:</b> " + (w.meaning_fa || "-") +
+    "<br><br><b>✏ مثال:</b> " + (w.example_en || "-") +
+    "<br><br><b>📌 کاربرد:</b> " + (w.usage_fa || "-") +
+    "<br><br><b>💡 نکته:</b> " + (w.note || "-");
 }
 
-// دکمه قبلی / بعدی
 function nextHard() {
   hardIndex++;
   if (hardIndex >= hardList.length) hardIndex = 0;
-  localStorage.hard_current_index = String(hardIndex);
   renderHard();
 }
 
 function prevHard() {
   hardIndex--;
   if (hardIndex < 0) hardIndex = hardList.length - 1;
-  localStorage.hard_current_index = String(hardIndex);
   renderHard();
 }
 
