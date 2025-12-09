@@ -2,135 +2,190 @@
 <html lang="fa" dir="rtl">
 <head>
   <meta charset="UTF-8" />
-  <title>Amin Vocab Pro – همه لغات</title>
+  <title>Amin Vocab Pro – کلمات</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#7209B7" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Amin Vocab Pro" />
+  <link rel="apple-touch-icon" href="icon-192.png" />
+
   <style>
-body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  margin: 0;
-  padding: 0;
-  background: radial-gradient(circle at top, #3a0ca3, #000);
-  color: #f8f8ff;
-}
-.container {
-  max-width: 720px;
-  margin: 70px auto 80px;
-  padding: 16px;
-}
-.card {
-  background: rgba(15, 15, 25, 0.85);
-  border-radius: 18px;
-  padding: 18px;
-  box-shadow: 0 0 18px rgba(114, 9, 183, 0.5);
-}
-h1 {
-  font-size: 22px;
-  margin-top: 0;
-  text-align: center;
-}
-.bottom-nav {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: rgba(10,10,20,0.9);
-  border-top: 1px solid rgba(148,163,184,0.4);
-  display: flex;
-  justify-content: space-around;
-  padding: 8px 0 10px;
-  backdrop-filter: blur(16px);
-  z-index: 20;
-}
-.nav-item {
-  font-size: 11px;
-  color: #9ca3af;
-  text-align: center;
-  text-decoration: none;
-}
-.nav-item span {
-  display: block;
-  font-size: 18px;
-}
-.nav-item.active {
-  color: #fbbf24;
-  text-shadow: 0 0 8px rgba(251, 191, 36, 0.8);
-}
-table { width:100%; border-collapse:collapse; margin-top:12px; font-size:13px; }
-th, td { border-bottom:1px solid rgba(148,163,184,0.3); padding:6px 4px; text-align:right; }
-th { background:rgba(15,23,42,0.8); position:sticky; top:0; z-index: 5; }
-.status-pill { border-radius:999px; padding:2px 8px; font-size:11px; }
-.status-hard { background:#b91c1c; }
-.status-known { background:#15803d; }
-.status-learning { background:#0369a1; }
-#searchInput {
-  width:100%;
-  padding:8px;
-  border-radius:10px;
-  border:none;
-  margin-bottom:8px;
-  font-size:13px;
-}
-#statusFilter {
-  width:100%;
-  margin-top:4px;
-  font-size:11px;
-  border-radius:999px;
-  border:none;
-  padding:3px 6px;
-  background:#0f172a;
-  color:#e5e7eb;
-}
-@media (max-width: 640px) {
-  .container { margin-top: 60px; padding: 12px; }
-}
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 0;
+      background: radial-gradient(circle at top, #3a0ca3, #000);
+      color: #f8f8ff;
+    }
+    .container {
+      max-width: 900px;
+      margin: 70px auto 80px;
+      padding: 16px;
+    }
+    .card {
+      background: rgba(15, 15, 25, 0.85);
+      border-radius: 18px;
+      padding: 18px;
+      box-shadow: 0 0 18px rgba(114, 9, 183, 0.5);
+    }
+    h1 {
+      font-size: 22px;
+      margin-top: 0;
+      text-align: center;
+    }
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 12px;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .toolbar input,
+    .toolbar select {
+      border-radius: 999px;
+      border: none;
+      padding: 8px 12px;
+      font-size: 13px;
+      outline: none;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    th, td {
+      padding: 6px 8px;
+      border-bottom: 1px solid rgba(148,163,184,0.2);
+      text-align: right;
+    }
+    th {
+      font-weight: 600;
+      color: #e5e7eb;
+    }
+    tr:hover {
+      background: rgba(15,15,30,0.7);
+    }
+    .status-pill {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+    }
+    .status-hard {
+      background: rgba(248,113,113,0.2);
+      color: #fecaca;
+    }
+    .status-known {
+      background: rgba(34,197,94,0.2);
+      color: #bbf7d0;
+    }
+    .status-new {
+      background: rgba(148,163,184,0.25);
+      color: #e5e7eb;
+    }
+    .summary {
+      margin-top: 10px;
+      font-size: 13px;
+      opacity: 0.9;
+    }
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(10,10,20,0.9);
+      border-top: 1px solid rgba(148,163,184,0.4);
+      display: flex;
+      justify-content: space-around;
+      padding: 8px 0 10px;
+      backdrop-filter: blur(16px);
+      z-index: 20;
+    }
+    .nav-item {
+      font-size: 11px;
+      color: #9ca3af;
+      text-align: center;
+      text-decoration: none;
+    }
+    .nav-item span {
+      display: block;
+      font-size: 18px;
+    }
+    .nav-item.active {
+      color: #fbbf24;
+      text-shadow: 0 0 8px rgba(251, 191, 36, 0.8);
+    }
+    @media (max-width: 640px) {
+      .container { margin-top: 60px; padding: 12px; }
+      table { font-size: 12px; }
+    }
   </style>
 </head>
 <body>
   <div class="container">
     <div class="card">
-      <h1>جدول همه لغات</h1>
+      <h1>فهرست همه‌ی کلمات</h1>
 
-      <input id="searchInput" placeholder="جستجوی لغت یا معنی..." />
+      <div class="toolbar">
+        <input id="searchInput" type="text" placeholder="جستجو در کلمه یا معنی..." />
+        <select id="statusFilter">
+          <option value="all">همه وضعیت‌ها</option>
+          <option value="new">جدید</option>
+          <option value="hard">سخت</option>
+          <option value="known">بلد</option>
+        </select>
+      </div>
 
-      <div style="font-size:12px;opacity:0.8;" id="wordsSummary"></div>
+      <table id="wordsTable">
+        <thead>
+          <tr>
+            <th>کلمه</th>
+            <th>معنی</th>
+            <th>وضعیت</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- اینجا با JS پر می‌شود -->
+        </tbody>
+      </table>
 
-      <div style="max-height:60vh;overflow:auto;margin-top:8px;">
-        <table id="wordsTable">
-          <thead>
-            <tr>
-              <th>لغت</th>
-              <th>معنی</th>
-              <th>
-                وضعیت
-                <br />
-                <select id="statusFilter">
-                  <option value="all">همه</option>
-                  <option value="new">جدید</option>
-                  <option value="learning">در حال یادگیری</option>
-                  <option value="known">بلد</option>
-                  <option value="hard">سخت</option>
-                </select>
-              </th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
+      <div class="summary" id="wordsSummary">
+        ...
       </div>
     </div>
   </div>
 
-<div class="bottom-nav">
-  <a class="nav-item" href="index.html"><span>🏠</span>یادگیری</a>
-  <a class="nav-item" href="hard.html"><span>🔥</span>سخت‌ها</a>
-  <a class="nav-item" href="test.html"><span>📝</span>تست</a>
-  <a class="nav-item active" href="words.html"><span>📚</span>کلمات</a>
-  <a class="nav-item" href="progress.html"><span>📊</span>پیشرفت</a>
-  <a class="nav-item" href="grammar-path.html"><span>🎓</span>گرامر</a>
-</div>
-
+  <div class="bottom-nav">
+    <a class="nav-item" href="index.html"><span>🏠</span>یادگیری</a>
+    <a class="nav-item" href="hard.html"><span>🔥</span>سخت‌ها</a>
+    <a class="nav-item" href="test.html"><span>📝</span>تست</a>
+    <a class="nav-item active" href="words.html"><span>📚</span>کلمات</a>
+    <a class="nav-item" href="progress.html"><span>📊</span>پیشرفت</a>
+    <a class="nav-item" href="grammar-path.html"><span>🎓</span>گرامر</a>
+  </div>
 
   <script src="data/vocab.js"></script>
   <script src="js/storage.js"></script>
+  <script src="js/srs.js"></script>
   <script src="js/words.js"></script>
+
+  <script>
+    if (
+      "serviceWorker" in navigator &&
+      (location.protocol === "https:" || location.hostname === "localhost")
+    ) {
+      window.addEventListener("load", function () {
+        navigator.serviceWorker
+          .register("service-worker.js")
+          .catch(function (err) {
+            console.log("Service Worker registration failed:", err);
+          });
+      });
+    }
+  </script>
 </body>
 </html>
