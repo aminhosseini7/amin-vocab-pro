@@ -68,7 +68,7 @@ function newQuiz() {
     quizAnswer = null;
     wordEl.textContent = "فعلاً لغت سختی نداری 👌";
     optionsEl.innerHTML =
-      "<p style='font-size:14px;line-height:1.7'>اول در بخش «یادگیری» چند لغت را با دکمه ⭐ سخت علامت بزن یا با جواب‌های غلط، سخت شوند؛ بعد برگرد اینجا تست بده.</p>";
+      "<p style='font-size:14px;line-height:1.7'>اول در بخش «یادگیری» چند لغت را با دکمه ⭐ سخت علامت بزن یا چند بار غلط بزن تا سخت شوند؛ بعد برگرد اینجا تست بده.</p>";
     return;
   }
 
@@ -93,7 +93,8 @@ function newQuiz() {
   options.forEach((opt) => {
     const btn = document.createElement("button");
     btn.textContent = opt.meaning_fa || "";
-    btn.dataset.wordId = String(opt.id);
+    // ❗ به‌جای id، خود کلمه را در data قرار می‌دهیم
+    btn.dataset.word = String(opt.word);
     btn.style.margin = "6px 4px";
     btn.onclick = () => chooseOption(opt, btn);
     optionsEl.appendChild(btn);
@@ -120,7 +121,7 @@ function chooseOption(opt, clickedBtn) {
     b.style.background = "#4c1d95"; // رنگ بنفش پیش‌فرض
   });
 
-  if (opt.id === quizAnswer.id) {
+  if (opt.word === quizAnswer.word) {
     // جواب درست
     ws.correct += 1;
     updateSRSState(ws, 5);
@@ -138,14 +139,14 @@ function chooseOption(opt, clickedBtn) {
   // فقط گزینهٔ درست سبز شود
   buttons.forEach((b) => {
     const isCorrect =
-      String(b.dataset.wordId) === String(quizAnswer.id);
+      String(b.dataset.word) === String(quizAnswer.word);
     if (isCorrect) {
       b.style.background = "#16a34a"; // سبز
     }
   });
 
   // اگر جواب غلط بود، گزینهٔ انتخاب‌شده قرمز شود
-  if (opt.id !== quizAnswer.id) {
+  if (opt.word !== quizAnswer.word) {
     clickedBtn.style.background = "#dc2626"; // قرمز
   }
 
