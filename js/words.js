@@ -23,19 +23,17 @@ function renderWordsTable(filterText = "", statusFilter = "all") {
 
   for (let w of allWords) {
     const ws = getWordState(aminWordsState, w);
-    const status = classifyWord(ws); // فقط: "new" | "known" | "hard"
+    const status = classifyWord(ws); // "new" | "known" | "hard"
 
-    // شمارش آمار کلی
+    // آمار
     if (status === "hard") hardCount++;
     else if (status === "known") knownCount++;
     else newCount++;
 
-    // فیلتر بر اساس وضعیت انتخابی
-    if (statusFilter !== "all" && status !== statusFilter) {
-      continue;
-    }
+    // فیلتر وضعیت
+    if (statusFilter !== "all" && status !== statusFilter) continue;
 
-    // فیلتر بر اساس متن جستجو
+    // فیلتر جستجو
     if (txt) {
       const wordText = (w.word || "").toLowerCase();
       const meaningText = (w.meaning_fa || "").toLowerCase();
@@ -62,13 +60,11 @@ function renderWordsTable(filterText = "", statusFilter = "all") {
       span.classList.add("status-known");
       span.textContent = "بلد";
     } else {
-      // new
       span.classList.add("status-new");
       span.textContent = "جدید";
     }
 
     tdStatus.appendChild(span);
-
     tr.appendChild(tdWord);
     tr.appendChild(tdMeaning);
     tr.appendChild(tdStatus);
@@ -95,13 +91,8 @@ document.addEventListener("DOMContentLoaded", () => {
     renderWordsTable(txt, st);
   }
 
-  if (searchInput) {
-    searchInput.addEventListener("input", updateTable);
-  }
-  if (statusSelect) {
-    statusSelect.addEventListener("change", updateTable);
-  }
+  if (searchInput) searchInput.addEventListener("input", updateTable);
+  if (statusSelect) statusSelect.addEventListener("change", updateTable);
 
-  // اولین رندر
   updateTable();
 });
