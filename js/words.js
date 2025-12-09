@@ -1,26 +1,36 @@
+// js/words.js
+// نمایش جدول همه‌ی لغات + وضعیت آن‌ها (جدید / بلد / سخت)
+
 let aminWordsState = loadState();
 let allWords = VOCAB || [];
 
-// statusFilter: "all" | "new" | "learning" | "known" | "hard"
+// statusFilter: "all" | "new" | "known" | "hard"
 function renderWordsTable(filterText = "", statusFilter = "all") {
   const tbody = document.querySelector("#wordsTable tbody");
+  if (!tbody) return;
+
   tbody.innerHTML = "";
 
-  let hardCount = 0, knownCount = 0, learningCount = 0, newCount = 0;
+  let hardCount = 0;
+  let knownCount = 0;
+  let newCount = 0;
 
   const txt = (filterText || "").toLowerCase();
+  const validFilters = ["all", "new", "known", "hard"];
+  if (!validFilters.includes(statusFilter)) {
+    statusFilter = "all";
+  }
 
   for (let w of allWords) {
     const ws = getWordState(aminWordsState, w);
-    const status = classifyWord(ws);
+    const status = classifyWord(ws); // فقط: "new" | "known" | "hard"
 
     // شمارش آمار کلی
     if (status === "hard") hardCount++;
     else if (status === "known") knownCount++;
-    else if (status === "learning") learningCount++;
     else newCount++;
 
-    // فیلتر بر اساس وضعیت
+    // فیلتر بر اساس وضعیت انتخابی
     if (statusFilter !== "all" && status !== statusFilter) {
       continue;
     }
@@ -44,14 +54,18 @@ function renderWordsTable(filterText = "", statusFilter = "all") {
 
     const span = document.createElement("span");
     span.classList.add("status-pill");
-    if (status === "hard") span.classList.add("status-hard");
-    if (status === "known") span.classList.add("status-known");
-    if (status === "learning") span.classList.add("status-learning");
 
-    span.textContent =
-      status === "hard" ? "سخت" :
-      status === "known" ? "بلد" :
-      status === "learning" ? "در حال یادگیری" : "جدید";
+    if (status === "hard") {
+      span.classList.add("status-hard");
+      span.textContent = "سخت";
+    } else if (status === "known") {
+      span.classList.add("status-known");
+      span.textContent = "بلد";
+    } else {
+      // new
+      span.classList.add("status-new");
+      span.textContent = "جدید";
+    }
 
     tdStatus.appendChild(span);
 
@@ -62,12 +76,13 @@ function renderWordsTable(filterText = "", statusFilter = "all") {
   }
 
   const summary = document.getElementById("wordsSummary");
-  summary.textContent =
-    "کل لغات: " + allWords.length +
-    " | سخت: " + hardCount +
-    " | بلد: " + knownCount +
-    " | در حال یادگیری: " + learningCount +
-    " | جدید: " + newCount;
+  if (summary) {
+    summary.textContent =
+      "کل لغات: " + allWords.length +
+      " | سخت: " + hardCount +
+      " | بلد: " + knownCount +
+      " | جدید: " + newCount;
+  }
 }
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -75,13 +90,17 @@ document.addEventListener("DOMContentLoaded", () => {
   const statusSelect = document.getElementById("statusFilter");
 
   function updateTable() {
-    const txt = searchInput.value.trim();
-    const st = statusSelect.value;
+    const txt = searchInput ? searchInput.value.trim() : "";
+    const st = statusSelect ? statusSelect.value : "all";
     renderWordsTable(txt, st);
   }
 
-  searchInput.addEventListener("input", updateTable);
-  statusSelect.addEventListener("change", updateTable);
+  if (searchInput) {
+    searchInput.addEventListener("input", updateTable);
+  }
+  if (statusSelect) {
+    statusSelect.addEventListener("change", updateTable);
+  }
 
   // اولین رندر
   updateTable();
