@@ -2,7 +2,7 @@
 <html lang="fa" dir="rtl">
 <head>
   <meta charset="UTF-8" />
-  <title>Amin Vocab Pro – Hard Words</title>
+  <title>Amin Vocab Pro – سخت‌ها</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <link rel="manifest" href="manifest.json" />
@@ -20,63 +20,63 @@ body {
   background: radial-gradient(circle at top, #3a0ca3, #000);
   color: #f8f8ff;
 }
+
 .container {
   max-width: 720px;
   margin: 70px auto 80px;
   padding: 16px;
 }
+
 .card {
-  background: rgba(15, 15, 25, 0.85);
-  border-radius: 18px;
+  background: rgba(15,15,25,0.85);
   padding: 18px;
-  box-shadow: 0 0 18px rgba(114, 9, 183, 0.5);
+  border-radius: 18px;
+  box-shadow: 0 0 18px rgba(114,9,183,0.5);
 }
+
 h1 {
-  font-size: 22px;
-  margin-top: 0;
   text-align: center;
+  margin: 0 0 16px;
 }
+
 .word {
-  font-size: 30px;
-  font-weight: 700;
   text-align: center;
+  font-size: 28px;
+  font-weight: bold;
   margin-bottom: 12px;
 }
+
+#hardMeaning {
+  margin-top: 12px;
+  padding: 12px;
+  border-radius: 14px;
+  background: rgba(0,0,0,0.35);
+  line-height: 1.7;
+}
+
 .btn-row {
   display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
   justify-content: center;
-  margin-top: 10px;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 15px;
 }
+
 button {
   border: none;
   border-radius: 999px;
-  padding: 10px 14px;
-  font-size: 14px;
+  padding: 10px 18px;
   cursor: pointer;
   background: #4c1d95;
-  color: #fff;
-  box-shadow: 0 0 10px rgba(76, 29, 149, 0.7);
-}
-button.primary { background: #3b82f6; }
-button.good { background: #16a34a; }
-button.bad { background: #dc2626; }
-button.hard-mark { background: #f97316; }
-button:active { transform: scale(0.96); }
-#meaningHard {
-  margin-top: 10px;
-  padding: 10px;
-  border-radius: 14px;
-  background: rgba(0,0,0,0.35);
+  color: white;
   font-size: 14px;
-  line-height: 1.7;
+  box-shadow: 0 0 12px rgba(76,29,149,0.7);
 }
-.stats {
-  margin-top: 14px;
-  font-size: 13px;
-  opacity: 0.9;
+
+button:active {
+  transform: scale(0.96);
 }
+
 .bottom-nav {
   position: fixed;
   bottom: 0;
@@ -87,80 +87,60 @@ button:active { transform: scale(0.96); }
   display: flex;
   justify-content: space-around;
   padding: 8px 0 10px;
-  backdrop-filter: blur(16px);
   z-index: 20;
+  backdrop-filter: blur(16px);
 }
+
 .nav-item {
-  font-size: 11px;
-  color: #9ca3af;
   text-align: center;
   text-decoration: none;
+  color: #9ca3af;
+  font-size: 11px;
 }
+
 .nav-item span {
   display: block;
   font-size: 18px;
 }
+
 .nav-item.active {
   color: #fbbf24;
-  text-shadow: 0 0 8px rgba(251, 191, 36, 0.8);
+  text-shadow: 0 0 8px rgba(251,191,36,0.8);
 }
-@media (max-width: 640px) {
-  .container { margin-top: 60px; padding: 12px; }
-  .word { font-size: 24px; }
-}
+
   </style>
 </head>
+
 <body>
   <div class="container">
     <div class="card">
-      <h1>تمرین لغات سخت</h1>
+      <h1>🔥 لغات سخت</h1>
+
       <div class="word" id="hardWord">...</div>
+
+      <div id="hardMeaning"></div>
+
       <div class="btn-row">
         <button id="btnSpeakHard">🔊 تلفظ</button>
-        <button class="primary" id="showMeaningHard">نمایش معنی</button>
-      </div>
-      <div id="meaningHard" style="display:none;"></div>
-      <div class="btn-row">
-        <button class="good" id="btnHardKnow">✔️ این‌بار بلدم</button>
-        <button class="bad" id="btnHardDontKnow">❌ هنوز سخته</button>
-        <button class="hard-mark" id="btnRemoveHard">❌ حذف از سخت‌ها</button>
-        
         <button id="btnHardPrev">⬅ قبلی</button>
         <button id="btnHardNext">بعدی ➡</button>
-
       </div>
-      <div class="stats" id="hardStats">در حال بارگذاری...</div>
     </div>
   </div>
 
-<div class="bottom-nav">
-  <a class="nav-item" href="index.html"><span>🏠</span>یادگیری</a>
-  <a class="nav-item active" href="hard.html"><span>🔥</span>سخت‌ها</a>
-  <a class="nav-item" href="test.html"><span>📝</span>تست</a>
-  <a class="nav-item" href="words.html"><span>📚</span>کلمات</a>
-  <a class="nav-item" href="progress.html"><span>📊</span>پیشرفت</a>
-  <a class="nav-item" href="grammar-path.html"><span>🎓</span>گرامر</a>
-</div>
-
+  <div class="bottom-nav">
+    <a class="nav-item" href="index.html"><span>🏠</span>یادگیری</a>
+    <a class="nav-item active" href="hard.html"><span>🔥</span>سخت‌ها</a>
+    <a class="nav-item" href="test.html"><span>📝</span>تست</a>
+    <a class="nav-item" href="words.html"><span>📚</span>کلمات</a>
+    <a class="nav-item" href="progress.html"><span>📊</span>پیشرفت</a>
+    <a class="nav-item" href="grammar-path.html"><span>🎓</span>گرامر</a>
+  </div>
 
   <script src="data/vocab.js"></script>
   <script src="js/storage.js"></script>
   <script src="js/srs.js"></script>
   <script src="js/hard.js"></script>
 
-  <script>
-    if (
-      "serviceWorker" in navigator &&
-      (location.protocol === "https:" || location.hostname === "localhost")
-    ) {
-      window.addEventListener("load", function () {
-        navigator.serviceWorker
-          .register("service-worker.js")
-          .catch(function (err) {
-            console.log("Service Worker registration failed:", err);
-          });
-      });
-    }
-  </script>
 </body>
 </html>
