@@ -1,8 +1,8 @@
 // js/words.js
-// نمایش جدول همه‌ی لغات + وضعیت آن‌ها (جدید / بلد / سخت)
+// نمایش همه‌ی لغات + وضعیت (جدید / سخت / بلد)
 
 let aminWordsState = loadState();
-let allWords = VOCAB || [];
+const allWords = VOCAB || [];
 
 // statusFilter: "all" | "new" | "known" | "hard"
 function renderWordsTable(filterText = "", statusFilter = "all") {
@@ -16,24 +16,22 @@ function renderWordsTable(filterText = "", statusFilter = "all") {
   let newCount = 0;
 
   const txt = (filterText || "").toLowerCase();
-  const validFilters = ["all", "new", "known", "hard"];
-  if (!validFilters.includes(statusFilter)) {
-    statusFilter = "all";
-  }
 
   for (let w of allWords) {
     const ws = getWordState(aminWordsState, w);
-    const status = classifyWord(ws); // "new" | "known" | "hard"
+    const status = classifyWord(ws); // "new" | "hard" | "known"
 
-    // آمار
+    // آمار کلی
     if (status === "hard") hardCount++;
     else if (status === "known") knownCount++;
     else newCount++;
 
-    // فیلتر وضعیت
-    if (statusFilter !== "all" && status !== statusFilter) continue;
+    // فیلتر بر اساس وضعیت
+    if (statusFilter !== "all" && status !== statusFilter) {
+      continue;
+    }
 
-    // فیلتر جستجو
+    // فیلتر بر اساس متن جستجو (کلمه یا معنی)
     if (txt) {
       const wordText = (w.word || "").toLowerCase();
       const meaningText = (w.meaning_fa || "").toLowerCase();
@@ -42,6 +40,7 @@ function renderWordsTable(filterText = "", statusFilter = "all") {
       }
     }
 
+    // ساخت سطر جدول
     const tr = document.createElement("tr");
     const tdWord = document.createElement("td");
     const tdMeaning = document.createElement("td");
@@ -65,6 +64,7 @@ function renderWordsTable(filterText = "", statusFilter = "all") {
     }
 
     tdStatus.appendChild(span);
+
     tr.appendChild(tdWord);
     tr.appendChild(tdMeaning);
     tr.appendChild(tdStatus);
@@ -91,8 +91,13 @@ document.addEventListener("DOMContentLoaded", () => {
     renderWordsTable(txt, st);
   }
 
-  if (searchInput) searchInput.addEventListener("input", updateTable);
-  if (statusSelect) statusSelect.addEventListener("change", updateTable);
+  if (searchInput) {
+    searchInput.addEventListener("input", updateTable);
+  }
+  if (statusSelect) {
+    statusSelect.addEventListener("change", updateTable);
+  }
 
+  // اولین رندر
   updateTable();
 });
