@@ -1,13 +1,14 @@
 // js/hard.js
-// نمایش فلش‌کارت برای کلمات سخت (hard)
+// فلش‌کارت برای کلمات سخت (hard) با دکمه «نمایش معنی»
 
 let aminStateHard = loadState();
-const ALL_WORDS = VOCAB || [];
+const ALL_WORDS_HARD = VOCAB || [];
 
 let hardList = [];
 let hardIndex = 0;
+let hardMeaningVisible = false;
 
-// ------------------ کمک‌تابع‌ها ------------------
+// ---------- کمک‌تابع ----------
 
 function shuffleHard(arr) {
   for (let i = arr.length - 1; i > 0; i--) {
@@ -16,26 +17,32 @@ function shuffleHard(arr) {
   }
 }
 
-// لیست سخت‌ها را هر بار از روی وضعیت واقعی می‌سازد
+// هر بار لیست سخت‌ها را از روی state واقعی می‌سازد
 function computeHardList() {
-  hardList = ALL_WORDS.filter((w) => {
+  hardList = ALL_WORDS_HARD.filter((w) => {
     const s = getWordState(aminStateHard, w);
     return classifyWord(s) === "hard";
   });
 
+  const wordEl = document.getElementById("hardWord");
+  const box = document.getElementById("hardMeaningBox");
+  const btnShow = document.getElementById("btnShowHardMeaning");
+
   if (!hardList.length) {
-    const wordEl = document.getElementById("hardWord");
-    const meaningEl = document.getElementById("hardMeaning");
     if (wordEl) wordEl.textContent = "فعلاً هیچ لغت سختی نداری 👌";
-    if (meaningEl) {
-      meaningEl.innerHTML =
-        "از بخش «یادگیری»، لغات را با دکمه ⭐ سخت علامت بزن یا چند بار در تست غلط جواب بده تا اینجا ظاهر شوند.";
+    if (box) {
+      box.style.display = "block";
+      box.innerHTML =
+        "از بخش «یادگیری» لغات را با دکمه ⭐ سخت علامت بزن یا در تست، چند بار غلط بزن تا اینجا ظاهر شوند.";
     }
+    if (btnShow) btnShow.style.display = "none";
     return false;
   }
 
   shuffleHard(hardList);
   hardIndex = 0;
+  hardMeaningVisible = false;
+  if (btnShow) btnShow.style.display = "inline-block";
   return true;
 }
 
@@ -44,27 +51,44 @@ function renderHard() {
 
   const w = hardList[hardIndex];
   const wordEl = document.getElementById("hardWord");
-  const meaningEl = document.getElementById("hardMeaning");
+  const box = document.getElementById("hardMeaningBox");
+  const btnShow = document.getElementById("btnShowHardMeaning");
 
   if (wordEl) wordEl.textContent = w.word;
 
-  if (meaningEl) {
-    meaningEl.innerHTML =
-      "<b>📘 معنی:</b> " +
-      (w.meaning_fa || "-") +
-      "<br><br><b>✏ مثال (English):</b> " +
-      (w.example_en || "-") +
-      "<br><br><b>📌 کاربرد:</b> " +
-      (w.usage_fa || "-") +
-      "<br><br><b>💡 نکتهٔ حفظ:</b> " +
-      (w.note || "-");
+  if (box) {
+    if (!hardMeaningVisible) {
+      box.style.display = "none";
+      box.innerHTML = "";
+    } else {
+      box.style.display = "block";
+      box.innerHTML =
+        "<b>📘 معنی:</b> " +
+        (w.meaning_fa || "-") +
+        "<br><br><b>✏ مثال (English):</b> " +
+        (w.example_en || "-") +
+        "<br><br><b>📌 کاربرد:</b> " +
+        (w.usage_fa || "-") +
+        "<br><br><b>💡 نکتهٔ حفظ:</b> " +
+        (w.note || "-");
+    }
   }
+
+  if (btnShow) {
+    btnShow.textContent = hardMeaningVisible ? "پنهان کردن معنی" : "نمایش معنی";
+  }
+}
+
+function toggleHardMeaning() {
+  hardMeaningVisible = !hardMeaningVisible;
+  renderHard();
 }
 
 function nextHard() {
   if (!hardList.length) return;
   hardIndex++;
   if (hardIndex >= hardList.length) hardIndex = 0;
+  hardMeaningVisible = false;
   renderHard();
 }
 
@@ -72,10 +96,11 @@ function prevHard() {
   if (!hardList.length) return;
   hardIndex--;
   if (hardIndex < 0) hardIndex = hardList.length - 1;
+  hardMeaningVisible = false;
   renderHard();
 }
 
-// ------------------ init ------------------
+// ---------- init ----------
 
 document.addEventListener("DOMContentLoaded", () => {
   if (!computeHardList()) return;
@@ -85,9 +110,11 @@ document.addEventListener("DOMContentLoaded", () => {
   const nextBtn = document.getElementById("btnHardNext");
   const prevBtn = document.getElementById("btnHardPrev");
   const speakBtn = document.getElementById("btnSpeakHard");
+  const showBtn = document.getElementById("btnShowHardMeaning");
 
   if (nextBtn) nextBtn.onclick = nextHard;
   if (prevBtn) prevBtn.onclick = prevHard;
+  if (showBtn) showBtn.onclick = toggleHardMeaning;
 
   if (speakBtn) {
     speakBtn.onclick = () => {
