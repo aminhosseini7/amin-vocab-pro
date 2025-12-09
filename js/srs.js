@@ -11,10 +11,11 @@ function todayStr() {
   return `${y}-${m}-${day}`;
 }
 
+// کلید یکتا برای هر لغت در state
+// ✅ فقط و فقط خود کلمه را کلید می‌کنیم (ساده و پایدار)
 function wordKeyFromObj(w) {
-  // ترجیح: id اگر وجود داشت، وگرنه خود کلمه
+  if (w && typeof w.word === "string") return w.word;
   if (w && typeof w.id !== "undefined") return String(w.id);
-  if (w && typeof w.word === "string") return `w:${w.word}`;
   return String(w);
 }
 
@@ -32,18 +33,43 @@ function defaultWordState() {
   };
 }
 
-// state در storage.js لود می‌شود
+// state در storage.js لود/ذخیره می‌شود
 function getWordState(state, w) {
   const key = wordKeyFromObj(w);
+
+  // اگر قبلاً با فرمت دیگری ذخیره شده بود، اینجا مایگریت می‌کنیم
   if (!state[key]) {
-    state[key] = defaultWordState();
+    let migrated = false;
+
+    // ۱) حالت قدیمی "w:word"
+    if (w && typeof w.word === "string") {
+      const legacyKey1 = `w:${w.word}`;
+      if (state[legacyKey1]) {
+        state[key] = state[legacyKey1];
+        delete state[legacyKey1];
+        migrated = true;
+      }
+    }
+
+    // ۲) حالت قدیمی id خالی
+    if (!migrated && w && typeof w.id !== "undefined") {
+      const legacyKey2 = String(w.id);
+      if (state[legacyKey2]) {
+        state[key] = state[legacyKey2];
+        delete state[legacyKey2];
+        migrated = true;
+      }
+    }
+
+    // اگر هیچ نسخهٔ قدیمی نبود → حالت جدید
+    if (!migrated) {
+      state[key] = defaultWordState();
+    }
   }
 
   const s = state[key];
 
-  // مایگریشن باگ‌های قدیمی:
-  // اگر قبلاً همه را hard=true ذخیره کرده بودیم
-  // ولی هنوز اصلاً دیده نشده‌اند، اینجا اصلاح می‌کنیم.
+  // اگر قبلاً همه را hard=true ذخیره کرده بودیم ولی اصلاً دیده نشده
   if (s.seen === 0 && s.correct === 0 && s.wrong === 0 && s.hard) {
     s.hard = false;
   }
@@ -53,7 +79,6 @@ function getWordState(state, w) {
 
 // ===================== طبقه‌بندی لغت =====================
 // فقط سه حالت: "new" | "hard" | "known"
-// «در حال یادگیری» حذف شد
 
 function classifyWord(s) {
   if (!s) return "new";
@@ -61,14 +86,13 @@ function classifyWord(s) {
   // کاملاً جدید
   if (s.seen === 0) return "new";
 
-  // هر لغتی که حداقل یک‌بار غلط زده شده
-  // یا عمداً hard علامت شده → سخت
+  // هر لغتی که حداقل یک‌بار غلط خورده یا عمداً سخت شده → سخت
   if (s.hard || s.wrong >= 1) return "hard";
 
   // اگر حداقل یک‌بار درست جواب داده شده و غلطی هم نخورده → بلد
   if (s.correct >= 1 && s.wrong === 0) return "known";
 
-  // حالت‌های مرزی را هم به عنوان جدید در نظر بگیر
+  // بقیه را جدید حساب کنیم
   return "new";
 }
 
@@ -84,7 +108,7 @@ function updateSRSState(s, grade) {
   const now = Date.now();
 
   if (grade >= 3) {
-    // پاسخ نسبتاً خوب
+    // پاسخ خوب
     if (s.reps === 0) {
       s.interval = 1; // ۱ روز
     } else if (s.reps === 1) {
@@ -94,7 +118,6 @@ function updateSRSState(s, grade) {
     }
     s.reps += 1;
 
-    // به‌روزرسانی EF
     const newEf =
       s.ef + (0.1 - (5 - grade) * (0.08 + (5 - grade) * 0.02));
     s.ef = Math.max(1.3, Math.min(newEf, 2.8));
