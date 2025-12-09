@@ -1,102 +1,98 @@
-// js/hard.js
-// نمایش فلش‌کارت برای لغات سخت
+// js/words.js
+// نمایش جدول همه‌ی لغات + وضعیت آن‌ها (جدید / بلد / سخت)
 
-let aminStateHard = loadState();
-const ALL_WORDS = VOCAB || [];
+let aminWordsState = loadState();
+let allWords = VOCAB || [];
 
-let hardList = [];
-let hardIndex = 0;
+// statusFilter: "all" | "new" | "known" | "hard"
+function renderWordsTable(filterText = "", statusFilter = "all") {
+  const tbody = document.querySelector("#wordsTable tbody");
+  if (!tbody) return;
 
-// ------------- کمک‌تابع‌ها -------------
+  tbody.innerHTML = "";
 
-function shuffle(arr) {
-  for (let i = arr.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [arr[i], arr[j]] = [arr[j], arr[i]];
+  let hardCount = 0;
+  let knownCount = 0;
+  let newCount = 0;
+
+  const txt = (filterText || "").toLowerCase();
+  const validFilters = ["all", "new", "known", "hard"];
+  if (!validFilters.includes(statusFilter)) {
+    statusFilter = "all";
   }
-}
 
-// لیست لغات سخت را بر اساس state می‌سازد
-function computeHardList() {
-  hardList = ALL_WORDS.filter((w) => {
-    const s = getWordState(aminStateHard, w);
-    return classifyWord(s) === "hard";
-  });
+  for (let w of allWords) {
+    const ws = getWordState(aminWordsState, w);
+    const status = classifyWord(ws); // "new" | "known" | "hard"
 
-  const wordEl = document.getElementById("hardWord");
-  const meaningEl = document.getElementById("hardMeaning");
+    // آمار
+    if (status === "hard") hardCount++;
+    else if (status === "known") knownCount++;
+    else newCount++;
 
-  if (!hardList.length) {
-    if (wordEl) wordEl.textContent = "فعلاً هیچ لغت سختی نداری 👌";
-    if (meaningEl) {
-      meaningEl.innerHTML =
-        "در بخش «یادگیری»، لغاتی که بلد نیستی را با دکمه ⭐ سخت علامت بزن، بعد بیا اینجا مرورشان کن.";
+    // فیلتر وضعیت
+    if (statusFilter !== "all" && status !== statusFilter) continue;
+
+    // فیلتر جستجو
+    if (txt) {
+      const wordText = (w.word || "").toLowerCase();
+      const meaningText = (w.meaning_fa || "").toLowerCase();
+      if (!wordText.includes(txt) && !meaningText.includes(txt)) {
+        continue;
+      }
     }
-    return false;
+
+    const tr = document.createElement("tr");
+    const tdWord = document.createElement("td");
+    const tdMeaning = document.createElement("td");
+    const tdStatus = document.createElement("td");
+
+    tdWord.textContent = w.word;
+    tdMeaning.textContent = w.meaning_fa || "";
+
+    const span = document.createElement("span");
+    span.classList.add("status-pill");
+
+    if (status === "hard") {
+      span.classList.add("status-hard");
+      span.textContent = "سخت";
+    } else if (status === "known") {
+      span.classList.add("status-known");
+      span.textContent = "بلد";
+    } else {
+      span.classList.add("status-new");
+      span.textContent = "جدید";
+    }
+
+    tdStatus.appendChild(span);
+    tr.appendChild(tdWord);
+    tr.appendChild(tdMeaning);
+    tr.appendChild(tdStatus);
+    tbody.appendChild(tr);
   }
 
-  shuffle(hardList);
-  hardIndex = 0;
-  return true;
-}
-
-// یک لغت سخت را رندر می‌کند
-function renderHard() {
-  if (!hardList.length) return;
-
-  const w = hardList[hardIndex];
-  const wordEl = document.getElementById("hardWord");
-  const meaningEl = document.getElementById("hardMeaning");
-
-  if (wordEl) wordEl.textContent = w.word;
-
-  if (meaningEl) {
-    meaningEl.innerHTML =
-      "<b>📘 معنی:</b> " +
-      (w.meaning_fa || "-") +
-      "<br><br><b>✏ مثال (English):</b> " +
-      (w.example_en || "-") +
-      "<br><br><b>📌 کاربرد:</b> " +
-      (w.usage_fa || "-") +
-      "<br><br><b>💡 نکته:</b> " +
-      (w.note || "-");
+  const summary = document.getElementById("wordsSummary");
+  if (summary) {
+    summary.textContent =
+      "کل لغات: " + allWords.length +
+      " | سخت: " + hardCount +
+      " | بلد: " + knownCount +
+      " | جدید: " + newCount;
   }
 }
-
-// دکمه‌ی بعدی / قبلی
-function nextHard() {
-  if (!hardList.length) return;
-  hardIndex++;
-  if (hardIndex >= hardList.length) hardIndex = 0;
-  renderHard();
-}
-
-function prevHard() {
-  if (!hardList.length) return;
-  hardIndex--;
-  if (hardIndex < 0) hardIndex = hardList.length - 1;
-  renderHard();
-}
-
-// ------------- init -------------
 
 document.addEventListener("DOMContentLoaded", () => {
-  if (!computeHardList()) return;
+  const searchInput = document.getElementById("searchInput");
+  const statusSelect = document.getElementById("statusFilter");
 
-  renderHard();
-
-  const btnNext = document.getElementById("btnHardNext");
-  const btnPrev = document.getElementById("btnHardPrev");
-  const speakBtn = document.getElementById("btnSpeakHard");
-
-  if (btnNext) btnNext.onclick = nextHard;
-  if (btnPrev) btnPrev.onclick = prevHard;
-
-  if (speakBtn) {
-    speakBtn.onclick = () => {
-      if (!hardList.length) return;
-      const w = hardList[hardIndex];
-      if (w && w.word) speakTextEn(w.word);
-    };
+  function updateTable() {
+    const txt = searchInput ? searchInput.value.trim() : "";
+    const st = statusSelect ? statusSelect.value : "all";
+    renderWordsTable(txt, st);
   }
+
+  if (searchInput) searchInput.addEventListener("input", updateTable);
+  if (statusSelect) statusSelect.addEventListener("change", updateTable);
+
+  updateTable();
 });
