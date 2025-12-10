@@ -36,6 +36,24 @@
       margin-top: 0;
       text-align: center;
     }
+
+
+        .toolbar {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 10px;
+    }
+    .toolbar select {
+      border-radius: 999px;
+      border: none;
+      padding: 8px 12px;
+      font-size: 13px;
+      outline: none;
+    }
+
+
+
+    
     .word {
       font-size: 30px;
       font-weight: 700;
@@ -108,6 +126,17 @@
   <div class="container">
     <div class="card">
       <h1>فلش‌کارت لغات سخت</h1>
+
+            <h1>فلش‌کارت لغات سخت</h1>
+
+      <div class="toolbar">
+        <select id="hardLessonFilter">
+          <option value="all">همهٔ درس‌ها</option>
+          <!-- بقیه درس‌ها با JS پر می‌شود -->
+        </select>
+      </div>
+
+      
       <div class="word" id="hardWord">...</div>
 
       <div class="btn-row">
