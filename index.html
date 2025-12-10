@@ -117,7 +117,21 @@
     <div class="card" id="card">
       <h1>فلش‌کارت روزانه</h1>
 
-      <div class="word" id="wordBox">...</div>
+      <h1>فلش‌کارت روزانه</h1>
+        
+        <div style="margin: 10px 0; text-align: center;">
+          <label for="lessonFilter" style="font-size: 13px; margin-left: 6px;">
+            انتخاب درس:
+          </label>
+          <select id="lessonFilter"
+                  style="padding: 6px 10px; border-radius: 999px; border: none; font-size: 13px;">
+            <option value="">همهٔ لغات</option>
+            <!-- بقیهٔ درس‌ها از داخل flashcards.js به‌صورت خودکار اضافه می‌شن -->
+          </select>
+        </div>
+        
+        <div class="word" id="wordBox">...</div>
+
 
       <div class="btn-row">
         <button id="btnSpeakFlash">🔊 تلفظ</button>
