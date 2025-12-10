@@ -1,5 +1,5 @@
 // js/flashcards.js
-// فلش‌کارت روزانه با SRS + فیلتر درس + حفظ فیلتر بین صفحات
+// فلش‌کارت روزانه با SRS + فیلتر درس + حفظ فیلتر فقط برای همین صفحه
 
 // Auto-generated from vocab_ALL_1-471_merged.xlsx
 let words = (typeof VOCAB !== "undefined" ? VOCAB.slice() : []);
@@ -13,14 +13,18 @@ const DAILY_TIME_GOAL_MIN = 30;   // ۳۰ دقیقه
 const DAILY_NEW_WORD_GOAL = 20;   // ۲۰ لغت جدید
 const DAILY_HARD_GOAL = 5;        // ۵ لغت سخت
 
-// کلید ذخیره فیلتر درس صفحه‌ی اصلی
+// کلید ذخیره فیلتر درس فقط برای صفحه‌ی فلش‌کارت
 const MAIN_LESSON_FILTER_KEY = "amin_main_lesson_filter_v1";
+
+// فیلتر فعلی درس در این صفحه
+let currentLessonFilterMain = "all";
 
 // ---------------------- ذخیره / لود فیلتر درس ----------------------
 
 function saveMainLessonFilter(val) {
   try {
-    localStorage.setItem(MAIN_LESSON_FILTER_KEY, val || "all");
+    currentLessonFilterMain = val || "all";
+    localStorage.setItem(MAIN_LESSON_FILTER_KEY, currentLessonFilterMain);
   } catch (e) {
     console.warn("Cannot save main lesson filter:", e);
   }
@@ -34,12 +38,6 @@ function loadMainLessonFilter() {
     console.warn("Cannot load main lesson filter:", e);
     return "all";
   }
-}
-
-function getCurrentLessonFilterMain() {
-  const sel = document.getElementById("lessonFilterMain");
-  if (!sel) return "all";
-  return sel.value || "all";
 }
 
 // --------------------------- شافل اولیه -----------------------------
@@ -86,17 +84,15 @@ function formatTime(sec) {
 
 function computeDueOrder() {
   const now = Date.now();
-  const currentLessonFilter = getCurrentLessonFilterMain(); // "all" یا شماره درس
+  const lessonFilter = currentLessonFilterMain || "all";
   const due = [];
   const rest = [];
 
   for (let w of words) {
     // اگر فیلتر درس فعال است، لغات درس‌های دیگر را رد کن
-    if (currentLessonFilter !== "all") {
+    if (lessonFilter !== "all") {
       const wl = (w.lesson != null ? String(w.lesson) : "");
-      if (wl !== String(currentLessonFilter)) {
-        continue;
-      }
+      if (wl !== String(lessonFilter)) continue;
     }
 
     const ws = getWordState(aminState, w);
@@ -115,12 +111,11 @@ function computeDueOrder() {
   } else if (rest.length) {
     dueOrder = rest;
   } else {
-    // اگر فیلتر درس آن‌قدر تنگ بود که هیچ لغتی نیامد،
-    // به‌صورت fallback از همه‌ی لغات (همان درس) استفاده کن
+    // اگر در این درس لغتی پیدا نشد، حداقل همه لغات آن درس (یا همه) را استفاده کن
     const allFiltered = words.filter(w => {
-      if (currentLessonFilter === "all") return true;
+      if (lessonFilter === "all") return true;
       const wl = (w.lesson != null ? String(w.lesson) : "");
-      return wl === String(currentLessonFilter);
+      return wl === String(lessonFilter);
     });
     dueOrder = allFiltered.length ? allFiltered.slice() : words.slice();
     shuffleArray(dueOrder);
@@ -198,11 +193,9 @@ function showMeaning() {
 
   const box = document.getElementById("meaningBox");
   const btn = document.getElementById("showMeaningBtn");
-
   if (!box || !btn) return;
 
   box.style.display = "block";
-
   box.innerHTML =
     "📘 معنی:<br>" +
     (w.meaning_fa || "-") +
@@ -294,20 +287,25 @@ function startTimer() {
 // ===================================================================
 
 document.addEventListener("DOMContentLoaded", () => {
-  // ۱) فیلتر درس صفحه اصلی را از localStorage بازیابی کن
+  // ۱) فیلتر ذخیره‌شده را برای این صفحه لود کن
+  currentLessonFilterMain = loadMainLessonFilter();
+
   const lessonSelect = document.getElementById("lessonFilterMain");
   if (lessonSelect) {
-    const savedLesson = loadMainLessonFilter(); // "all" یا شماره درس
     // اگر option متناظر وجود دارد، همان را انتخاب کن
-    if ([...lessonSelect.options].some(opt => opt.value === savedLesson)) {
-      lessonSelect.value = savedLesson;
+    if ([...lessonSelect.options].some(opt => opt.value === currentLessonFilterMain)) {
+      lessonSelect.value = currentLessonFilterMain;
+    } else {
+      currentLessonFilterMain = "all";
+      lessonSelect.value = "all";
     }
 
-    // هر بار تغییر، در localStorage ذخیره و SRS را روی همان درس از نو بساز
+    // هر بار تغییر، فقط برای همین صفحه ذخیره کن
     lessonSelect.addEventListener("change", () => {
       const val = lessonSelect.value || "all";
       saveMainLessonFilter(val);
       currentIndex = 0;
+      dueOrder = [];
       computeDueOrder();
       renderCurrent();
     });
