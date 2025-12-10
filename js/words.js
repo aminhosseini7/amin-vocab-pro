@@ -1,22 +1,11 @@
 // js/words.js
-// نمایش همه‌ی لغات + وضعیت (جدید / سخت / بلد)
+// نمایش همه‌ی لغات + وضعیت (جدید / سخت / بلد) + فیلتر بر اساس درس
 
 let aminWordsState = loadState();
 const allWords = VOCAB || [];
 
-// لیست یکتای درس‌ها
-function getUniqueLessonsWords() {
-  const set = new Set();
-  for (let w of allWords) {
-    if (w.lesson !== undefined && w.lesson !== null && w.lesson !== "") {
-      set.add(String(w.lesson));
-    }
-  }
-  return Array.from(set).sort();
-}
-
 // statusFilter: "all" | "new" | "known" | "hard"
-// lessonFilter: "all" | "<lesson-id>"
+// lessonFilter: "all" یا شماره درس به‌صورت رشته مثل "1", "2", ...
 function renderWordsTable(filterText = "", statusFilter = "all", lessonFilter = "all") {
   const tbody = document.querySelector("#wordsTable tbody");
   if (!tbody) return;
@@ -44,11 +33,11 @@ function renderWordsTable(filterText = "", statusFilter = "all", lessonFilter = 
     }
 
     // فیلتر بر اساس درس
-    if (lessonFilter !== "all") {
-      const ls = (w.lesson !== undefined && w.lesson !== null) ? String(w.lesson) : "";
-      if (ls !== lessonFilter) {
-        continue;
-      }
+    const lesson = (w.lesson != null && w.lesson !== "")
+      ? String(w.lesson)
+      : "";
+    if (lessonFilter !== "all" && lesson !== lessonFilter) {
+      continue;
     }
 
     // فیلتر بر اساس متن جستجو (کلمه یا معنی)
@@ -104,19 +93,32 @@ function renderWordsTable(filterText = "", statusFilter = "all", lessonFilter = 
 document.addEventListener("DOMContentLoaded", () => {
   const searchInput = document.getElementById("searchInput");
   const statusSelect = document.getElementById("statusFilter");
-  const lessonSelect = document.getElementById("lessonFilterWords");
+  const lessonSelect = document.getElementById("lessonFilter");
 
-  // اگر دراپ‌داون درس‌ها در HTML موجود است، پرش می‌کنیم
+  // پر کردن لیست درس‌ها از روی VOCAB
   if (lessonSelect) {
+    const lessonsSet = new Set();
+
+    allWords.forEach(w => {
+      if (w.lesson != null && w.lesson !== "") {
+        lessonsSet.add(String(w.lesson));
+      }
+    });
+
+    const sortedLessons = Array.from(lessonsSet).sort((a, b) => {
+      const na = Number(a), nb = Number(b);
+      if (!isNaN(na) && !isNaN(nb)) return na - nb;
+      return a.localeCompare(b);
+    });
+
     lessonSelect.innerHTML = "";
 
     const optAll = document.createElement("option");
     optAll.value = "all";
-    optAll.textContent = "همهٔ دروس";
+    optAll.textContent = "همهٔ درس‌ها";
     lessonSelect.appendChild(optAll);
 
-    const lessons = getUniqueLessonsWords();
-    lessons.forEach(ls => {
+    sortedLessons.forEach(ls => {
       const opt = document.createElement("option");
       opt.value = ls;
       opt.textContent = "درس " + ls;
@@ -144,3 +146,4 @@ document.addEventListener("DOMContentLoaded", () => {
   // اولین رندر
   updateTable();
 });
+
