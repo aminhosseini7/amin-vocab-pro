@@ -3,7 +3,10 @@
 // لیست لغات از vocab.js خوانده می‌شود (ثابت، بدون هوش مصنوعی)
 let words = (typeof VOCAB !== "undefined" ? VOCAB.slice() : []);
 
-// وضعیت SRS
+// درس فعلی: "all" یعنی همه‌ی دروس
+let currentLesson = "all";
+
+// SRS state
 let aminState = loadState();
 let meta = loadMeta();
 
@@ -20,6 +23,23 @@ function shuffleArray(arr) {
   }
 }
 shuffleArray(words);
+
+// برگرداندن لیست درس‌ها از روی VOCAB
+function getUniqueLessons() {
+  const set = new Set();
+  for (let w of words) {
+    if (w.lesson !== undefined && w.lesson !== null && w.lesson !== "") {
+      set.add(String(w.lesson));
+    }
+  }
+  return Array.from(set).sort();
+}
+
+// کلماتی که در درس فعلی باید در نظر گرفته شوند
+function getActiveWords() {
+  if (currentLesson === "all") return words;
+  return words.filter(w => String(w.lesson) === String(currentLesson));
+}
 
 // وضعیت
 let currentIndex = 0;
@@ -50,7 +70,7 @@ function formatTime(sec) {
 }
 
 // ===================================================================
-//            محاسبه ترتیب نمایش SRS
+//            محاسبه ترتیب نمایش SRS (بر اساس درس)
 // ===================================================================
 
 function computeDueOrder() {
@@ -58,7 +78,9 @@ function computeDueOrder() {
   const due = [];
   const rest = [];
 
-  for (let w of words) {
+  const activeWords = getActiveWords();
+
+  for (let w of activeWords) {
     const ws = getWordState(aminState, w);
     if (!ws.nextReview || ws.nextReview <= now) {
       due.push(w);
@@ -75,7 +97,7 @@ function computeDueOrder() {
   } else if (rest.length) {
     dueOrder = rest;
   } else {
-    dueOrder = words.slice();
+    dueOrder = activeWords.slice();
     shuffleArray(dueOrder);
   }
 }
@@ -107,6 +129,9 @@ function updateStatsBox() {
   const hardGoalText = "لغات سخت یادگرفته‌شده امروز: " +
         meta.hardMasteredToday + " / " + DAILY_HARD_GOAL;
 
+  const activeCount = getActiveWords().length;
+  const lessonLabel = (currentLesson === "all" ? "همهٔ دروس" : ("درس " + currentLesson));
+
   const statsEl = document.getElementById("statsBox");
   statsEl.innerHTML =
     "کل لغات: " + total +
@@ -116,7 +141,9 @@ function updateStatsBox() {
     " | در حال یادگیری: " + learningCount +
     "<br>" + timeText +
     "<br>" + newGoalText +
-    "<br>" + hardGoalText;
+    "<br>" + hardGoalText +
+    "<br>درس فعلی: " + lessonLabel +
+    " | تعداد لغات این درس: " + activeCount;
 }
 
 // ===================================================================
@@ -125,6 +152,17 @@ function updateStatsBox() {
 
 function renderCurrent() {
   if (!dueOrder.length) computeDueOrder();
+  if (!dueOrder.length) {
+    // اگر برای این درس لغتی نیست
+    document.getElementById("wordBox").textContent = "لغتی برای این درس پیدا نشد.";
+    const box = document.getElementById("meaningBox");
+    box.style.display = "none";
+    box.innerHTML = "";
+    document.getElementById("showMeaningBtn").style.display = "none";
+    updateStatsBox();
+    return;
+  }
+
   if (currentIndex < 0) currentIndex = 0;
   if (currentIndex >= dueOrder.length) currentIndex = 0;
 
@@ -145,6 +183,8 @@ function renderCurrent() {
 // ===================================================================
 
 function showMeaning() {
+  if (!dueOrder.length) return;
+
   const w = dueOrder[currentIndex];
   const box = document.getElementById("meaningBox");
   const btn = document.getElementById("showMeaningBtn");
@@ -171,6 +211,8 @@ function showMeaning() {
 // ===================================================================
 
 function answerCurrent(known) {
+  if (!dueOrder.length) return;
+
   const w = dueOrder[currentIndex];
   const ws = getWordState(aminState, w);
 
@@ -205,6 +247,8 @@ function answerCurrent(known) {
 }
 
 function markHardCurrent() {
+  if (!dueOrder.length) return;
+
   const w = dueOrder[currentIndex];
   const ws = getWordState(aminState, w);
   ws.hard = true;
@@ -239,6 +283,34 @@ function startTimer() {
 // ===================================================================
 
 document.addEventListener("DOMContentLoaded", () => {
+  // ساخت دراپ‌داون درس‌ها اگر در HTML باشد
+  const lessonSelect = document.getElementById("lessonFilter");
+  if (lessonSelect) {
+    // گزینه‌ی "همهٔ دروس"
+    lessonSelect.innerHTML = "";
+    const optAll = document.createElement("option");
+    optAll.value = "all";
+    optAll.textContent = "همهٔ دروس";
+    lessonSelect.appendChild(optAll);
+
+    // بقیه‌ی درس‌ها از روی VOCAB
+    const lessons = getUniqueLessons();
+    lessons.forEach(ls => {
+      const opt = document.createElement("option");
+      opt.value = ls;
+      opt.textContent = "درس " + ls;
+      lessonSelect.appendChild(opt);
+    });
+
+    lessonSelect.addEventListener("change", () => {
+      currentLesson = lessonSelect.value;
+      currentIndex = 0;
+      dueOrder = [];
+      computeDueOrder();
+      renderCurrent();
+    });
+  }
+
   computeDueOrder();
   renderCurrent();
   startTimer();
@@ -256,7 +328,6 @@ document.addEventListener("DOMContentLoaded", () => {
       if (!dueOrder.length) return;
       const w = dueOrder[currentIndex];
       if (w && w.word) {
-        // تابع تلفظ، اگر جایی تعریف شده باشد:
         try {
           speakTextEn(w.word);
         } catch (e) {
