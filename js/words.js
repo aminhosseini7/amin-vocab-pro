@@ -4,6 +4,28 @@
 
 let aminWordsState = loadState();
 const allWords = VOCAB || [];
+// ساخت گزینه‌های درس از روی فیلد lesson در VOCAB
+function fillLessonFilterOptions(selectEl) {
+  if (!selectEl) return;
+
+  const lessonsSet = new Set();
+
+  allWords.forEach((w) => {
+    if (w.lesson != null && w.lesson !== "") {
+      lessonsSet.add(String(w.lesson));
+    }
+  });
+
+  const lessons = Array.from(lessonsSet).sort((a, b) => Number(a) - Number(b));
+
+  lessons.forEach((ls) => {
+    const opt = document.createElement("option");
+    opt.value = ls;
+    opt.textContent = "درس " + ls;
+    selectEl.appendChild(opt);
+  });
+}
+
 
 // کلید ذخیره‌سازی تنظیمات فیلتر
 const WORDS_FILTER_STATE_KEY = "amin_words_filters_v1";
@@ -125,7 +147,12 @@ document.addEventListener("DOMContentLoaded", () => {
   const statusSelect = document.getElementById("statusFilter");
   const lessonSelect = document.getElementById("lessonFilter");
 
-  // اول، تنظیمات ذخیره‌شده را لود کن
+  // ۱) optionهای درس را از روی VOCAB بساز
+  if (lessonSelect) {
+    fillLessonFilterOptions(lessonSelect);
+  }
+
+  // ۲) تنظیمات ذخیره‌شده را لود کن
   const saved = loadWordsFilterState();
 
   if (searchInput && typeof saved.filterText === "string") {
@@ -135,7 +162,12 @@ document.addEventListener("DOMContentLoaded", () => {
     statusSelect.value = saved.statusFilter;
   }
   if (lessonSelect && saved.lessonFilter) {
-    lessonSelect.value = saved.lessonFilter;
+    const exists = [...lessonSelect.options].some(
+      (opt) => opt.value === saved.lessonFilter
+    );
+    if (exists) {
+      lessonSelect.value = saved.lessonFilter;
+    }
   }
 
   function updateTable() {
@@ -158,6 +190,6 @@ document.addEventListener("DOMContentLoaded", () => {
     lessonSelect.addEventListener("change", updateTable);
   }
 
-  // اولین رندر بر اساس تنظیمات ذخیره‌شده (یا پیش‌فرض)
+  // ۳) اولین رندر بر اساس تنظیمات ذخیره‌شده (یا پیش‌فرض)
   updateTable();
 });
