@@ -142,6 +142,8 @@ function renderWordsTable(filterText = "", statusFilter = "all", lessonFilter = 
   }
 }
 
+
+
 document.addEventListener("DOMContentLoaded", () => {
   const searchInput = document.getElementById("searchInput");
   const statusSelect = document.getElementById("statusFilter");
