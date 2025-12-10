@@ -492,3 +492,8 @@ const VOCAB = [
 
   
 ];
+
+
+
+console.log("VOCAB loaded. Total words:", VOCAB.length);
+
