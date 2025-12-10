@@ -4,8 +4,20 @@
 let aminWordsState = loadState();
 const allWords = VOCAB || [];
 
+// لیست یکتای درس‌ها
+function getUniqueLessonsWords() {
+  const set = new Set();
+  for (let w of allWords) {
+    if (w.lesson !== undefined && w.lesson !== null && w.lesson !== "") {
+      set.add(String(w.lesson));
+    }
+  }
+  return Array.from(set).sort();
+}
+
 // statusFilter: "all" | "new" | "known" | "hard"
-function renderWordsTable(filterText = "", statusFilter = "all") {
+// lessonFilter: "all" | "<lesson-id>"
+function renderWordsTable(filterText = "", statusFilter = "all", lessonFilter = "all") {
   const tbody = document.querySelector("#wordsTable tbody");
   if (!tbody) return;
 
@@ -29,6 +41,14 @@ function renderWordsTable(filterText = "", statusFilter = "all") {
     // فیلتر بر اساس وضعیت
     if (statusFilter !== "all" && status !== statusFilter) {
       continue;
+    }
+
+    // فیلتر بر اساس درس
+    if (lessonFilter !== "all") {
+      const ls = (w.lesson !== undefined && w.lesson !== null) ? String(w.lesson) : "";
+      if (ls !== lessonFilter) {
+        continue;
+      }
     }
 
     // فیلتر بر اساس متن جستجو (کلمه یا معنی)
@@ -84,11 +104,31 @@ function renderWordsTable(filterText = "", statusFilter = "all") {
 document.addEventListener("DOMContentLoaded", () => {
   const searchInput = document.getElementById("searchInput");
   const statusSelect = document.getElementById("statusFilter");
+  const lessonSelect = document.getElementById("lessonFilterWords");
+
+  // اگر دراپ‌داون درس‌ها در HTML موجود است، پرش می‌کنیم
+  if (lessonSelect) {
+    lessonSelect.innerHTML = "";
+
+    const optAll = document.createElement("option");
+    optAll.value = "all";
+    optAll.textContent = "همهٔ دروس";
+    lessonSelect.appendChild(optAll);
+
+    const lessons = getUniqueLessonsWords();
+    lessons.forEach(ls => {
+      const opt = document.createElement("option");
+      opt.value = ls;
+      opt.textContent = "درس " + ls;
+      lessonSelect.appendChild(opt);
+    });
+  }
 
   function updateTable() {
     const txt = searchInput ? searchInput.value.trim() : "";
     const st = statusSelect ? statusSelect.value : "all";
-    renderWordsTable(txt, st);
+    const ls = lessonSelect ? lessonSelect.value : "all";
+    renderWordsTable(txt, st, ls);
   }
 
   if (searchInput) {
@@ -96,6 +136,9 @@ document.addEventListener("DOMContentLoaded", () => {
   }
   if (statusSelect) {
     statusSelect.addEventListener("change", updateTable);
+  }
+  if (lessonSelect) {
+    lessonSelect.addEventListener("change", updateTable);
   }
 
   // اولین رندر
