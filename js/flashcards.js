@@ -16,15 +16,11 @@ const DAILY_HARD_GOAL = 5;        // ۵ لغت سخت
 // کلید ذخیره فیلتر درس فقط برای صفحه‌ی فلش‌کارت
 const MAIN_LESSON_FILTER_KEY = "amin_main_lesson_filter_v1";
 
-// فیلتر فعلی درس در این صفحه
-let currentLessonFilterMain = "all";
-
 // ---------------------- ذخیره / لود فیلتر درس ----------------------
 
 function saveMainLessonFilter(val) {
   try {
-    currentLessonFilterMain = val || "all";
-    localStorage.setItem(MAIN_LESSON_FILTER_KEY, currentLessonFilterMain);
+    localStorage.setItem(MAIN_LESSON_FILTER_KEY, val || "all");
   } catch (e) {
     console.warn("Cannot save main lesson filter:", e);
   }
@@ -38,6 +34,15 @@ function loadMainLessonFilter() {
     console.warn("Cannot load main lesson filter:", e);
     return "all";
   }
+}
+
+// همیشه سعی کن اول از خود select بخوانی، اگر نبود، از localStorage
+function getLessonFilterForFlash() {
+  const sel = document.getElementById("lessonFilterMain");
+  if (sel) {
+    return sel.value || "all";
+  }
+  return loadMainLessonFilter();
 }
 
 // --------------------------- شافل اولیه -----------------------------
@@ -84,7 +89,7 @@ function formatTime(sec) {
 
 function computeDueOrder() {
   const now = Date.now();
-  const lessonFilter = currentLessonFilterMain || "all";
+  const lessonFilter = getLessonFilterForFlash(); // "all" یا شماره درس
   const due = [];
   const rest = [];
 
@@ -112,7 +117,7 @@ function computeDueOrder() {
     dueOrder = rest;
   } else {
     // اگر در این درس لغتی پیدا نشد، حداقل همه لغات آن درس (یا همه) را استفاده کن
-    const allFiltered = words.filter(w => {
+    const allFiltered = words.filter((w) => {
       if (lessonFilter === "all") return true;
       const wl = (w.lesson != null ? String(w.lesson) : "");
       return wl === String(lessonFilter);
@@ -287,20 +292,19 @@ function startTimer() {
 // ===================================================================
 
 document.addEventListener("DOMContentLoaded", () => {
-  // ۱) فیلتر ذخیره‌شده را برای این صفحه لود کن
-  currentLessonFilterMain = loadMainLessonFilter();
-
   const lessonSelect = document.getElementById("lessonFilterMain");
+
+  // ۱) فیلتر ذخیره‌شده را برای همین صفحه لود کن و روی select اعمال کن
   if (lessonSelect) {
-    // اگر option متناظر وجود دارد، همان را انتخاب کن
-    if ([...lessonSelect.options].some(opt => opt.value === currentLessonFilterMain)) {
-      lessonSelect.value = currentLessonFilterMain;
+    const savedLesson = loadMainLessonFilter(); // "all" یا شماره درس
+    if ([...lessonSelect.options].some(opt => opt.value === savedLesson)) {
+      lessonSelect.value = savedLesson;
     } else {
-      currentLessonFilterMain = "all";
       lessonSelect.value = "all";
+      saveMainLessonFilter("all");
     }
 
-    // هر بار تغییر، فقط برای همین صفحه ذخیره کن
+    // هر بار تغییر، فیلتر را ذخیره کن و ترتیب SRS را از نو بساز
     lessonSelect.addEventListener("change", () => {
       const val = lessonSelect.value || "all";
       saveMainLessonFilter(val);
