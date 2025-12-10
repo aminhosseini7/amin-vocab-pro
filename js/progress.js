@@ -1,40 +1,99 @@
-let aminProgState = loadState();
-let progWords = VOCAB || [];
-let metaProg = loadMeta();
+// js/progress.js
+// نمایش آمار کلی + وضعیت هر درس (کل، بلد، سخت، جدید، درصد بلد)
 
-document.addEventListener("DOMContentLoaded", () => {
-  const total = progWords.length;
-  let hardCount = 0, knownCount = 0, learningCount = 0, newCount = 0;
-  let totalReviews = 0;
+let aminState = loadState();
+const allWords = VOCAB || [];
 
-  for (let w of progWords) {
-    const ws = getWordState(aminProgState, w);
-    totalReviews += ws.seen || 0;
-    const c = classifyWord(ws);
-    if (c === "hard") hardCount++;
-    else if (c === "known") knownCount++;
-    else if (c === "learning") learningCount++;
-    else newCount++;
+function buildLessonStats() {
+  const statsDiv = document.getElementById("progressStats");
+  if (!statsDiv) return;
+
+  if (!allWords.length) {
+    statsDiv.textContent = "هیچ لغتی در دیتابیس پیدا نشد.";
+    return;
   }
 
-  // اهداف را مثل flashcards.js نگه می‌داریم
-  const DAILY_TIME_GOAL_MIN = 30;
-  const DAILY_NEW_WORD_GOAL = 20;
-  const DAILY_HARD_GOAL = 5;
+  // آمار کلی
+  let total = allWords.length;
+  let known = 0;
+  let hard = 0;
+  let neu = 0;
 
-  const statsEl = document.getElementById("progressStats");
-  statsEl.innerHTML =
-    "کل لغات: " + total + "<br>" +
-    "لغات سخت (فعلی): " + hardCount + "<br>" +
-    "لغات بلد: " + knownCount + "<br>" +
-    "در حال یادگیری: " + learningCount + "<br>" +
-    "لغات جدید: " + newCount + "<br>" +
-    "تعداد کل دفعات مرور (همه روزها): " + totalReviews + "<br><br>" +
-    "📅 امروز (" + metaProg.date + ")<br>" +
-    "⏱ زمان مطالعه امروز: " + Math.floor(metaProg.secondsToday / 60) +
-      " دقیقه (هدف: " + DAILY_TIME_GOAL_MIN + " دقیقه)<br>" +
-    "✅ لغات جدید یادگرفته‌شده امروز: " +
-      metaProg.learnedToday + " / " + DAILY_NEW_WORD_GOAL + "<br>" +
-    "🔥 لغات سختِ یادگرفته‌شده امروز: " +
-      metaProg.hardMasteredToday + " / " + DAILY_HARD_GOAL;
-});
+  // map: lesson → { total, known, hard, neu }
+  const lessonsMap = new Map();
+
+  for (const w of allWords) {
+    const lesson = (typeof w.lesson !== "undefined" ? w.lesson : "بدون‌درس");
+    const ws = getWordState(aminState, w);
+    const status = classifyWord(ws); // "new" | "hard" | "known"
+
+    if (!lessonsMap.has(lesson)) {
+      lessonsMap.set(lesson, { total: 0, known: 0, hard: 0, neu: 0 });
+    }
+    const ls = lessonsMap.get(lesson);
+
+    ls.total++;
+
+    if (status === "known") {
+      known++;
+      ls.known++;
+    } else if (status === "hard") {
+      hard++;
+      ls.hard++;
+    } else {
+      neu++;
+      ls.neu++;
+    }
+  }
+
+  // مرتب‌سازی درس‌ها (عددی‌ها اول، «بدون‌درس» آخر)
+  const lessonKeys = Array.from(lessonsMap.keys()).sort((a, b) => {
+    const na = typeof a === "number" ? a : 1e9;
+    const nb = typeof b === "number" ? b : 1e9;
+    return na - nb;
+  });
+
+  let html = "";
+
+  // خط آمار کلی
+  html +=
+    "کل لغات: " + total +
+    " | بلد: " + known +
+    " | سخت: " + hard +
+    " | جدید: " + neu +
+    "<br><br>";
+
+  // جدول درس به درس
+  html += '<table style="width:100%;border-collapse:collapse;font-size:13px;">';
+  html +=
+    '<thead><tr>' +
+      '<th style="text-align:right;border-bottom:1px solid rgba(148,163,184,0.4);padding:4px 6px;">درس</th>' +
+      '<th style="text-align:right;border-bottom:1px solid rgba(148,163,184,0.4);padding:4px 6px;">کل</th>' +
+      '<th style="text-align:right;border-bottom:1px solid rgba(148,163,184,0.4);padding:4px 6px;">بلد</th>' +
+      '<th style="text-align:right;border-bottom:1px solid rgba(148,163,184,0.4);padding:4px 6px;">سخت</th>' +
+      '<th style="text-align:right;border-bottom:1px solid rgba(148,163,184,0.4);padding:4px 6px;">جدید</th>' +
+      '<th style="text-align:right;border-bottom:1px solid rgba(148,163,184,0.4);padding:4px 6px;">٪ بلد</th>' +
+    '</tr></thead><tbody>';
+
+  for (const k of lessonKeys) {
+    const ls = lessonsMap.get(k);
+    const pctKnown = ls.total ? Math.round((ls.known / ls.total) * 100) : 0;
+    const lessonLabel = (k === "بدون‌درس" ? "بدون‌درس" : "درس " + k);
+
+    html +=
+      '<tr>' +
+        '<td style="padding:4px 6px;border-bottom:1px solid rgba(31,41,55,0.7);">' + lessonLabel + "</td>" +
+        '<td style="padding:4px 6px;border-bottom:1px solid rgba(31,41,55,0.7);">' + ls.total + "</td>" +
+        '<td style="padding:4px 6px;border-bottom:1px solid rgba(31,41,55,0.7);">' + ls.known + "</td>" +
+        '<td style="padding:4px 6px;border-bottom:1px solid rgba(31,41,55,0.7);">' + ls.hard + "</td>" +
+        '<td style="padding:4px 6px;border-bottom:1px solid rgba(31,41,55,0.7);">' + ls.neu + "</td>" +
+        '<td style="padding:4px 6px;border-bottom:1px solid rgba(31,41,55,0.7);">' + pctKnown + "%</td>" +
+      "</tr>";
+  }
+
+  html += "</tbody></table>";
+
+  statsDiv.innerHTML = html;
+}
+
+document.addEventListener("DOMContentLoaded", buildLessonStats);
