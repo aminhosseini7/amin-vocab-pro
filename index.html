@@ -105,16 +105,32 @@
       text-shadow: 0 0 8px rgba(251,191,36,0.8);
     }
 
-    /* استایل کوچیک برای فیلتر درس صفحه اصلی */
-    #lessonFilterMain {
-      border-radius: 999px;
-      border: none;
-      padding: 6px 12px;
-      font-size: 13px;
-      outline: none;
-      background: #111827;
-      color: #e5e7eb;
-    }
+/* نوار بالایی برای فیلتر درس */
+.top-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 10px;
+  font-size: 12px;
+  opacity: 0.9;
+}
+
+.lesson-label {
+  color: #e5e7eb;
+}
+
+  /* استایل فیلتر درس صفحه اصلی */
+  #lessonFilterMain {
+    border-radius: 999px;
+    border: 1px solid rgba(148,163,184,0.6);
+    padding: 4px 10px;
+    font-size: 12px;
+    outline: none;
+    background: rgba(15,23,42,0.95);
+    color: #e5e7eb;
+  }
+
 
     @media (max-width: 640px) {
       .container { margin-top: 60px; padding: 12px; }
