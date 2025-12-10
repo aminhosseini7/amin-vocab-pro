@@ -105,6 +105,17 @@
       text-shadow: 0 0 8px rgba(251,191,36,0.8);
     }
 
+    /* استایل کوچیک برای فیلتر درس صفحه اصلی */
+    #lessonFilterMain {
+      border-radius: 999px;
+      border: none;
+      padding: 6px 12px;
+      font-size: 13px;
+      outline: none;
+      background: #111827;
+      color: #e5e7eb;
+    }
+
     @media (max-width: 640px) {
       .container { margin-top: 60px; padding: 12px; }
       .word { font-size: 24px; }
@@ -116,20 +127,36 @@
   <div class="container">
     <div class="card" id="card">
       <h1>فلش‌کارت روزانه</h1>
-        
-        <div style="margin: 10px 0; text-align: center;">
-          <label for="lessonFilter" style="font-size: 13px; margin-left: 6px;">
-            انتخاب درس:
-          </label>
-          <select id="lessonFilter"
-                  style="padding: 6px 10px; border-radius: 999px; border: none; font-size: 13px;">
-            <option value="">همهٔ لغات</option>
-            <!-- بقیهٔ درس‌ها از داخل flashcards.js به‌صورت خودکار اضافه می‌شن -->
-          </select>
-        </div>
-        
-        <div class="word" id="wordBox">...</div>
 
+      <!-- 🔹 این بخش جدید اضافه شد: فیلتر بر اساس درس -->
+      <div class="btn-row">
+        <select id="lessonFilterMain">
+          <option value="all">همه‌ی درس‌ها</option>
+          <option value="1">درس ۱</option>
+          <option value="2">درس ۲</option>
+          <option value="3">درس ۳</option>
+          <option value="4">درس ۴</option>
+          <option value="5">درس ۵</option>
+          <option value="6">درس ۶</option>
+          <option value="7">درس ۷</option>
+          <option value="8">درس ۸</option>
+          <option value="9">درس ۹</option>
+          <option value="10">درس ۱۰</option>
+          <option value="11">درس ۱۱</option>
+          <option value="12">درس ۱۲</option>
+          <option value="13">درس ۱۳</option>
+          <option value="14">درس ۱۴</option>
+          <option value="15">درس ۱۵</option>
+          <option value="16">درس ۱۶</option>
+          <option value="17">درس ۱۷</option>
+          <option value="18">درس ۱۸</option>
+          <option value="19">درس ۱۹</option>
+          <option value="20">درس ۲۰</option>
+        </select>
+      </div>
+      <!-- 🔹 پایان بخش جدید -->
+
+      <div class="word" id="wordBox">...</div>
 
       <div class="btn-row">
         <button id="btnSpeakFlash">🔊 تلفظ</button>
