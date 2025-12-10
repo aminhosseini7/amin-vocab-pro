@@ -1,5 +1,5 @@
 // js/hard.js
-// فلش‌کارت برای کلمات سخت (hard) با دکمه «نمایش معنی» و «یاد گرفتم»
+// فلش‌کارت برای کلمات سخت (hard) با دکمه «نمایش معنی» و «یاد گرفتم» + فیلتر درس
 
 let aminStateHard = loadState();
 const ALL_WORDS_HARD = VOCAB || [];
@@ -7,6 +7,7 @@ const ALL_WORDS_HARD = VOCAB || [];
 let hardList = [];
 let hardIndex = 0;
 let hardMeaningVisible = false;
+let currentHardLesson = "all"; // فیلتر فعلی درس
 
 // ---------- کمک‌تابع ----------
 
@@ -17,11 +18,23 @@ function shuffleHard(arr) {
   }
 }
 
-// هر بار لیست سخت‌ها را از روی state واقعی می‌سازد
+// هر بار لیست سخت‌ها را از روی state واقعی و فیلتر درس می‌سازد
 function computeHardList() {
+  const lessonFilter = currentHardLesson;
+
   hardList = ALL_WORDS_HARD.filter((w) => {
     const s = getWordState(aminStateHard, w);
-    return classifyWord(s) === "hard";
+    if (classifyWord(s) !== "hard") return false;
+
+    const lesson = (w.lesson != null && w.lesson !== "")
+      ? String(w.lesson)
+      : "";
+
+    if (lessonFilter !== "all" && lesson !== lessonFilter) {
+      return false;
+    }
+
+    return true;
   });
 
   const wordEl = document.getElementById("hardWord");
@@ -30,11 +43,22 @@ function computeHardList() {
   const btnMark = document.getElementById("btnHardMarkKnown");
 
   if (!hardList.length) {
-    if (wordEl) wordEl.textContent = "فعلاً هیچ لغت سختی نداری 👌";
+    if (wordEl) {
+      if (lessonFilter === "all") {
+        wordEl.textContent = "فعلاً هیچ لغت سختی نداری 👌";
+      } else {
+        wordEl.textContent = "در این درس فعلاً هیچ لغت سختی نداری 👌";
+      }
+    }
     if (box) {
       box.style.display = "block";
-      box.innerHTML =
-        "از بخش «یادگیری» لغات را با دکمه ⭐ سخت علامت بزن یا در تست، چند بار غلط بزن تا اینجا ظاهر شوند.";
+      if (lessonFilter === "all") {
+        box.innerHTML =
+          "از بخش «یادگیری» لغات را با دکمه ⭐ سخت علامت بزن یا در تست، چند بار غلط بزن تا اینجا ظاهر شوند.";
+      } else {
+        box.innerHTML =
+          "برای این درس هنوز لغتی را به‌عنوان سخت علامت نزدی. از بخش «یادگیری» با ⭐ می‌توانی اضافه کنی.";
+      }
     }
     if (btnShow) btnShow.style.display = "none";
     if (btnMark) btnMark.style.display = "none";
@@ -123,9 +147,9 @@ function markHardAsKnown() {
 
   saveState(aminStateHard);
 
-  // لیست سخت‌ها را دوباره بساز
+  // لیست سخت‌ها را دوباره بساز بر اساس فیلتر فعلی درس
   if (!computeHardList()) {
-    // یعنی دیگر لغت سختی نداریم
+    // یعنی دیگر در این درس (یا کلاً) لغت سختی نداریم
     return;
   }
   renderHard();
@@ -134,6 +158,44 @@ function markHardAsKnown() {
 // ---------- init ----------
 
 document.addEventListener("DOMContentLoaded", () => {
+  // پر کردن لیست درس‌ها برای سخت‌ها
+  const lessonSelect = document.getElementById("hardLessonFilter");
+  if (lessonSelect) {
+    const lessonsSet = new Set();
+
+    ALL_WORDS_HARD.forEach(w => {
+      if (w.lesson != null && w.lesson !== "") {
+        lessonsSet.add(String(w.lesson));
+      }
+    });
+
+    const sortedLessons = Array.from(lessonsSet).sort((a, b) => {
+      const na = Number(a), nb = Number(b);
+      if (!isNaN(na) && !isNaN(nb)) return na - nb;
+      return a.localeCompare(b);
+    });
+
+    lessonSelect.innerHTML = "";
+
+    const optAll = document.createElement("option");
+    optAll.value = "all";
+    optAll.textContent = "همهٔ درس‌ها";
+    lessonSelect.appendChild(optAll);
+
+    sortedLessons.forEach(ls => {
+      const opt = document.createElement("option");
+      opt.value = ls;
+      opt.textContent = "درس " + ls;
+      lessonSelect.appendChild(opt);
+    });
+
+    lessonSelect.addEventListener("change", () => {
+      currentHardLesson = lessonSelect.value || "all";
+      if (!computeHardList()) return;
+      renderHard();
+    });
+  }
+
   if (!computeHardList()) return;
 
   renderHard();
