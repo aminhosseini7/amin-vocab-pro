@@ -1,10 +1,8 @@
 // js/flashcards.js
-// فلش‌کارت‌ها + SRS + فیلتر بر اساس درس (از روی فیلدهای VOCAB مثل lesson / unit / group)
+// فلش‌کارت روزانه با SRS + فیلتر درس + حفظ فیلتر بین صفحات
 
-// ===================== داده‌های اصلی =====================
-
-const ALL_WORDS = (typeof VOCAB !== "undefined" ? VOCAB.slice() : []);
-let words = ALL_WORDS.slice(); // لیست لغات فعال فعلی بر اساس درس انتخاب شده
+// Auto-generated from vocab_ALL_1-471_merged.xlsx
+let words = (typeof VOCAB !== "undefined" ? VOCAB.slice() : []);
 
 // وضعیت SRS
 let aminState = loadState();
@@ -15,59 +13,46 @@ const DAILY_TIME_GOAL_MIN = 30;   // ۳۰ دقیقه
 const DAILY_NEW_WORD_GOAL = 20;   // ۲۰ لغت جدید
 const DAILY_HARD_GOAL = 5;        // ۵ لغت سخت
 
-// شافل
+// کلید ذخیره فیلتر درس صفحه‌ی اصلی
+const MAIN_LESSON_FILTER_KEY = "amin_main_lesson_filter_v1";
+
+// ---------------------- ذخیره / لود فیلتر درس ----------------------
+
+function saveMainLessonFilter(val) {
+  try {
+    localStorage.setItem(MAIN_LESSON_FILTER_KEY, val || "all");
+  } catch (e) {
+    console.warn("Cannot save main lesson filter:", e);
+  }
+}
+
+function loadMainLessonFilter() {
+  try {
+    const v = localStorage.getItem(MAIN_LESSON_FILTER_KEY);
+    return v || "all";
+  } catch (e) {
+    console.warn("Cannot load main lesson filter:", e);
+    return "all";
+  }
+}
+
+function getCurrentLessonFilterMain() {
+  const sel = document.getElementById("lessonFilterMain");
+  if (!sel) return "all";
+  return sel.value || "all";
+}
+
+// --------------------------- شافل اولیه -----------------------------
+
 function shuffleArray(arr) {
   for (let i = arr.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [arr[i], arr[j]] = [arr[j], arr[i]];
   }
 }
+shuffleArray(words);
 
-// ===================== کمک‌تابع‌های درس =====================
-
-// از روی داده‌ها، لیست درس‌ها را می‌سازیم
-// اگر در VOCAB فیلدی مثل lesson / unit / group داشته باشی، از همان استفاده می‌شود
-function buildLessonsList() {
-  const set = new Set();
-  for (let w of ALL_WORDS) {
-    const lesson = w.lesson || w.unit || w.group;
-    if (lesson !== undefined && lesson !== null && lesson !== "") {
-      set.add(String(lesson));
-    }
-  }
-  return Array.from(set).sort((a, b) => {
-    // سعی در sort عددی اگر ممکن بود
-    const na = Number(a), nb = Number(b);
-    if (!Number.isNaN(na) && !Number.isNaN(nb)) return na - nb;
-    return a.localeCompare(b, "fa");
-  });
-}
-
-// اعمال فیلتر بر اساس درس انتخاب شده
-function applyLessonFilter(lessonValue) {
-  if (!lessonValue) {
-    // همهٔ لغات
-    words = ALL_WORDS.slice();
-  } else {
-    words = ALL_WORDS.filter(w => {
-      const l = w.lesson || w.unit || w.group;
-      return String(l) === String(lessonValue);
-    });
-    // اگر به هر دلیل خالی شد، برای اینکه برنامه نخوابد، برگرد به همهٔ لغات
-    if (!words.length) {
-      words = ALL_WORDS.slice();
-    }
-  }
-
-  // بعد از تغییر لیست لغات، SRS را دوباره تنظیم کن
-  shuffleArray(words);
-  computeDueOrder(true); // true یعنی فوراً از روی words جدید محاسبه کن
-  currentIndex = 0;
-  renderCurrent();
-}
-
-// ===================== وضعیت نمایش و SRS =====================
-
+// وضعیت
 let currentIndex = 0;
 let dueOrder = [];
 let timerLastTick = null;
@@ -96,18 +81,24 @@ function formatTime(sec) {
 }
 
 // ===================================================================
-//            محاسبه ترتیب نمایش SRS
+//            محاسبه ترتیب نمایش SRS (با فیلتر درس)
 // ===================================================================
 
-function computeDueOrder(force = false) {
+function computeDueOrder() {
   const now = Date.now();
+  const currentLessonFilter = getCurrentLessonFilterMain(); // "all" یا شماره درس
   const due = [];
   const rest = [];
 
-  // اگر words خالی باشد، حداقل از ALL_WORDS استفاده کن
-  const sourceWords = words.length ? words : ALL_WORDS;
+  for (let w of words) {
+    // اگر فیلتر درس فعال است، لغات درس‌های دیگر را رد کن
+    if (currentLessonFilter !== "all") {
+      const wl = (w.lesson != null ? String(w.lesson) : "");
+      if (wl !== String(currentLessonFilter)) {
+        continue;
+      }
+    }
 
-  for (let w of sourceWords) {
     const ws = getWordState(aminState, w);
     if (!ws.nextReview || ws.nextReview <= now) {
       due.push(w);
@@ -124,7 +115,14 @@ function computeDueOrder(force = false) {
   } else if (rest.length) {
     dueOrder = rest;
   } else {
-    dueOrder = sourceWords.slice();
+    // اگر فیلتر درس آن‌قدر تنگ بود که هیچ لغتی نیامد،
+    // به‌صورت fallback از همه‌ی لغات (همان درس) استفاده کن
+    const allFiltered = words.filter(w => {
+      if (currentLessonFilter === "all") return true;
+      const wl = (w.lesson != null ? String(w.lesson) : "");
+      return wl === String(currentLessonFilter);
+    });
+    dueOrder = allFiltered.length ? allFiltered.slice() : words.slice();
     shuffleArray(dueOrder);
   }
 }
@@ -134,7 +132,7 @@ function computeDueOrder(force = false) {
 // ===================================================================
 
 function updateStatsBox() {
-  const total = words.length || ALL_WORDS.length;
+  const total = words.length;
   let hardCount = 0, knownCount = 0, learningCount = 0;
   const ids = Object.keys(aminState);
 
@@ -157,10 +155,8 @@ function updateStatsBox() {
         meta.hardMasteredToday + " / " + DAILY_HARD_GOAL;
 
   const statsEl = document.getElementById("statsBox");
-  if (!statsEl) return;
-
   statsEl.innerHTML =
-    "کل لغات (در این فیلتر): " + total +
+    "کل لغات: " + total +
     " | دیده‌شده: " + seenCount +
     " | سخت: " + hardCount +
     " | بلد: " + knownCount +
@@ -176,48 +172,34 @@ function updateStatsBox() {
 
 function renderCurrent() {
   if (!dueOrder.length) computeDueOrder();
-  if (!dueOrder.length) {
-    const wb = document.getElementById("wordBox");
-    const mb = document.getElementById("meaningBox");
-    if (wb) wb.textContent = "هیچ لغتی پیدا نشد.";
-    if (mb) {
-      mb.style.display = "block";
-      mb.innerHTML = "احتمالاً فیلتر خیلی محدود شده است.";
-    }
-    return;
-  }
-
   if (currentIndex < 0) currentIndex = 0;
   if (currentIndex >= dueOrder.length) currentIndex = 0;
 
   const w = dueOrder[currentIndex];
 
-  const wordBox = document.getElementById("wordBox");
-  if (wordBox) wordBox.textContent = w.word || "...";
+  document.getElementById("wordBox").textContent = w ? w.word : "...";
 
   const box = document.getElementById("meaningBox");
-  if (!box) return;
-
   box.style.display = "none";
   box.innerHTML = "";
-  const showBtn = document.getElementById("showMeaningBtn");
-  if (showBtn) showBtn.style.display = "inline-block";
+  document.getElementById("showMeaningBtn").style.display = "inline-block";
 
   updateStatsBox();
 }
 
 // ===================================================================
-//                     نمایش معنی (کاملاً آفلاین)
+//                     نمایش معنی (کاملًا آفلاین)
 // ===================================================================
 
 function showMeaning() {
   if (!dueOrder.length) return;
-
   const w = dueOrder[currentIndex];
+  if (!w) return;
+
   const box = document.getElementById("meaningBox");
   const btn = document.getElementById("showMeaningBtn");
 
-  if (!w || !box || !btn) return;
+  if (!box || !btn) return;
 
   box.style.display = "block";
 
@@ -240,10 +222,10 @@ function showMeaning() {
 
 function answerCurrent(known) {
   if (!dueOrder.length) return;
-
   const w = dueOrder[currentIndex];
-  const ws = getWordState(aminState, w);
+  if (!w) return;
 
+  const ws = getWordState(aminState, w);
   const wasSeenBefore = ws.seen > 0;
 
   ws.seen += 1;
@@ -268,7 +250,7 @@ function answerCurrent(known) {
 
   currentIndex++;
   if (currentIndex >= dueOrder.length) {
-    computeDueOrder(true);
+    computeDueOrder();
     currentIndex = 0;
   }
   renderCurrent();
@@ -276,8 +258,9 @@ function answerCurrent(known) {
 
 function markHardCurrent() {
   if (!dueOrder.length) return;
-
   const w = dueOrder[currentIndex];
+  if (!w) return;
+
   const ws = getWordState(aminState, w);
   ws.hard = true;
   saveState(aminState);
@@ -311,44 +294,37 @@ function startTimer() {
 // ===================================================================
 
 document.addEventListener("DOMContentLoaded", () => {
-  // ۱) لیست درس‌ها را از روی VOCAB بساز و داخل select بریز
-  const lessonSelect = document.getElementById("lessonFilter");
+  // ۱) فیلتر درس صفحه اصلی را از localStorage بازیابی کن
+  const lessonSelect = document.getElementById("lessonFilterMain");
   if (lessonSelect) {
-    const lessons = buildLessonsList();
-    lessons.forEach(ls => {
-      const opt = document.createElement("option");
-      opt.value = ls;
-      // اگر خودت دوست داشتی می‌تونی اینجا فرمت نمایش رو عوض کنی
-      opt.textContent = "درس " + ls;
-      lessonSelect.appendChild(opt);
-    });
+    const savedLesson = loadMainLessonFilter(); // "all" یا شماره درس
+    // اگر option متناظر وجود دارد، همان را انتخاب کن
+    if ([...lessonSelect.options].some(opt => opt.value === savedLesson)) {
+      lessonSelect.value = savedLesson;
+    }
 
+    // هر بار تغییر، در localStorage ذخیره و SRS را روی همان درس از نو بساز
     lessonSelect.addEventListener("change", () => {
-      const val = lessonSelect.value;
-      applyLessonFilter(val);
+      const val = lessonSelect.value || "all";
+      saveMainLessonFilter(val);
+      currentIndex = 0;
+      computeDueOrder();
+      renderCurrent();
     });
   }
 
-  // ۲) ترتیب اولیه SRS
+  // ۲) SRS را با فیلتر فعلی بساز و فلش‌کارت را نمایش بده
   computeDueOrder();
   renderCurrent();
   startTimer();
 
   // ۳) اتصال دکمه‌ها
-  const showBtn = document.getElementById("showMeaningBtn");
-  if (showBtn) showBtn.onclick = showMeaning;
-
-  const btnKnow = document.getElementById("btnKnow");
-  const btnDontKnow = document.getElementById("btnDontKnow");
-  const btnHard = document.getElementById("btnHard");
-  const btnPrev = document.getElementById("btnPrev");
-  const btnNext = document.getElementById("btnNext");
-
-  if (btnKnow) btnKnow.onclick = () => answerCurrent(true);
-  if (btnDontKnow) btnDontKnow.onclick = () => answerCurrent(false);
-  if (btnHard) btnHard.onclick = markHardCurrent;
-  if (btnPrev) btnPrev.onclick = () => { currentIndex--; renderCurrent(); };
-  if (btnNext) btnNext.onclick = () => { currentIndex++; renderCurrent(); };
+  document.getElementById("showMeaningBtn").onclick = showMeaning;
+  document.getElementById("btnKnow").onclick = () => answerCurrent(true);
+  document.getElementById("btnDontKnow").onclick = () => answerCurrent(false);
+  document.getElementById("btnHard").onclick = markHardCurrent;
+  document.getElementById("btnPrev").onclick = () => { currentIndex--; renderCurrent(); };
+  document.getElementById("btnNext").onclick = () => { currentIndex++; renderCurrent(); };
 
   const speakBtn = document.getElementById("btnSpeakFlash");
   if (speakBtn) {
