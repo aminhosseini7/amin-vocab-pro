@@ -1,11 +1,41 @@
 // js/words.js
 // نمایش همه‌ی لغات + وضعیت (جدید / سخت / بلد) + فیلتر بر اساس درس
+// و حفظ فیلترها بین رفت‌وآمد بین صفحات با localStorage
 
 let aminWordsState = loadState();
 const allWords = VOCAB || [];
 
+// کلید ذخیره‌سازی تنظیمات فیلتر
+const WORDS_FILTER_STATE_KEY = "amin_words_filters_v1";
+
+// ذخیره وضعیت فیلترها
+function saveWordsFilterState(filterText, statusFilter, lessonFilter) {
+  try {
+    const obj = {
+      filterText: filterText || "",
+      statusFilter: statusFilter || "all",
+      lessonFilter: lessonFilter || "all",
+    };
+    localStorage.setItem(WORDS_FILTER_STATE_KEY, JSON.stringify(obj));
+  } catch (e) {
+    console.warn("Cannot save words filter state:", e);
+  }
+}
+
+// لود وضعیت فیلترها
+function loadWordsFilterState() {
+  try {
+    const raw = localStorage.getItem(WORDS_FILTER_STATE_KEY);
+    if (!raw) return {};
+    return JSON.parse(raw) || {};
+  } catch (e) {
+    console.warn("Cannot load words filter state:", e);
+    return {};
+  }
+}
+
 // statusFilter: "all" | "new" | "known" | "hard"
-// lessonFilter: "all" یا شماره درس به‌صورت رشته مثل "1", "2", ...
+// lessonFilter: "all" | شماره درس به صورت رشته
 function renderWordsTable(filterText = "", statusFilter = "all", lessonFilter = "all") {
   const tbody = document.querySelector("#wordsTable tbody");
   if (!tbody) return;
@@ -32,12 +62,12 @@ function renderWordsTable(filterText = "", statusFilter = "all", lessonFilter = 
       continue;
     }
 
-    // فیلتر بر اساس درس
-    const lesson = (w.lesson != null && w.lesson !== "")
-      ? String(w.lesson)
-      : "";
-    if (lessonFilter !== "all" && lesson !== lessonFilter) {
-      continue;
+    // فیلتر بر اساس درس (در صورتی که lessonFilter != "all")
+    if (lessonFilter !== "all") {
+      const wl = (w.lesson != null ? String(w.lesson) : "");
+      if (wl !== String(lessonFilter)) {
+        continue;
+      }
     }
 
     // فیلتر بر اساس متن جستجو (کلمه یا معنی)
@@ -95,42 +125,27 @@ document.addEventListener("DOMContentLoaded", () => {
   const statusSelect = document.getElementById("statusFilter");
   const lessonSelect = document.getElementById("lessonFilter");
 
-  // پر کردن لیست درس‌ها از روی VOCAB
-  if (lessonSelect) {
-    const lessonsSet = new Set();
+  // اول، تنظیمات ذخیره‌شده را لود کن
+  const saved = loadWordsFilterState();
 
-    allWords.forEach(w => {
-      if (w.lesson != null && w.lesson !== "") {
-        lessonsSet.add(String(w.lesson));
-      }
-    });
-
-    const sortedLessons = Array.from(lessonsSet).sort((a, b) => {
-      const na = Number(a), nb = Number(b);
-      if (!isNaN(na) && !isNaN(nb)) return na - nb;
-      return a.localeCompare(b);
-    });
-
-    lessonSelect.innerHTML = "";
-
-    const optAll = document.createElement("option");
-    optAll.value = "all";
-    optAll.textContent = "همهٔ درس‌ها";
-    lessonSelect.appendChild(optAll);
-
-    sortedLessons.forEach(ls => {
-      const opt = document.createElement("option");
-      opt.value = ls;
-      opt.textContent = "درس " + ls;
-      lessonSelect.appendChild(opt);
-    });
+  if (searchInput && typeof saved.filterText === "string") {
+    searchInput.value = saved.filterText;
+  }
+  if (statusSelect && saved.statusFilter) {
+    statusSelect.value = saved.statusFilter;
+  }
+  if (lessonSelect && saved.lessonFilter) {
+    lessonSelect.value = saved.lessonFilter;
   }
 
   function updateTable() {
     const txt = searchInput ? searchInput.value.trim() : "";
     const st = statusSelect ? statusSelect.value : "all";
-    const ls = lessonSelect ? lessonSelect.value : "all";
-    renderWordsTable(txt, st, ls);
+    const lf = lessonSelect ? lessonSelect.value : "all";
+
+    // هر بار که فیلتر عوض می‌شود، در localStorage ذخیره‌اش کن
+    saveWordsFilterState(txt, st, lf);
+    renderWordsTable(txt, st, lf);
   }
 
   if (searchInput) {
@@ -143,6 +158,6 @@ document.addEventListener("DOMContentLoaded", () => {
     lessonSelect.addEventListener("change", updateTable);
   }
 
-  // اولین رندر
+  // اولین رندر بر اساس تنظیمات ذخیره‌شده (یا پیش‌فرض)
   updateTable();
 });
